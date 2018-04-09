@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!-- development 为开发模式
+         work 为工作模式
+
+         参数设置网站：http://www.mybatis.org/mybatis-3/configuration.html
+                    http://www.mybatis.org/guice/datasources/builtin.html
+    -->
+    <properties resource="myBatis/db.properties"/> <!--引用的配置文件-->
+    <!-- 配置实体类的别名 -->
+    <typeAliases>
+        <package name="FrontEnd/myBatis/entity"/> <!--配置包即可，会到对应的包下查找实体类-->
+    </typeAliases>
+    <environments default="development"><!-- default 和id 两个值一定要一致-->
+        <environment id="development">
+            <transactionManager type="JDBC" /> <!--事物提交-->
+                <dataSource type="POOLED"> <!-- 配置数据源，这个关闭连接只需放去连接池-->
+                    <property name="driver" value="${driver}" />
+                    <property name="url" value="${url}" />
+                    <property name="username" value="${username}" />
+                    <property name="password" value="${password}" />
+
+                    <!-- Connection Pooling Info -->
+                    <property name="poolMaximumActiveConnections" value="${jdbc.pool.maxActive}" />
+                    <property name="poolMaximumIdleConnections" value="${jdbc.pool.maxIdle}" />
+                    <property name="defaultAutoCommit" value="false" />
+
+                    <!--在popConnection的时候：-->
+
+                    <!--1.如果池中有idle的，返回之-->
+
+                    <!--2.如果没有，并且池中的active连接数小于配置的最大连接数，新建一个连接返回-->
+
+                    <!--3.如果没有idle并且连接数已经创建到最大，就不创建新连接。从acitve connection列表中返回一个最老的值state.activeConnections.get(0)，看这个连接被取出的时间（check out时间，表示从连接开始使用到目前还未close）是不是超过poolMaximumCheckoutTime（配置项，默认是20秒），如果超过，使这个连接失效，并且使用这个连接返回做下一个操作-->
+
+                    <!--4.如果这个连接check out时间还未到poolMaximumCheckoutTime，调用state对象的wait函数：state.wait(poolTimeToWait);等待被唤醒（在连接close的时候会调用pushConnection函数，这里会调用state对象的notifyAll,唤醒之后重新进入循环取连接）-->
+                    <!---->
+
+                </dataSource>
+        </environment>
+    </environments>
+
+                    <!--<property user_name="driver" value="com.mysql.jdbc.Driver" />
+                    <property user_name="url" value="jdbc:mysql://rdsmo85ayg2u71w33zez.mysql.rds.aliyuncs.com:3306/r0kp7vzu46a9h1k5" /> &lt;!&ndash; 分别是数据库的地址:端口号/数据库名字 一定要5.4， 5.5， 5.6 以上的版本才可以&ndash;&gt;
+                    <property user_name="username" value="r0kp7vzu46a9h1k5" />
+                    <property user_name="password" value="intellectual" />-->
+
+    <mappers>
+        <!--<mapper userUploadFile="myBatis/Mapper/UserMapper.xml"/> &lt;!&ndash; xml文件的话查找需要用/ 路径&ndash;&gt;-->
+        <mapper class="FrontEnd.myBatis.mapper.UserMapper"/> <!--类的话查找全类名 需要用.标识-->
+        <mapper class="FrontEnd.myBatis.mapper.ProjectMapper"/> <!--类的话查找全类名 需要用.标识-->
+        <mapper class="FrontEnd.myBatis.mapper.ChiefMapper"/> <!--类的话查找全类名 需要用.标识-->
+        <mapper class="FrontEnd.myBatis.mapper.UploadFileMapper"/> <!--类的话查找全类名 需要用.标识-->
+        <mapper class="FrontEnd.myBatis.mapper.OrderMapper"/> <!--类的话查找全类名 需要用.标识-->
+    </mappers>
+</configuration>
