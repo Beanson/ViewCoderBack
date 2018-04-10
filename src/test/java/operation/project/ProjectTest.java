@@ -33,7 +33,7 @@ public class ProjectTest {
         Map<String, Object> map = new HashMap<>();
         //成功返回user_id为1的所有用户的数据
         map.put("user_id", 1);
-        junitReqRespVerify(map,"getProjectData",200);
+        junitReqRespVerify(map,"getProjectListData",200);
     }
 
 

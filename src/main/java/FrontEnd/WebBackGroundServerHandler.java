@@ -5,12 +5,11 @@ package FrontEnd;
  */
 
 import FrontEnd.helper.common.Common;
-import FrontEnd.myBatis.entity.Project;
 import FrontEnd.myBatis.entity.response.ResponseData;
 import FrontEnd.myBatis.operation.common.CommonService;
+import FrontEnd.myBatis.operation.logon.Logon;
 import FrontEnd.myBatis.operation.overall.Overall;
 import FrontEnd.myBatis.operation.personal.Personal;
-import FrontEnd.myBatis.operation.logon.Logon;
 import FrontEnd.myBatis.operation.project.CreateProject;
 import FrontEnd.myBatis.operation.project.ProjectList;
 import FrontEnd.myBatis.operation.project.StoreList;
@@ -18,23 +17,21 @@ import FrontEnd.myBatis.operation.purchase.AliPay;
 import FrontEnd.myBatis.operation.purchase.Purchase;
 import FrontEnd.myBatis.operation.purchase.wechat.WechatPay;
 import FrontEnd.myBatis.operation.render.Render;
-import FrontEnd.myBatis.operation.test.TestUtil;
 import UploadFile.Global;
 import com.alibaba.fastjson.JSON;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.multipart.*;
-import io.netty.util.CharsetUtil;
+import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
+import io.netty.handler.codec.http.multipart.HttpDataFactory;
+import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import org.apache.log4j.Logger;
 
-import javax.activation.MimetypesFileTypeMap;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-
-import static io.netty.handler.codec.http.HttpHeaders.Names.*;
+import static com.aliyun.oss.internal.OSSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+//import static io.netty.handler.codec.http.HttpHeaders.Names.*;
+import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
@@ -163,24 +160,11 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                 }
 
                 /***************************************************************/
-                /*Project 专区**************************/
+                /*Project 专区***********************************/
+                /*Project Store页面********************/
                 //根据用户id获取用户所有project所有数据
                 else if (uri.equals("/getProjectListData")) {
                     ResponseData response = ProjectList.getProjectListData(msg);
-                    httpResponse(ctx, msg, response);
-                }
-                else if (uri.equals("/getTargetStoreWebModel")) {
-                    ResponseData response = StoreList.getTargetStoreWebModel(msg);
-                    httpResponse(ctx, msg, response);
-                }
-                //新建空的project项目
-                else if (uri.equals("/createEmptyProject")) {
-                    ResponseData response = CreateProject.createEmptyProject(msg);
-                    httpResponse(ctx, msg, response);
-                }
-                //新建PSD项目
-                else if (uri.equals("/createPSDProject")) {
-                    ResponseData response = CreateProject.createPSDProject(msg);
                     httpResponse(ctx, msg, response);
                 }
                 //拷贝复制项目
@@ -193,10 +177,33 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     ResponseData response = ProjectList.modifyProjectName(msg);
                     httpResponse(ctx, msg, response);
                 }
-
                 //删除项目
                 else if (uri.equals("/deleteProject")) {
                     ResponseData response = ProjectList.deleteProject(msg);
+                    httpResponse(ctx, msg, response);
+                }
+                //更新项目开放程度
+                else if (uri.equals("/updateProjectOpenness")) {
+                    ResponseData response = StoreList.updateProjectOpenness(msg);
+                    httpResponse(ctx, msg, response);
+                }
+
+                /*Project Store页面*******************/
+                //获取指定类型的project store的project数据
+                else if (uri.equals("/getTargetStoreWebModel")) {
+                    ResponseData response = StoreList.getTargetStoreWebModel(msg);
+                    httpResponse(ctx, msg, response);
+                }
+
+                /*Create Project页面*******************/
+                //新建空的project项目
+                else if (uri.equals("/createEmptyProject")) {
+                    ResponseData response = CreateProject.createEmptyProject(msg);
+                    httpResponse(ctx, msg, response);
+                }
+                //新建PSD项目
+                else if (uri.equals("/createPSDProject")) {
+                    ResponseData response = CreateProject.createPSDProject(msg);
                     httpResponse(ctx, msg, response);
                 }
 

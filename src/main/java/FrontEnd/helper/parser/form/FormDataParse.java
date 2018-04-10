@@ -35,6 +35,7 @@ public class FormDataParse {
         this.msg=msg;
         this.request = (HttpRequest) msg;
         decoder = new HttpPostRequestDecoder(factory, request);//解析请求数据。
+        hashMap=new HashMap<>();
     }
 
     /** 构造函数 处理formData数据请求上传，只请求一个参数方法，返回单一字符串 */

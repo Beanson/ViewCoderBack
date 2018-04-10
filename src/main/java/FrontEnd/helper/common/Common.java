@@ -123,6 +123,7 @@ public class Common {
     public static final String PAY_STATUS = "pay_status"; //支付状态
     public static final String PAY_WAY = "pay_way"; //支付方式
     public static final String SERVICE_ID = "service_id"; //服务类型
+    public static final String IS_PUBLIC = "is_public"; //该项目是否为公开项目
     public static final String INDUSTRY_CODE = "industry_code"; //行业一级代号
     public static final String INDUSTRY_SUB_CODE = "industry_sub_code"; //行业二级代号
 

@@ -36,7 +36,6 @@ public class ProjectList {
      * 根据用户id获取用户所有projects的数据
      */
     public static ResponseData getProjectListData(Object msg) {
-
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
 
@@ -57,8 +56,7 @@ public class ProjectList {
                     "Get ProjectList Data with System Error");
 
         } finally {
-            ProjectList.logger.debug("ResponseData responseData" + responseData);
-            sqlSession.close();
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
 
         return responseData;

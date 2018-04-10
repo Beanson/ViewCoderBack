@@ -26,6 +26,7 @@ public class Mapper {
     public static final String UPDATE_PSD_PROJECT_DATA="updatePSDProjectData";
     public static final String MODIFY_PROJECT_NAME="modifyProjectName";
     public static final String UPDATE_PROJECT_RESOURCE_SIZE="updateProjectResourceSize";
+    public static final String UPDATE_PROJECT_OPENNESS="updateProjectOpenness";
 
 
 

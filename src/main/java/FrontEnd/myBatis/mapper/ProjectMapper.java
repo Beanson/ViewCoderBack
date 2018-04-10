@@ -7,6 +7,7 @@ import FrontEnd.myBatis.entity.Project;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ProjectMapper {
 
@@ -81,4 +82,21 @@ public interface ProjectMapper {
     @Update("update project set resource_size=#{resource_size} where id=#{id}")
     public int updateProjectResourceSize(Project Project);
 
+    //根据项目传递过来参数进行更新项目公开程度状态
+    @SelectProvider(type=SqlProvider.class,method="updateProjectOpenness")
+    List<Project> updateProjectOpenness(Map<String,Object> map);
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

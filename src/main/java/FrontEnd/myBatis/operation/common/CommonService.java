@@ -86,6 +86,30 @@ public class CommonService {
         sqlSession.close(); //数据库操作完毕，关闭连接，释放资源
     }
 
+
+    /**
+     * 查看该对象是否为空，返回不为空的Boolean值
+     *
+     * @param object
+     * @return
+     */
+    public static boolean checkNotNull(Object object) {
+        boolean status = false;
+        if (object != null) {
+            if (object instanceof String) {
+                if (!((String) object).isEmpty()) {
+                    CommonService.logger.debug("checkNotNull: " + object + " come to String check, result is true");
+                    status = true;
+                }
+            } else {
+                CommonService.logger.debug("checkNotNull: " + object + " come to Object check, result is true");
+                status = true;
+            }
+        }
+        return status;
+    }
+
+
     /**
      * 查看在redis数据库中该文件的引用如果为0则删除该资源在OSS中的文件
      *

@@ -21,6 +21,7 @@ public class User implements Serializable{
     private FileUpload portrait_file;
     private String resource_remain;
     private String last_store_type;
+    private int total_usage_amount;
     private int points;
     private int preferential_amount;
 
@@ -151,12 +152,28 @@ public class User implements Serializable{
         this.last_store_type = last_store_type;
     }
 
+    public int getTotal_usage_amount() {
+        return total_usage_amount;
+    }
+
+    public void setTotal_usage_amount(int total_usage_amount) {
+        this.total_usage_amount = total_usage_amount;
+    }
+
     public int getPoints() {
         return points;
     }
 
     public void setPoints(int points) {
         this.points = points;
+    }
+
+    public int getPreferential_amount() {
+        return preferential_amount;
+    }
+
+    public void setPreferential_amount(int preferential_amount) {
+        this.preferential_amount = preferential_amount;
     }
 
     @Override
@@ -174,6 +191,7 @@ public class User implements Serializable{
                 ", portrait_file=" + portrait_file +
                 ", resource_remain='" + resource_remain + '\'' +
                 ", last_store_type='" + last_store_type + '\'' +
+                ", total_usage_amount=" + total_usage_amount +
                 ", points=" + points +
                 ", preferential_amount=" + preferential_amount +
                 '}';
