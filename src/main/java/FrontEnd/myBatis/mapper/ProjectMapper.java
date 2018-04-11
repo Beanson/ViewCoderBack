@@ -27,7 +27,7 @@ public interface ProjectMapper {
 
     //根据项目id获取对应project的resource_size数据信息
     @Select("select id, project_name, project_file_name, last_modify_time, is_mobile, resource_size, price, usage_amount " +
-            "from project where is_public=2 and industry_code=#{industry_code} and industry_sub_code=#{industry_sub_code}")
+            "from project where is_public=1 and industry_code=#{industry_code} and industry_sub_code=#{industry_sub_code}")
     public List<Project> getTargetStoreData(@Param("industry_code") String industry_code, @Param("industry_sub_code") String industry_sub_code);
 
 
