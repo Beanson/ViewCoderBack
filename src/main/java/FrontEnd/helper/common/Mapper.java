@@ -71,6 +71,7 @@ public class Mapper {
     public static final String UPDATE_USER_INFO="updateUserInfo";
     public static final String UPDATE_USER_RESOURCE_SPACE_REMAIN="updateUserResourceSpaceRemain";
     public static final String UPDATE_USER_LAST_SELECTED_INDUSTRY="updateLastSelectedIndustry";
+    public static final String UPDATE_USER_TOTAL_POINTS="updateUserTotalPoints";
 
 
 
