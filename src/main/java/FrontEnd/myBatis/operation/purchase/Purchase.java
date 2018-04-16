@@ -324,8 +324,8 @@ public class Purchase {
             User user = sqlSession.select(Mapper.GET_USER_DATA, orders.getUser_id());
             //根据service_id的值不同，设置该user对应的total_points的数目
             int newTotalPoints = user.getTotal_points() - CommonObject.serviceToPoints.get(orders.getService_id());
-            //进一步验证，只有总积分大于零才可继续进行
-            if (newTotalPoints > 0) {
+            //进一步验证，只有总积分不小于0才可继续进行
+            if (newTotalPoints >= 0) {
                 user.setTotal_points(newTotalPoints);
                 //更新兑换后的total_points的值
                 int num = sqlSession.update(Mapper.UPDATE_USER_TOTAL_POINTS, user);
