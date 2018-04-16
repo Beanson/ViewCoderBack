@@ -8,6 +8,7 @@ import FrontEnd.helper.parser.form.FormData;
 import FrontEnd.helper.parser.text.TextData;
 import FrontEnd.myBatis.MybatisUtils;
 import FrontEnd.myBatis.entity.Orders;
+import FrontEnd.myBatis.entity.User;
 import FrontEnd.myBatis.entity.response.ResponseData;
 import FrontEnd.myBatis.entity.response.StatusCode;
 import FrontEnd.myBatis.operation.common.CommonService;
@@ -16,6 +17,7 @@ import com.mysql.fabric.Response;
 import com.sun.org.apache.xpath.internal.operations.Or;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
+import purchase.CommonObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -143,9 +145,8 @@ public class Purchase {
             case 3: {
                 //进行积分兑换交易操作
                 insertNewPaidOrderItem(orders);
-                updateTotalPoints(responseData);
                 responseData.setMark(2);
-                Assemble.responseSuccessSetting(responseData, null);
+                updateTotalPointsAfterExchange(responseData);
                 break;
             }
             default: {
@@ -310,15 +311,40 @@ public class Purchase {
     }
 
 
-    public static void updateTotalPoints(Orders orders){
+    /**
+     * 积分兑换后，更新user表中的total_points值
+     *
+     * @param orders       订单信息
+     * @param responseData 返回包装数据
+     */
+    public static void updateTotalPointsAfterExchange(Orders orders, ResponseData responseData) {
         SqlSession sqlSession = MybatisUtils.getSession();
         try {
-            //int num = sqlSession.update(Mapper.GET_TOTAL_POINTS, );
-
+            //获取该user的值
+            User user = sqlSession.select(Mapper.GET_USER_DATA, orders.getUser_id());
+            //根据service_id的值不同，设置该user对应的total_points的数目
+            int newTotalPoints = user.getTotal_points() - CommonObject.serviceToPoints.get(orders.getService_id());
+            //进一步验证，只有总积分大于零才可继续进行
+            if (newTotalPoints > 0) {
+                user.setTotal_points(newTotalPoints);
+                //更新兑换后的total_points的值
+                int num = sqlSession.update(Mapper.UPDATE_USER_TOTAL_POINTS, user);
+                //如果更新成功则返回正确
+                if (num > 0) {
+                    Assemble.responseSuccessSetting(responseData, newTotalPoints);
+                } else {
+                    Assemble.responseErrorSetting(responseData, 401,
+                            "updateTotalPointsAfterExchange update error, num is:" + num);
+                }
+            } else {
+                Assemble.responseErrorSetting(responseData, 402,
+                        "updateTotalPointsAfterExchange newTotalPoints error, newTotalPoints is:" + newTotalPoints);
+            }
         } catch (Exception e) {
-
+            Assemble.responseErrorSetting(responseData, 500,
+                    "updateTotalPointsAfterExchange error: " + e);
         } finally {
-            CommonService.databaseCommitClose(sqlSession, null, true);
+            CommonService.databaseCommitClose(sqlSession, responseData, true);
         }
     }
 }
