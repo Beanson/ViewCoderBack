@@ -66,8 +66,8 @@ public interface UserMapper {
     public String updateLastSelectedIndustry(@Param("user_id") Integer user_id, @Param("last_store_code") String last_store_code,
                                              @Param("last_store_sub_code") String last_store_sub_code);
 
-
-    @Update("update user set total_points=total_points+5 where id=1")
+    //更新用户积分数值
+    @Update("update user set total_points=#{total_points} where id=#{user_id}")
     public int updateTotalPoints(User user);
 
 
