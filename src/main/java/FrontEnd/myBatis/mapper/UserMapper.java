@@ -68,7 +68,7 @@ public interface UserMapper {
 
     //更新用户积分数值
     @Update("update user set total_points=#{total_points} where id=#{user_id}")
-    public int updateTotalPoints(User user);
+    public int updateUserTotalPoints(User user);
 
 
 }
