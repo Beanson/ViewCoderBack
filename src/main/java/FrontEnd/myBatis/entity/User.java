@@ -27,6 +27,10 @@ public class User implements Serializable{
 
     public User(){}
 
+    public User(int id) {
+        this.id = id;
+    }
+
     //注册登录时使用
     public User(int id, String user_name, String email, String password){
         this.id=id;
