@@ -49,14 +49,8 @@ public class StoreList {
             List<Project> projects = sqlSession.selectList(Mapper.GET_TARGET_STORE_DATA, data);
 
             //进行projects数据,并打包成ResponseData格式并回传
-            //如果projects不为null则数据库查询projects成功，返回该projects数据到前端
-            //projects.size()为0也是可以的，说明该用户尚未创建任何项目
-            if (projects != null) {
-                Assemble.responseSuccessSetting(responseData, projects);
-            } else {
-                StoreList.logger.error("getTargetStoreWebModel with Database Error");
-                Assemble.responseErrorSetting(responseData, 401, "getTargetStoreWebModel with Database Error");
-            }
+            //projects为null也是可以的，说明尚未有任何该类型的商城项目
+            Assemble.responseSuccessSetting(responseData, projects);
 
         } catch (Exception e) {
             StoreList.logger.error("getTargetStoreWebModel catch exception", e);
@@ -105,5 +99,42 @@ public class StoreList {
         return responseData;
     }
 
+
+    /**
+     * 更新最新用户在project_store页面选择的industry类型到数据库
+     * @param msg
+     * @return
+     */
+    public static ResponseData updateLastSelectedIndustry(Object msg){
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        SqlSession sqlSession = MybatisUtils.getSession();
+
+        try {
+            //接收前台传过来关于获取指定行业的project model数据
+            //传递三个数据：user_id, industry_code, industry_sub_code
+            Map<String, Object> data = FormData.getParam(msg);
+            sqlSession = MybatisUtils.getSession();
+
+            //更新openness状态并返回影响条目数量
+            int num = sqlSession.update(Mapper.UPDATE_USER_LAST_SELECTED_INDUSTRY, data);
+
+            //进行projects数据,并打包成ResponseData格式并回传
+            if (num != 0) {
+                Assemble.responseSuccessSetting(responseData, null);
+            } else {
+                StoreList.logger.error("updateLastSelectedIndustry with Database Error");
+                Assemble.responseErrorSetting(responseData, 401, "updateLastSelectedIndustry with Database Error");
+            }
+
+        } catch (Exception e) {
+            StoreList.logger.error("updateLastSelectedIndustry catch exception", e);
+            Assemble.responseErrorSetting(responseData, 500,
+                    "updateLastSelectedIndustry Data with System Error");
+
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, true);
+        }
+        return responseData;
+    }
 
 }

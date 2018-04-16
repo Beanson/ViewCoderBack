@@ -129,7 +129,7 @@ public class WechatPay {
                 Orders orders = JSON.parseObject(
                         URLDecoder.decode(packageParams.get(Common.PAY_WECHAT_KEY_ATTACH), Common.UTF8), Orders.class);
                 //插入新订单信息到数据库的操作
-                Purchase.insertNewOrderItem(orders);
+                Purchase.insertNewPaidOrderItem(orders);
 
             } else {
                 WechatPay.logger.warn("WeChatPay failure, message: " + packageParams.get(Common.PAY_WECHAT_NOTIFY_ERROR_CODE) +

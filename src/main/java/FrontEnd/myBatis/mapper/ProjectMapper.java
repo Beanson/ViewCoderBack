@@ -13,8 +13,8 @@ public interface ProjectMapper {
 
     /********************以下是获取项目信息操作***********************/
     //根据用户user_id获取该用户所有project的数据
-    @Select("select id, project_name, project_file_name, last_modify_time, is_mobile, resource_size, is_public, price, " +
-            "industry_code, industry_sub_code, usage_amount from project where user_id=#{userId}")
+    @Select("select id, project_name, project_file_name, last_modify_time, is_mobile, resource_size, is_public, verify_comment," +
+            "industry_code, industry_sub_code, usage_amount points, ref_id from project where user_id=#{userId}")
     public List<Project> getProjectListData(int userId);
 
     //根据项目id获取该项目数据信息
@@ -26,7 +26,7 @@ public interface ProjectMapper {
     public String getProjectResourceSize(int id);
 
     //根据项目id获取对应project的resource_size数据信息
-    @Select("select id, project_name, project_file_name, last_modify_time, is_mobile, resource_size, price, usage_amount " +
+    @Select("select id, project_name, project_file_name, last_modify_time, is_mobile, resource_size, usage_amount, points " +
             "from project where is_public=1 and industry_code=#{industry_code} and industry_sub_code=#{industry_sub_code}")
     public List<Project> getTargetStoreData(@Param("industry_code") String industry_code, @Param("industry_sub_code") String industry_sub_code);
 

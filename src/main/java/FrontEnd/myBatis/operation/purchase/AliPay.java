@@ -98,7 +98,7 @@ public class AliPay {
                 Orders orders = JSON.parseObject(
                         URLDecoder.decode(paramsMap.get(Common.PAY_ALI_KEY_PASSBACK_PARAMS), Common.UTF8), Orders.class);
                 //插入新订单信息到数据库操作
-                Purchase.insertNewOrderItem(orders);
+                Purchase.insertNewPaidOrderItem(orders);
 
             } else {
                 AliPay.logger.debug("aliPayNotify signVerified failure");

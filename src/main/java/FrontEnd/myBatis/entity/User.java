@@ -14,16 +14,16 @@ public class User implements Serializable{
     private String user_name;
     private String email;
     private String password;
-    private String phone;
     private String open_id;
+    private String phone;
     private String role;
     private String nation;
     private FileUpload portrait_file;
     private String resource_remain;
-    private String last_store_type;
+    private String last_store_code;
+    private String last_store_sub_code;
     private int total_usage_amount;
-    private int points;
-    private int preferential_amount;
+    private int total_points;
 
     public User(){}
 
@@ -144,12 +144,20 @@ public class User implements Serializable{
         this.resource_remain = resource_remain;
     }
 
-    public String getLast_store_type() {
-        return last_store_type;
+    public String getLast_store_code() {
+        return last_store_code;
     }
 
-    public void setLast_store_type(String last_store_type) {
-        this.last_store_type = last_store_type;
+    public void setLast_store_code(String last_store_code) {
+        this.last_store_code = last_store_code;
+    }
+
+    public String getLast_store_sub_code() {
+        return last_store_sub_code;
+    }
+
+    public void setLast_store_sub_code(String last_store_sub_code) {
+        this.last_store_sub_code = last_store_sub_code;
     }
 
     public int getTotal_usage_amount() {
@@ -160,20 +168,12 @@ public class User implements Serializable{
         this.total_usage_amount = total_usage_amount;
     }
 
-    public int getPoints() {
-        return points;
+    public int getTotal_points() {
+        return total_points;
     }
 
-    public void setPoints(int points) {
-        this.points = points;
-    }
-
-    public int getPreferential_amount() {
-        return preferential_amount;
-    }
-
-    public void setPreferential_amount(int preferential_amount) {
-        this.preferential_amount = preferential_amount;
+    public void setTotal_points(int total_points) {
+        this.total_points = total_points;
     }
 
     @Override
@@ -184,16 +184,16 @@ public class User implements Serializable{
                 ", user_name='" + user_name + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", phone='" + phone + '\'' +
                 ", open_id='" + open_id + '\'' +
+                ", phone='" + phone + '\'' +
                 ", role='" + role + '\'' +
                 ", nation='" + nation + '\'' +
                 ", portrait_file=" + portrait_file +
                 ", resource_remain='" + resource_remain + '\'' +
-                ", last_store_type='" + last_store_type + '\'' +
+                ", last_store_code='" + last_store_code + '\'' +
+                ", last_store_sub_code='" + last_store_sub_code + '\'' +
                 ", total_usage_amount=" + total_usage_amount +
-                ", points=" + points +
-                ", preferential_amount=" + preferential_amount +
+                ", total_points=" + total_points +
                 '}';
     }
 }

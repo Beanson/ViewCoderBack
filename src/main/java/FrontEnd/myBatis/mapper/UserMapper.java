@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.*;
 import java.util.List;
 import java.util.Map;
 
-@CacheNamespace(flushInterval = 50000)
+//@CacheNamespace(flushInterval = 3000)
 public interface UserMapper {
 
     /********************以下是选择user操作***********************/
@@ -33,6 +33,9 @@ public interface UserMapper {
     @Select("select resource_remain from user where id=#{userId}")
     public String getUserResourceSpaceRemain(int userId);
 
+    //根据user_id获取用户最新的total_points数据
+    @Select("select total_points from user where id=#{userId}")
+    public int getTotalPoints(int userId);
 
 
     /********************以下是插入user操作***********************/
@@ -59,6 +62,10 @@ public interface UserMapper {
     @Update("update user set resource_remain=#{resource_remain} where id=#{id}")
     public String updateUserResourceSpaceRemain(User user);
 
+    //更新用户最新使用的industry和sub_industry信息
+    @Update("update user set last_store_code=#{last_store_code}, last_store_sub_code=#{last_store_sub_code} where id=#{user_id}")
+    public String updateLastSelectedIndustry(@Param("user_id") Integer user_id, @Param("last_store_code") String last_store_code,
+                                             @Param("last_store_sub_code") String last_store_sub_code);
 
 
 

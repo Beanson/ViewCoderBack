@@ -158,6 +158,11 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     ResponseData response = Purchase.deleteOrderItem(msg);
                     httpResponse(ctx, msg, response);
                 }
+                //获取用户最新的积分数据
+                else if (uri.equals("/getTotalPoints")) {
+                    ResponseData response = Purchase.getTotalPoints(msg);
+                    httpResponse(ctx, msg, response);
+                }
 
                 /***************************************************************/
                 /*Project 专区***********************************/
@@ -192,6 +197,11 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                 //获取指定类型的project store的project数据
                 else if (uri.equals("/getTargetStoreWebModel")) {
                     ResponseData response = StoreList.getTargetStoreWebModel(msg);
+                    httpResponse(ctx, msg, response);
+                }
+                //更新最新用户在project_store页面选择的industry类型到数据库
+                else if (uri.equals("/updateLastSelectedIndustry")) {
+                    ResponseData response = StoreList.updateLastSelectedIndustry(msg);
                     httpResponse(ctx, msg, response);
                 }
 

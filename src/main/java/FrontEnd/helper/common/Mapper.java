@@ -5,7 +5,7 @@ package FrontEnd.helper.common;
  */
 public class Mapper {
 
-    //project表的数据库操作mapper********************************************
+    //project表的数据库操作mapper*******************************************************************
     //select
     public static final String GET_PROJECT_LIST_DATA="getProjectListData";
     public static final String GET_PROJECT_DATA="getProjectData";
@@ -30,7 +30,7 @@ public class Mapper {
 
 
 
-    //user_upload_file表的数据库操作mapper********************************
+    //user_upload_file表的数据库操作mapper**************************************************************
     //select
     public static final String GET_ALL_RESOURCE_BY_PROJECT_ID="getAllResourceByProjectId";
     public static final String GET_RESOURCE_DATA="getResourceData";
@@ -52,13 +52,14 @@ public class Mapper {
 
 
 
-    //user 表数据库操作mapper********************************************
+    //user 表数据库操作mapper************************************************************************
     //select
     public static final String GET_USER_DATA="getUserData";
     public static final String LOGON_VALIDATION="loginValidation";
     public static final String REGISTER_ACCOUNT_CHECK="registerAccountCheck";
     public static final String GET_ORIGIN_PORTRAIT_NAME="getOriginPortraitName";
     public static final String GET_USER_RESOURCE_SPACE_REMAIN="getUserResourceSpaceRemain";
+    public static final String GET_TOTAL_POINTS="getTotalPoints";
 
     //insert
     public static final String REGISTER_NEW_ACCOUNT="registerNewAccount";
@@ -69,10 +70,11 @@ public class Mapper {
     //update
     public static final String UPDATE_USER_INFO="updateUserInfo";
     public static final String UPDATE_USER_RESOURCE_SPACE_REMAIN="updateUserResourceSpaceRemain";
+    public static final String UPDATE_USER_LAST_SELECTED_INDUSTRY="updateLastSelectedIndustry";
 
 
 
-    //order表数据库操作mapper********************************************
+    //order表数据库操作mapper************************************************************************
     //select
     public static final String GET_ORDER_LIST="getOrderList";
     public static final String GET_TARGET_ORDER_LIST="getTargetOrderList";

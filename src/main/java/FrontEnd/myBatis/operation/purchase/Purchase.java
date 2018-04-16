@@ -12,6 +12,7 @@ import FrontEnd.myBatis.entity.response.ResponseData;
 import FrontEnd.myBatis.entity.response.StatusCode;
 import FrontEnd.myBatis.operation.common.CommonService;
 import FrontEnd.myBatis.operation.purchase.wechat.WechatPay;
+import com.mysql.fabric.Response;
 import com.sun.org.apache.xpath.internal.operations.Or;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
@@ -53,6 +54,8 @@ public class Purchase {
         } catch (Exception e) {
             Assemble.responseErrorSetting(responseData, 500,
                     "getOrderList error: " + e);
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
         return responseData;
     }
@@ -84,6 +87,8 @@ public class Purchase {
         } catch (Exception e) {
             Assemble.responseErrorSetting(responseData, 500,
                     "getOrderList error: " + e);
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
         return responseData;
     }
@@ -119,7 +124,7 @@ public class Purchase {
         orders.setOrder_id(CommonService.getTimeStamp());//保证order_id的唯一性
         orders.setOrder_date(CommonService.getDateTime());
 
-        System.out.println(orders.getPay_way()+ " "+ (orders.getPay_way()==1));
+        System.out.println(orders.getPay_way() + " " + (orders.getPay_way() == 1));
         switch (orders.getPay_way()) {
             case 1: {
                 //进行支付宝方式支付，并返回支付宝官方的支付页面HTML，以text/html方式返回
@@ -133,6 +138,13 @@ public class Purchase {
                 String wechatPayUrlCode = WechatPay.invokePayment(orders);
                 responseData.setMark(2);
                 Assemble.responseSuccessSetting(responseData, wechatPayUrlCode);
+                break;
+            }
+            case 3: {
+                //进行积分兑换交易操作
+
+                responseData.setMark(2);
+                Assemble.responseSuccessSetting(responseData, null);
                 break;
             }
             default: {
@@ -150,7 +162,7 @@ public class Purchase {
      *
      * @param orders 订单详情
      */
-    public static void insertNewOrderItem(Orders orders) {
+    public static void insertNewPaidOrderItem(Orders orders) {
         SqlSession sqlSession = MybatisUtils.getSession();
         try {
             //设置订单的购买时间和到期时间
@@ -162,6 +174,9 @@ public class Purchase {
 
         } catch (Exception e) {
             Purchase.logger.error("insertNewOrderItem error: ", e);
+
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, null, true);
         }
     }
 
@@ -198,10 +213,10 @@ public class Purchase {
         }
 
         //设置过期日期为晚上十二点，也就是过期日期第二天的凌晨0点
-        expireDate.add(Calendar.DATE,1);
-        expireDate.set(Calendar.HOUR_OF_DAY,0);
-        expireDate.set(Calendar.MINUTE,0);
-        expireDate.set(Calendar.SECOND,0);
+        expireDate.add(Calendar.DATE, 1);
+        expireDate.set(Calendar.HOUR_OF_DAY, 0);
+        expireDate.set(Calendar.MINUTE, 0);
+        expireDate.set(Calendar.SECOND, 0);
 
         //设置订单order的支付和过期时间
         orders.setPay_date(sdf.format(date));
@@ -260,6 +275,35 @@ public class Purchase {
         } catch (Exception e) {
             Assemble.responseErrorSetting(responseData, 500,
                     "updateOrderPayment error: " + e);
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, true);
+        }
+        return responseData;
+    }
+
+
+    /**
+     * 获取用户最新的total_points数据
+     *
+     * @param msg
+     * @return
+     */
+    public static ResponseData getTotalPoints(Object msg) {
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        SqlSession sqlSession = MybatisUtils.getSession();
+
+        try {
+            //从http请求中获取total_points数据
+            String id = FormData.getParam(msg, Common.USER_ID);
+            //删除order表中某条数据并返回删除影响条目数量
+            int totalPoints = sqlSession.selectOne(Mapper.GET_TOTAL_POINTS, Integer.parseInt(id));
+            Assemble.responseSuccessSetting(responseData, totalPoints);
+
+        } catch (Exception e) {
+            Assemble.responseErrorSetting(responseData, 500,
+                    "getTotalPoints error: " + e);
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, true);
         }
         return responseData;
     }

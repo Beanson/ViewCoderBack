@@ -16,10 +16,11 @@ public class Project {
     private String project_data;
     private String resource_size;
     private int is_public;
-    private String price;
     private String industry_code;
     private String industry_sub_code;
     private int usage_amount;
+    private int points;
+    private int ref_id;
 
     private FileUpload psd_file;
 
@@ -133,14 +134,6 @@ public class Project {
         this.is_public = is_public;
     }
 
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
     public String getIndustry_code() {
         return industry_code;
     }
@@ -165,6 +158,22 @@ public class Project {
         this.usage_amount = usage_amount;
     }
 
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public int getRef_id() {
+        return ref_id;
+    }
+
+    public void setRef_id(int ref_id) {
+        this.ref_id = ref_id;
+    }
+
     @Override
     public String toString() {
         return "Project{" +
@@ -177,10 +186,11 @@ public class Project {
                 ", project_data='" + project_data + '\'' +
                 ", resource_size='" + resource_size + '\'' +
                 ", is_public=" + is_public +
-                ", price='" + price + '\'' +
                 ", industry_code='" + industry_code + '\'' +
                 ", industry_sub_code='" + industry_sub_code + '\'' +
                 ", usage_amount=" + usage_amount +
+                ", points=" + points +
+                ", ref_id=" + ref_id +
                 ", psd_file=" + psd_file +
                 '}';
     }

@@ -79,7 +79,7 @@ public class CommonService {
         //传入参数定义是否需要提交操作，纯粹数据库查询则不需提交操作
         if (toCommit) {
             //如果整个流程准确无误地实现则对数据库操作进行提交，否则不提交
-            if (responseData.getStatus_code() == StatusCode.OK.getValue()) {
+            if (responseData != null && responseData.getStatus_code() == StatusCode.OK.getValue()) {
                 sqlSession.commit();
             }
         }
