@@ -142,7 +142,8 @@ public class Purchase {
             }
             case 3: {
                 //进行积分兑换交易操作
-
+                insertNewPaidOrderItem(orders);
+                updateTotalPoints(responseData);
                 responseData.setMark(2);
                 Assemble.responseSuccessSetting(responseData, null);
                 break;
@@ -308,6 +309,18 @@ public class Purchase {
         return responseData;
     }
 
+
+    public static void updateTotalPoints(Orders orders){
+        SqlSession sqlSession = MybatisUtils.getSession();
+        try {
+            //int num = sqlSession.update(Mapper.GET_TOTAL_POINTS, );
+
+        } catch (Exception e) {
+
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, null, true);
+        }
+    }
 }
 
 

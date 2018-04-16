@@ -3,6 +3,7 @@ package FrontEnd.myBatis.mapper;
 /**
  * Created by Administrator on 2017/2/8.
  */
+
 import FrontEnd.myBatis.entity.User;
 import org.apache.ibatis.annotations.*;
 
@@ -45,12 +46,10 @@ public interface UserMapper {
     public int registerNewAccount(User user);
 
 
-
     /********************以下是删除user操作***********************/
     //测试Junit时删除新添加的user数据
     @Delete("delete from user where email=#{email}")
     public int deleteUserInDb(String email);
-
 
 
     /********************以下是更新user操作***********************/
@@ -68,7 +67,8 @@ public interface UserMapper {
                                              @Param("last_store_sub_code") String last_store_sub_code);
 
 
-
+    @Update("update user set total_points=total_points+5 where id=1")
+    public int updateTotalPoints(User user);
 
 
 }
