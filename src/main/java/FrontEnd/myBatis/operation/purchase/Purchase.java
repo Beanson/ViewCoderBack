@@ -3,6 +3,7 @@ package FrontEnd.myBatis.operation.purchase;
 import FrontEnd.exceptions.purchase.PayException;
 import FrontEnd.helper.common.Assemble;
 import FrontEnd.helper.common.Common;
+import FrontEnd.helper.common.CommonObject;
 import FrontEnd.helper.common.Mapper;
 import FrontEnd.helper.parser.form.FormData;
 import FrontEnd.helper.parser.text.TextData;
@@ -17,7 +18,6 @@ import com.mysql.fabric.Response;
 import com.sun.org.apache.xpath.internal.operations.Or;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
-import purchase.CommonObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -126,7 +126,7 @@ public class Purchase {
         orders.setOrder_id(CommonService.getTimeStamp());//保证order_id的唯一性
         orders.setOrder_date(CommonService.getDateTime());
 
-        System.out.println(orders.getPay_way() + " " + (orders.getPay_way() == 1));
+        //根据不同支付方式进行不同逻辑处理
         switch (orders.getPay_way()) {
             case 1: {
                 //进行支付宝方式支付，并返回支付宝官方的支付页面HTML，以text/html方式返回
@@ -146,7 +146,7 @@ public class Purchase {
                 //进行积分兑换交易操作
                 insertNewPaidOrderItem(orders);
                 responseData.setMark(2);
-                updateTotalPointsAfterExchange(responseData);
+                updateTotalPointsAfterExchange(orders, responseData);
                 break;
             }
             default: {
@@ -169,16 +169,18 @@ public class Purchase {
         try {
             //设置订单的购买时间和到期时间
             updateOrderTime(orders);
+            //设置pay_status为1，表示已支付
+            orders.setPay_status(1);
 
             //更新orders数据库条目，并返回影响条数
-            int num = sqlSession.update(Mapper.INSERT_NEW_ORDER_ITEM, orders);
+            int num = sqlSession.insert(Mapper.INSERT_NEW_ORDER_ITEM, orders);
             Purchase.logger.debug("Purchase update database num is:" + num);
 
         } catch (Exception e) {
             Purchase.logger.error("insertNewOrderItem error: ", e);
 
         } finally {
-            CommonService.databaseCommitClose(sqlSession, null, true);
+            CommonService.databaseCommitClose(sqlSession, new ResponseData(200), true);
         }
     }
 
@@ -321,7 +323,7 @@ public class Purchase {
         SqlSession sqlSession = MybatisUtils.getSession();
         try {
             //获取该user的值
-            User user = sqlSession.select(Mapper.GET_USER_DATA, orders.getUser_id());
+            User user = sqlSession.selectOne(Mapper.GET_USER_DATA, orders.getUser_id());
             //根据service_id的值不同，设置该user对应的total_points的数目
             int newTotalPoints = user.getTotal_points() - CommonObject.serviceToPoints.get(orders.getService_id());
             //进一步验证，只有总积分不小于0才可继续进行

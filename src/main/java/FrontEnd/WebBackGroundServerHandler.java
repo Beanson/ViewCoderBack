@@ -139,6 +139,10 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                         }else if(response.getMark()==2){
                             //微信支付类型返回数据
                             httpResponse(ctx,msg,response);
+
+                        }else if(response.getMark()==3){
+                            //积分兑换套餐返回数据
+                            httpResponse(ctx, msg, response);
                         }
                     }else{
                         httpResponse(ctx, msg, response);
