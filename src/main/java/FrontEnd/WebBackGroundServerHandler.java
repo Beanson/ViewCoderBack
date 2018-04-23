@@ -118,6 +118,17 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
 
                 /***************************************************************/
                 /*Purchase专区**************************/
+                //计算扩容或续期的价格
+                else if (uri.equals("/refreshInstance")) {
+                    ResponseData response = Purchase.refreshInstance(msg);
+                    httpResponse(ctx, msg, response);
+                }
+                //计算扩容或续期的价格
+                else if (uri.equals("/calculateExtendPrice")) {
+                    ResponseData response = Purchase.calculateExtendPrice(msg);
+                    httpResponse(ctx, msg, response);
+                }
+
                 //查询所有订单内容
                 else if (uri.equals("/getOrderList")) {
                     ResponseData response = Purchase.getOrderList(msg);

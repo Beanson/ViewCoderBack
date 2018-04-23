@@ -32,6 +32,54 @@ public class Purchase {
     private static Logger logger = Logger.getLogger(Purchase.class.getName());
 
     /**
+     * 计算扩容或续期的价格
+     *
+     * @param msg
+     * @return
+     */
+    public static ResponseData refreshInstance(Object msg) {
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        SqlSession sqlSession = MybatisUtils.getSession();
+
+        try {
+            Map<String, Object> data = FormData.getParam(msg);
+            Integer userId = (Integer) data.get(Common.USER_ID);
+            //获取表数据
+
+        } catch (Exception e) {
+            Assemble.responseErrorSetting(responseData, 500,
+                    "refreshInstance error: " + e);
+        }
+        return responseData;
+    }
+
+    /**
+     * 计算扩容或续期的价格
+     *
+     * @param msg
+     * @return
+     */
+    public static ResponseData calculateExtendPrice(Object msg) {
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+
+        try {
+            Map<String, Object> data = FormData.getParam(msg);
+            String extendUnit = (String) data.get(Common.EXTEND_UNIT);
+            Integer extendSize = (Integer) data.get(Common.EXTEND_SIZE);
+            //通过扩容单位找到扩容价格
+            Double unitPrice = CommonObject.getExtendPrice().get(extendUnit);
+            Double priceTotal = unitPrice * extendSize;
+            Assemble.responseSuccessSetting(responseData, priceTotal);
+
+        } catch (Exception e) {
+            Assemble.responseErrorSetting(responseData, 500,
+                    "calculateExtendPrice error: " + e);
+        }
+        return responseData;
+    }
+
+
+    /**
      * 查询该用户的所有订单
      *
      * @param msg http请求数据
@@ -325,7 +373,7 @@ public class Purchase {
             //获取该user的值
             User user = sqlSession.selectOne(Mapper.GET_USER_DATA, orders.getUser_id());
             //根据service_id的值不同，设置该user对应的total_points的数目
-            int newTotalPoints = user.getTotal_points() - CommonObject.serviceToPoints.get(orders.getService_id());
+            int newTotalPoints = user.getTotal_points() - CommonObject.getServiceToPoints().get(orders.getService_id());
             //进一步验证，只有总积分不小于0才可继续进行
             if (newTotalPoints >= 0) {
                 user.setTotal_points(newTotalPoints);

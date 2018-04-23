@@ -67,7 +67,6 @@ public class Common {
     public static String PAY_ALI_RETURN_URL = "com.pay.ali.return_url";
     public static String PAY_ALI_NOTIFY_URL = "com.pay.ali.notify_url";
     public static String PAY_ALI_PRODUCT_CODE = "com.pay.ali.product_code";
-
     //Alipay一些发送请求参数
     public static final String PAY_ALI_KEY_TRADE_NO = "out_trade_no"; //交易单号，唯一
     public static final String PAY_ALI_KEY_PRODUCT_CODE = "product_code"; //现仅支持 FAST_INSTANT_TRADE_PAY 模式
@@ -84,7 +83,6 @@ public class Common {
     public static final String PAY_WECHAT_NOTIFY_URL = "com.pay.wechat.notify_url";
     public static final String PAY_WECHAT_CREATE_IP = "com.pay.wechat.create_ip";
     public static final String PAY_WECHAT_FEE_TYPE = "com.pay.wechat.fee_type";
-
     //WechatPay配置一些参数
     public static final String PAY_WECHAT_KEY_OPENID = "openid"; //微信支付客户的openid值
     public static final String PAY_WECHAT_KEY_APPID = "appid"; //微信支付分配的公众账号ID
@@ -125,7 +123,10 @@ public class Common {
     public static final String SERVICE_ID = "service_id"; //服务类型
     public static final String IS_PUBLIC = "is_public"; //该项目是否为公开项目
     public static final String INDUSTRY_CODE = "industry_code"; //行业一级代号
-    public static final String INDUSTRY_SUB_CODE = "industry_sub_code"; //行业二级代号
+    public static final String INDUSTRY_SUB_CODE = "industry_sub_code"; //行业一级代号
+    public static final String EXTEND_UNIT = "extend_unit"; //扩容或续期的单位
+    public static final String EXTEND_SIZE = "extend_size"; //扩容或续期的容量
+    public static final String EXTEND_TYPE = "extend_type"; //是扩容还是续期的类型
 
 
     //的AES加解密的key

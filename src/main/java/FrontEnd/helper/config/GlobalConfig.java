@@ -2,7 +2,6 @@ package FrontEnd.helper.config;
 
 import FrontEnd.helper.common.Common;
 import org.apache.log4j.Logger;
-import sun.dc.pr.PRError;
 
 import java.io.*;
 import java.util.Properties;
@@ -15,7 +14,7 @@ public class GlobalConfig {
     private static Logger logger = Logger.getLogger(GlobalConfig.class);
 
     private final static String CONFIG_PATH = "/config/config.properties";
-    private final static String PAY_PATH = "/config/pay.properties";
+    private final static String PAY_PATH = "/config/pay_prod.properties";
     private static Properties props = new Properties();
 
     //加载properties文件信息
