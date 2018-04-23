@@ -19,11 +19,9 @@ import com.sun.org.apache.xpath.internal.operations.Or;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 
+import javax.jnlp.UnavailableServiceException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Administrator on 2018/3/11.
@@ -44,7 +42,15 @@ public class Purchase {
         try {
             Map<String, Object> data = FormData.getParam(msg);
             Integer userId = (Integer) data.get(Common.USER_ID);
-            //获取表数据
+            //根据user_id获取user表total_usage_amount和rest_usage_amount的数据
+            User user = sqlSession.selectOne(Mapper.GET_USER_SPACE_INFO, userId);
+            //根据user_id获取instance表数据
+            List<Instance> instances = sqlSession.selectList(Mapper.GET_INSTANCE_BY_USERID, userId);
+            //准备返回数据
+            Map<String, Object> map=new HashMap<>();
+            map.put(Common.USER_INFO, user);
+            map.put(Common.INSTANCE, instances);
+            Assemble.responseSuccessSetting(responseData, map);
 
         } catch (Exception e) {
             Assemble.responseErrorSetting(responseData, 500,
