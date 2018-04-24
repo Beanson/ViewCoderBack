@@ -8,6 +8,7 @@ import FrontEnd.helper.common.Mapper;
 import FrontEnd.helper.parser.form.FormData;
 import FrontEnd.helper.parser.text.TextData;
 import FrontEnd.myBatis.MybatisUtils;
+import FrontEnd.myBatis.entity.Instance;
 import FrontEnd.myBatis.entity.Orders;
 import FrontEnd.myBatis.entity.User;
 import FrontEnd.myBatis.entity.response.ResponseData;
@@ -30,7 +31,7 @@ public class Purchase {
     private static Logger logger = Logger.getLogger(Purchase.class.getName());
 
     /**
-     * 计算扩容或续期的价格
+     * 刷新获取该实例方法的信息
      *
      * @param msg
      * @return
@@ -41,23 +42,26 @@ public class Purchase {
 
         try {
             Map<String, Object> data = FormData.getParam(msg);
-            Integer userId = (Integer) data.get(Common.USER_ID);
-            //根据user_id获取user表total_usage_amount和rest_usage_amount的数据
+            Integer userId = Integer.parseInt(data.get(Common.USER_ID).toString());
+            //根据user_id获取user表resource_remain和resource_used的数据
             User user = sqlSession.selectOne(Mapper.GET_USER_SPACE_INFO, userId);
             //根据user_id获取instance表数据
-            List<Instance> instances = sqlSession.selectList(Mapper.GET_INSTANCE_BY_USERID, userId);
+            List<Instance> instances = sqlSession.selectList(Mapper.GET_INSTANCE_BY_USER_ID, userId);
             //准备返回数据
             Map<String, Object> map=new HashMap<>();
-            map.put(Common.USER_INFO, user);
-            map.put(Common.INSTANCE, instances);
+            map.put(Common.SPACE_INFO, user);
+            map.put(Common.INSTANCE_INFO, instances);
             Assemble.responseSuccessSetting(responseData, map);
 
         } catch (Exception e) {
             Assemble.responseErrorSetting(responseData, 500,
                     "refreshInstance error: " + e);
+        }finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
         return responseData;
     }
+
 
     /**
      * 计算扩容或续期的价格

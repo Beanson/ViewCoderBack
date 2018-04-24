@@ -20,6 +20,7 @@ public class User implements Serializable{
     private String nation;
     private FileUpload portrait_file;
     private String resource_remain;
+    private String resource_used;
     private String last_store_code;
     private String last_store_sub_code;
     private int total_usage_amount;
@@ -45,20 +46,6 @@ public class User implements Serializable{
         this.resource_remain = resource_remain;
     }
 
-    public User(int id, String portrait, String user_name, String email, String password, String phone, String open_id,
-                String role, String nation, FileUpload portrait_file, String resource_remain) {
-        this.id = id;
-        this.portrait = portrait;
-        this.user_name = user_name;
-        this.email = email;
-        this.password = password;
-        this.phone = phone;
-        this.open_id = open_id;
-        this.role = role;
-        this.nation = nation;
-        this.portrait_file=portrait_file;
-        this.resource_remain=resource_remain;
-    }
 
     public int getId() {
         return id;
@@ -180,6 +167,14 @@ public class User implements Serializable{
         this.total_points = total_points;
     }
 
+    public String getResource_used() {
+        return resource_used;
+    }
+
+    public void setResource_used(String resource_used) {
+        this.resource_used = resource_used;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -194,6 +189,7 @@ public class User implements Serializable{
                 ", nation='" + nation + '\'' +
                 ", portrait_file=" + portrait_file +
                 ", resource_remain='" + resource_remain + '\'' +
+                ", resource_used='" + resource_used + '\'' +
                 ", last_store_code='" + last_store_code + '\'' +
                 ", last_store_sub_code='" + last_store_sub_code + '\'' +
                 ", total_usage_amount=" + total_usage_amount +

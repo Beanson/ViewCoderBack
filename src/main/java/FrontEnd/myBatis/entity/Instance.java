@@ -12,17 +12,9 @@ public class Instance {
     private int space;  //单位是KByte
     private String from_date;
     private String end_date;
+    private int expire_days; //将要过期的时间
 
     public Instance() {
-    }
-
-    public Instance(int id, int user_id, int service_id, int space, String from_date, String end_date) {
-        this.id = id;
-        this.user_id = user_id;
-        this.service_id = service_id;
-        this.space = space;
-        this.from_date = from_date;
-        this.end_date = end_date;
     }
 
     public int getId() {
@@ -73,6 +65,14 @@ public class Instance {
         this.end_date = end_date;
     }
 
+    public int getExpire_days() {
+        return expire_days;
+    }
+
+    public void setExpire_days(int expire_days) {
+        this.expire_days = expire_days;
+    }
+
     @Override
     public String toString() {
         return "Instance{" +
@@ -82,6 +82,7 @@ public class Instance {
                 ", space=" + space +
                 ", from_date='" + from_date + '\'' +
                 ", end_date='" + end_date + '\'' +
+                ", expire_days=" + expire_days +
                 '}';
     }
 }

@@ -127,6 +127,8 @@ public class Common {
     public static final String EXTEND_UNIT = "extend_unit"; //扩容或续期的单位
     public static final String EXTEND_SIZE = "extend_size"; //扩容或续期的容量
     public static final String EXTEND_TYPE = "extend_type"; //是扩容还是续期的类型
+    public static final String SPACE_INFO = "space_info"; //资源空间资料
+    public static final String INSTANCE_INFO = "instance_info"; //实例资料
 
 
     //的AES加解密的key

@@ -38,6 +38,11 @@ public interface UserMapper {
     @Select("select total_points from user where id=#{userId}")
     public int getTotalPoints(int userId);
 
+    //根据user_id获取用户space的数据
+    @Select("select resource_remain, resource_used from user where id=#{userId}")
+    public User getUserSpaceInfo(int userId);
+
+
 
     /********************以下是插入user操作***********************/
     //注册操作
@@ -46,10 +51,12 @@ public interface UserMapper {
     public int registerNewAccount(User user);
 
 
+
     /********************以下是删除user操作***********************/
     //测试Junit时删除新添加的user数据
     @Delete("delete from user where email=#{email}")
     public int deleteUserInDb(String email);
+
 
 
     /********************以下是更新user操作***********************/
