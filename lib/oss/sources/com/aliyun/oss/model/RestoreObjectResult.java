@@ -20,7 +20,7 @@
 package com.aliyun.oss.model;
 
 /**
- * Successful response of restore object operation.
+ * Successful response of restore object impl.
  */
 public class RestoreObjectResult extends GenericResult {
  

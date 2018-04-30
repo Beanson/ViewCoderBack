@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static FrontEnd.myBatis.operation.common.CommonService.junitReqRespVerify;
+import static viewcoder.operation.impl.common.CommonService.junitReqRespVerify;
 
 /**
  * Created by Administrator on 2018/4/9.

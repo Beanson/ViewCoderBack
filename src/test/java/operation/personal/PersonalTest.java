@@ -1,6 +1,6 @@
 package operation.personal;
 
-import FrontEnd.myBatis.operation.common.CommonService;
+import viewcoder.operation.impl.common.CommonService;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 

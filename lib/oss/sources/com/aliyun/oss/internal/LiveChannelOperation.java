@@ -67,7 +67,7 @@ import com.aliyun.oss.model.LiveRecord;
 import com.aliyun.oss.model.SetLiveChannelRequest;
 
 /**
- * Live channel operation.
+ * Live channel impl.
  */
 public class LiveChannelOperation extends OSSOperation {
     

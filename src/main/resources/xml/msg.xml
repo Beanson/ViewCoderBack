@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MsgXml>
+    <msg>
+        <type>instance_expire_msg</type>
+        <description><![CDATA[某service实例过期前几天，发送邮件提醒续费操作。]]></description>
+    </msg>
+
+    <msg>
+        <type>verification_code</type>
+        <description><![CDATA[验证码　＊＊＊＊　。]]></description>
+    </msg>
+</MsgXml>

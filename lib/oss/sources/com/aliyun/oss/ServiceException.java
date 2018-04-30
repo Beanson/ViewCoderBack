@@ -40,7 +40,7 @@ package com.aliyun.oss;
  * <p>
  * So generally speaking, the caller only needs to handle {@link ServiceException} properly as it means the request is
  * processed, but not completely finished due to different errors. The error code in the exception is a good diagnostics
- * information. Sometimes these exceptions are completely expected.
+ * information. Sometimes these exception are completely expected.
  * </p>
  */
 public class ServiceException extends RuntimeException {

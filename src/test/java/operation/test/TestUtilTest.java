@@ -1,8 +1,7 @@
 package operation.test;
 
-import FrontEnd.helper.util.HttpUtil;
-import FrontEnd.myBatis.operation.common.CommonService;
-import operation.logon.LogonTest;
+import viewcoder.tool.util.HttpUtil;
+import viewcoder.operation.impl.common.CommonService;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 

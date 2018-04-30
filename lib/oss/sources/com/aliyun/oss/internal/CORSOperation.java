@@ -41,7 +41,7 @@ import com.aliyun.oss.model.SetBucketCORSRequest;
 import com.aliyun.oss.model.SetBucketCORSRequest.CORSRule;
 
 /**
- * CORS operation.
+ * CORS impl.
  */
 public class CORSOperation extends OSSOperation {
     

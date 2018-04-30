@@ -126,7 +126,7 @@ import com.aliyun.oss.model.SetObjectAclRequest;
 import com.aliyun.oss.model.SimplifiedObjectMeta;
 
 /**
- * Object operation.
+ * Object impl.
  */
 public class OSSObjectOperation extends OSSOperation {
     

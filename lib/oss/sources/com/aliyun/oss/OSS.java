@@ -610,7 +610,7 @@ public interface OSS {
 
     /**
      * Batch deletes the specified files under a specific bucket.
-     * If the files are non-exist, the operation will still return successful.
+     * If the files are non-exist, the impl will still return successful.
      * @param deleteObjectsRequest 
      *             A {@link DeleteObjectsRequest} instance which specifies the bucket and file keys to delete.
      * @return A {@link DeleteObjectsResult} instance which specifies each file's result in normal mode or only failed

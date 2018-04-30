@@ -1,22 +1,12 @@
 package operation.purchase;
 
-import FrontEnd.helper.common.Mapper;
-import FrontEnd.myBatis.MybatisUtils;
-import FrontEnd.myBatis.entity.Orders;
-import FrontEnd.myBatis.operation.common.CommonService;
-import FrontEnd.myBatis.operation.purchase.AliPay;
-import com.sun.org.apache.xpath.internal.operations.Or;
-import operation.project.ProjectTest;
-import org.apache.ibatis.session.SqlSession;
+import viewcoder.operation.entity.Orders;
+import viewcoder.operation.impl.common.CommonService;
+import viewcoder.operation.impl.purchase.AliPay;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.io.File;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

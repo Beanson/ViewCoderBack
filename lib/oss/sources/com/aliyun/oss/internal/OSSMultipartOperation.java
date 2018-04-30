@@ -86,7 +86,7 @@ import com.aliyun.oss.model.UploadPartRequest;
 import com.aliyun.oss.model.UploadPartResult;
 
 /**
- * Multipart operation.
+ * Multipart impl.
  */
 public class OSSMultipartOperation extends OSSOperation {
     

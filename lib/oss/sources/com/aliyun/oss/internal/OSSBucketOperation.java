@@ -131,7 +131,7 @@ import com.aliyun.oss.model.Style;
 import com.aliyun.oss.model.UserQos;
 
 /**
- * Bucket operation.
+ * Bucket impl.
  */
 public class OSSBucketOperation extends OSSOperation {
 

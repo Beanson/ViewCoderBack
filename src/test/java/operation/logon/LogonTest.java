@@ -1,18 +1,11 @@
 package operation.logon;
 
-import FrontEnd.helper.common.Common;
-import FrontEnd.helper.util.HttpUtil;
-import FrontEnd.myBatis.MybatisUtils;
-import FrontEnd.myBatis.entity.User;
-import FrontEnd.myBatis.entity.response.ResponseData;
-import FrontEnd.myBatis.operation.common.CommonService;
-import com.alibaba.fastjson.JSON;
+import viewcoder.tool.util.MybatisUtils;
+import viewcoder.operation.impl.common.CommonService;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
-import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 

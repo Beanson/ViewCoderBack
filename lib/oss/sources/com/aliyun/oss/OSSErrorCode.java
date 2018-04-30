@@ -215,7 +215,7 @@ public interface OSSErrorCode {
     static final String SECURITY_TOKEN_NOT_SUPPORTED = "SecurityTokenNotSupported";
     
     /**
-     * The specified object does not support append operation.
+     * The specified object does not support append impl.
      */
     static final String OBJECT_NOT_APPENDALBE = "ObjectNotAppendable";
     
@@ -230,7 +230,7 @@ public interface OSSErrorCode {
     static final String INVALID_RESPONSE = "InvalidResponse";
     
     /**
-     * Callback failed. The operation (such as download or upload) succeeded though.
+     * Callback failed. The impl (such as download or upload) succeeded though.
      */
     static final String CALLBACK_FAILED = "CallbackFailed";
     

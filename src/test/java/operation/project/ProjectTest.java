@@ -1,20 +1,19 @@
 package operation.project;
 
-import FrontEnd.helper.common.Common;
-import FrontEnd.helper.config.GlobalConfig;
-import FrontEnd.helper.test.TestResponseOpt;
-import FrontEnd.myBatis.entity.response.ResponseData;
-import FrontEnd.myBatis.operation.common.CommonService;
+import viewcoder.tool.common.Common;
+import viewcoder.tool.config.GlobalConfig;
+import viewcoder.tool.test.TestResponseOpt;
+import viewcoder.operation.entity.response.ResponseData;
+import viewcoder.operation.impl.common.CommonService;
 import com.alibaba.fastjson.JSON;
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static FrontEnd.myBatis.operation.common.CommonService.junitReqRespVerify;
+import static viewcoder.operation.impl.common.CommonService.junitReqRespVerify;
 
 /**
  * Created by Administrator on 2018/2/19.

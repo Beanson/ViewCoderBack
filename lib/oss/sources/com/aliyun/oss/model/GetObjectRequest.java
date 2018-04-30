@@ -41,7 +41,7 @@ public class GetObjectRequest extends GenericRequest {
     private ResponseHeaderOverrides responseHeaders;
     
     /**
-     * Fields releated with getobject operation by using url signature.
+     * Fields releated with getobject impl by using url signature.
      */
     private URL absoluteUrl;
     private boolean useUrlSignature = false;

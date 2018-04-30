@@ -1,9 +1,8 @@
-import FrontEnd.helper.common.Common;
-import FrontEnd.helper.common.OssOpt;
-import FrontEnd.helper.config.GlobalConfig;
-import FrontEnd.helper.encrypt.AESEncryptor;
+import viewcoder.tool.common.Common;
+import viewcoder.tool.common.OssOpt;
+import viewcoder.tool.config.GlobalConfig;
+import viewcoder.tool.encrypt.AESEncryptor;
 import com.aliyun.oss.OSSClient;
-import com.aliyun.oss.model.Callback;
 import com.aliyun.oss.model.PutObjectResult;
 import org.junit.Test;
 
