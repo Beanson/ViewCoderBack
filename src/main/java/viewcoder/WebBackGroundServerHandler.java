@@ -17,7 +17,7 @@ import viewcoder.operation.impl.purchase.AliPay;
 import viewcoder.operation.impl.purchase.Purchase;
 import viewcoder.operation.impl.purchase.wechat.WechatPay;
 import viewcoder.operation.impl.render.Render;
-import UploadFile.Global;
+
 import com.alibaba.fastjson.JSON;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -54,12 +54,6 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
 
     private HttpPostRequestDecoder decoder;
     private HttpRequest request;
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        Global.allChannels.add(ctx.channel());
-        super.channelActive(ctx);
-    }
 
 
     @Override

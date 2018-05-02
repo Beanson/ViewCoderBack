@@ -250,7 +250,7 @@ public class ProjectList {
         String destFileName = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + projectCopy.getProject_file_name();
         boolean found = OssOpt.getObjectExist(ossClient, sourceFileName);
         if (found) {
-            CommonService.copyProject(ossClient, sourceFileName, destFileName);
+            OssOpt.copyProject(ossClient, sourceFileName, destFileName);
         }
     }
 
@@ -328,7 +328,7 @@ public class ProjectList {
         OssOpt.deleteFileInOss(deleteHtmlFileInOss, ossClient);
 
         //批量删除OSS中对应user_upload_file引用为0的组件文件
-        CommonService.deleteResourceBatch(list, sqlSession, ossClient);
+        OssOpt.deleteResourceBatch(list, sqlSession, ossClient);
 
         //更新用户可用空间
         int updateUserResourceNum = addUserResourceSpace(sqlSession, project.getUser_id(),

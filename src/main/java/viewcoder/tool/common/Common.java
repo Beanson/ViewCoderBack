@@ -11,6 +11,7 @@ public class Common {
 
     //后台返回status_code
     public final static int STATUS_CODE_OK = 200;
+    public final static String STATUS_OK = "OK";
 
     //PSD文件解析出来后的组件类型
     public final static String COMMON_IMAGE = "Common_Image";
@@ -27,10 +28,17 @@ public class Common {
     public final static int FOLDER_FILE = 1;
     public final static int NOT_FOLDER_FILE = 0;
 
+    //timeout配置
+    public final static String TIMEOUT_10000="10000";
+
     //XML的配置文件类型
     public final static String XML_MSG_TYPE="msg";
 
     //各种配置文件的key值
+    //阿里云key
+    public static final String ACCESS_KEY_ID = "com.viewcoder.aliyun.access.key";
+    public static final String ACCESS_KEY_SECRET = "com.viewcoder.aliyun.access.secret";
+
     //文件存储配置信息
     public final static String PORTRAIT_IMG = "com.viewcoder.file.portrait_img";
     public final static String MULTI_EXPORT = "com.viewcoder.file.multi_export";
@@ -42,6 +50,35 @@ public class Common {
     public static String FILE_SYS_BASE_URL_KEY = "com.viewcoder.file.system.base.url";
     public static String FILE_OSS_BASE_URL_KEY = "com.viewcoder.file.oss.base.url";
     public static String FILE_HTTP_BASE_URL_KEY = "com.viewcoder.file.http.base.url";
+
+    //配置查看资源空间的URL
+    public static String SERVICE_SPACE_URL = "com.viewcoder.service.space.url";
+
+    //邮件配置
+    public static String MAIL_BASE_URL = "com.viewcoder.mail.base.url";
+    public static String MAIL_HOST = "com.viewcoder.mail.host";
+    public static String MAIL_USERNAME = "com.viewcoder.mail.username";
+    public static String MAIL_FROM = "com.viewcoder.mail.from";
+    public static String MAIL_PASS = "com.viewcoder.mail.pass";
+    public static String MAIL_PROTOCOL = "com.viewcoder.mail.protocol";
+    public static String MAIL_PORT = "com.viewcoder.mail.port";
+    public static String MAIL_AUTH = "com.viewcoder.mail.auth";
+    public static String MAIL_TIMEOUT = "com.viewcoder.mail.timeout";
+    public static String MAIL_INSTANCE_EXPIRE_NOTIFICATION = "ViewCoder实例即将到期提醒";
+
+    //阿里云短信服务配置
+    public static final String MSG_PRODUCT = "com.viewcoder.msg.product";
+    public static final String MSG_DOMAIN = "com.viewcoder.msg.domain";
+    public static final String MSG_ENDPOINT = "com.viewcoder.msg.endPointName";
+    public static final String MSG_REGIONID = "com.viewcoder.msg.regionId";
+
+    //阿里云短信直接调用配置
+    public static final String MSG_SIGNNAME_LIPHIN = "莱芬科技"; //短信签名
+    public static final String MSG_TEMPLEATE_RELEASE = "instance_release"; //instance释放提醒
+    public static final String MSG_TEMPLEATE_EXPIRE1 = "instance_expire1"; //instance过期还有剩余空间
+    public static final String MSG_TEMPLEATE_EXPIRE2 = "instance_expire2"; //instance过期且无剩余空间
+    public static final String MSG_TEMPLEATE_PURCHASE = "instance_purchase";//成功购买instance提醒
+    public static final String MSG_TEMPLEATE_VERIFY = "verification_code"; //验证码提醒
 
     //Test配置信息
     public static String PROJECT_TEST_INTEGRATION = "com.viewcoder.project.test.integration";
@@ -134,8 +171,14 @@ public class Common {
     public static final String TIME_FORMAT_1 = "yyyy-MM-dd HH:mm:ss";
     public static final String UPLOAD_FILES_FOLDER = "upload_files";
 
+    //mail的其他配置
+    public static final String MAIL_HTML_TYPE = "html";
+    public static final String MAIL_TEXT_TYPE = "text";
+
     //测试辅助数据
     public static final String BASE_HTTP_URL = "http://127.0.0.1:8080/";
+
+
 
 
 }

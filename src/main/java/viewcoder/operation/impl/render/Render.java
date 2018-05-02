@@ -319,7 +319,7 @@ public class Render {
             //删除文件在数据库user_upload_file的条目
             deleteNum = sqlSession.delete(Mapper.DELETE_RESOURCE_BY_ID, userUploadFile.getId());
             deleteResourceSize = Integer.parseInt(userUploadFile.getFile_size());
-            CommonService.deleteResourceOSSFile(userUploadFile, ossClient, sqlSession);
+            OssOpt.deleteResourceOSSFile(userUploadFile, ossClient, sqlSession);
 
         } else {
             //如果删除的文件资源是文件夹则进行级联删除
@@ -343,7 +343,7 @@ public class Render {
                 }
             }
             //OSS删除resource文件
-            CommonService.deleteResourceBatch(list, sqlSession, ossClient);
+            OssOpt.deleteResourceBatch(list, sqlSession, ossClient);
         }
         //删除资源后对User和Project的资源空间的更新
         updateDelResRemain(sqlSession, userUploadFile, deleteResourceSize, deleteNum, responseData);

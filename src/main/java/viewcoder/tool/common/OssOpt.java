@@ -1,8 +1,10 @@
 package viewcoder.tool.common;
 
+import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.*;
 import org.apache.ibatis.session.SqlSession;
 import viewcoder.operation.entity.UserUploadFile;
+import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.encrypt.AESEncryptor;
 import com.aliyun.oss.OSSClient;
@@ -25,8 +27,6 @@ public class OssOpt {
     //TODO 上ECS后把 END_POINT 设置为ECS处的连接
     private static final String END_POINT = "com.viewcoder.oss.endpoint.outer";
     // 云账号AccessKey有所有API访问权限，建议遵循阿里云安全最佳实践，创建并使用RAM子账号进行API访问或日常运维，请登录 https://ram.console.aliyun.com 创建
-    private static final String ACCESS_KEY_ID = "com.viewcoder.oss.access.key";
-    private static final String ACCESS_KEY_SECRET = "com.viewcoder.oss.access.secret";
     private static final String VIEWCODER_BUCKET = "viewcoder-bucket";
 
 
@@ -37,9 +37,14 @@ public class OssOpt {
      * @return 返回OSSClient的实例
      */
     public static OSSClient initOssClient() {
-        return new OSSClient(GlobalConfig.getProperties(END_POINT),
-                AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(ACCESS_KEY_ID)),
-                AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(ACCESS_KEY_SECRET)));
+        //accessKeyId,和KEY_SECRET
+        String accessKeyId = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_ID));
+        String accessKeySecret = AESEncryptor.AESDncode(Common.ACCESS_KEY_SECRET, GlobalConfig.getProperties(Common.ACCESS_KEY_SECRET));
+        if (CommonService.checkNotNull(accessKeyId) && CommonService.checkNotNull(accessKeySecret)) {
+            return new OSSClient(GlobalConfig.getProperties(END_POINT), accessKeyId, accessKeySecret);
+        }else{
+            throw new OSSException("Aliyun accesskey and keySecret null error");
+        }
     }
 
     /**
@@ -64,7 +69,7 @@ public class OssOpt {
      */
     public static void uploadFileToOss(String fileName, byte[] content, OSSClient ossClient) {
         OssOpt.logger.debug("===upload resource file to common: " + fileName);
-        PutObjectResult result=ossClient.putObject(VIEWCODER_BUCKET, fileName, new ByteArrayInputStream(content));
+        PutObjectResult result = ossClient.putObject(VIEWCODER_BUCKET, fileName, new ByteArrayInputStream(content));
     }
 
     /**
@@ -88,7 +93,6 @@ public class OssOpt {
         OssOpt.logger.debug("===upload resource file to common: " + fileName);
         ossClient.putObject(VIEWCODER_BUCKET, fileName, file);
     }
-
 
 
     /**************************** 删除资源文件方法 ***************************/
@@ -205,30 +209,30 @@ public class OssOpt {
     }
 
 
-
     /*************************** 查看资源文件是否存在方法 *************************/
     /**
      * 查看资源是否存在方法
+     *
      * @param ossClient oss句柄
-     * @param fileName 存储在oss中的文件名
+     * @param fileName  存储在oss中的文件名
      * @return
      */
-    public static boolean getObjectExist(OSSClient ossClient, String fileName){
-        boolean found= ossClient.doesObjectExist(VIEWCODER_BUCKET,fileName);
-        OssOpt.logger.debug("===get Object exist: "+found);
+    public static boolean getObjectExist(OSSClient ossClient, String fileName) {
+        boolean found = ossClient.doesObjectExist(VIEWCODER_BUCKET, fileName);
+        OssOpt.logger.debug("===get Object exist: " + found);
         return found;
     }
-
 
 
     /***************************** 设置文件的ACK操作 *********************************/
 
     /**
      * 更新文件的ACL设置
+     *
      * @param ossClient
      * @param openness
      */
-    public static void updateAclConfig(OSSClient ossClient, String prefix, boolean openness ) {
+    public static void updateAclConfig(OSSClient ossClient, String prefix, boolean openness) {
         // 构造ListObjectsRequest请求
         ListObjectsRequest listObjectsRequest = new ListObjectsRequest(VIEWCODER_BUCKET);
         listObjectsRequest.setPrefix(prefix);
@@ -237,10 +241,10 @@ public class OssOpt {
         // 遍历该文件夹下的所有文件
         for (OSSObjectSummary objectSummary : listing.getObjectSummaries()) {
             //根据是否公开设置其访问权限
-            if(openness){
-                ossClient.setObjectAcl(VIEWCODER_BUCKET,objectSummary.getKey(), CannedAccessControlList.PublicRead);
-            }else{
-                ossClient.setObjectAcl(VIEWCODER_BUCKET,objectSummary.getKey(), CannedAccessControlList.Private);
+            if (openness) {
+                ossClient.setObjectAcl(VIEWCODER_BUCKET, objectSummary.getKey(), CannedAccessControlList.PublicRead);
+            } else {
+                ossClient.setObjectAcl(VIEWCODER_BUCKET, objectSummary.getKey(), CannedAccessControlList.Private);
             }
 
         }

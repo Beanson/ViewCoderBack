@@ -8,9 +8,9 @@ import org.quartz.impl.StdSchedulerFactory;
 /**
  * Created by Administrator on 2018/4/28.
  */
-public class TaskImpl {
+public class JobImpl {
 
-    private static Logger logger = Logger.getLogger(TaskImpl.class);
+    private static Logger logger = Logger.getLogger(JobImpl.class);
 
     static {
         //每天午夜task去update用户的信息数据
@@ -21,8 +21,8 @@ public class TaskImpl {
     private static void midNightTask() {
         try {
             //设置午夜job的task
-            JobDetail job = JobBuilder.newJob(MidNightTask.class)
-                    .withIdentity("MidNightTask", "version1").build();
+            JobDetail job = JobBuilder.newJob(MidNightJob.class)
+                    .withIdentity("MidNightJob", "version1").build();
 
             //设置触发器
             Trigger trigger = TriggerBuilder
@@ -37,7 +37,7 @@ public class TaskImpl {
             scheduler.scheduleJob(job, trigger); //开始触发run task
 
         } catch (Exception e) {
-            TaskImpl.logger.warn("midNightTask failure", e);
+            JobImpl.logger.warn("midNightTask failure", e);
         }
     }
 

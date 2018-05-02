@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MsgXml>
+    <msg>
+        <!--项目到期提醒-->
+        <type>instance_expire_msg_with_space</type>
+        <!--项目到期后可继续使用提醒-->
+        <description><![CDATA[【莱芬科技】【到期提醒】尊敬的{name}客户，您有一个{service_name}实例将于{expire_date}正式到期，
+        截止目前仅剩{days}天。到期后将剩余{space_remain}资源空间，届时不影响您继续使用原有服务。点击{url}查看资源空间。
+        感谢您对莱芬科技的支持，我们将继续努力把产品打造更加精致。]]></description>
+    </msg>
+
+    <msg>
+        <!--项目到期提醒-->
+        <type>instance_expire_msg_no_space</type>
+        <!--项目到期后无资源空间提醒-->
+        <description><![CDATA[【莱芬科技】【到期提醒】尊敬的{name}客户，您有一个{service_name}实例将于{expire_date}正式到期，
+        截止目前仅剩{days}天。到期后无剩余资源空间，系统将为您保存项目快照，待续费或订购新实例补全资源空间后可继续使用原有服务。点击{url}查看资源空间。
+        感谢您对莱芬科技的支持，我们将继续努力把产品打造更加精致。]]></description>
+    </msg>
+
+    <msg>
+        <!--实例到期释放提醒-->
+        <type>instance_release_msg</type>
+        <description_2><![CDATA[【莱芬科技】【到期提醒】尊敬的{name}客户，您有一个{service_name}实例于{expire_date}正式到期。点击{url}查看资源剩余空间。
+        感谢您对莱芬科技的支持，我们将继续努力把产品打造更加精致。]]></description_2>
+    </msg>
+
+    <msg>
+        <!--成功购买实例提醒：新购、续费、积分兑换-->
+        <type>instance_purchase_msg</type>
+        <description><![CDATA[【莱芬科技】【新购提醒】尊敬的{name}客户，您于{time}订购了{service_num}个{service_name}实例。
+        点击{url}查看订购详情。感谢您对莱芬科技的支持，我们将继续努力把产品打造更加精致。]]></description>
+    </msg>
+
+    <msg>
+        <!--验证码提醒-->
+        <type>verification_code_msg</type>
+        <description><![CDATA[【莱芬科技】【验证码】尊敬的{name}客户，您的验证码：{code}，工作人员不会索取，请勿泄漏。]]></description>
+    </msg>
+</MsgXml>

@@ -9,7 +9,7 @@ public class Instance {
     private int id;
     private int user_id;
     private int service_id;
-    private int space;  //单位是KByte
+    private String space;  //单位是KByte
     private String from_date;
     private String end_date;
     private int expire_days; //将要过期的时间
@@ -41,11 +41,11 @@ public class Instance {
         this.service_id = service_id;
     }
 
-    public int getSpace() {
+    public String getSpace() {
         return space;
     }
 
-    public void setSpace(int space) {
+    public void setSpace(String space) {
         this.space = space;
     }
 

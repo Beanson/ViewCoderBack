@@ -13,7 +13,7 @@ public class GlobalConfig {
 
     private static Logger logger = Logger.getLogger(GlobalConfig.class);
 
-    private final static String CONFIG_PATH = "/config/config.properties";
+    private final static String CONFIG_PATH = "/config/config_prod.properties";
     private final static String PAY_PATH = "/config/pay_prod.properties";
     private static Properties props = new Properties();
 

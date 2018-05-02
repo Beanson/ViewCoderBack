@@ -1,158 +1,98 @@
 package viewcoder.helper.mail;
 
+import com.sun.mail.util.MailSSLSocketFactory;
+import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
+import viewcoder.tool.common.Common;
+import viewcoder.tool.config.GlobalConfig;
+import viewcoder.tool.encrypt.AESEncryptor;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.*;
 import java.io.File;
+import java.security.GeneralSecurityException;
 import java.util.Properties;
+
 
 /**
  * Created by Administrator on 2018/4/28.
  */
 public class MailHelper {
 
+    private static Logger logger = Logger.getLogger(MailHelper.class);
+    private MailEntity mailEntity;
 
-    private String to;
-    private String from;
-    private String host;
-    private String subject;
-    private String type; //text, html
-    private String textAndContent; //设置纯text或html数据
-    private String attachment; //设置发送的附件文件名
-
-    public MailHelper(String type) {
-        this.type = type;
+    public MailHelper() {
     }
 
-    public String getTo() {
-        return to;
+    public MailHelper(MailEntity mailEntity) {
+        this.mailEntity = mailEntity;
     }
-
-    public MailHelper setTo(String to) {
-        this.to = to;
-        return this;
-    }
-
-    public String getFrom() {
-        return from;
-    }
-
-    public MailHelper setFrom(String from) {
-        this.from = from;
-        return this;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public MailHelper setHost(String host) {
-        this.host = host;
-        return this;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public MailHelper setSubject(String subject) {
-        this.subject = subject;
-        return this;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public MailHelper setType(String type) {
-        this.type = type;
-        return this;
-    }
-
-    public String getTextAndContent() {
-        return textAndContent;
-    }
-
-    public MailHelper setTextAndContent(String textAndContent) {
-        this.textAndContent = textAndContent;
-        return this;
-    }
-
-    public String getAttachment() {
-        return attachment;
-    }
-
-    public MailHelper setAttachment(String attachment) {
-        this.attachment = attachment;
-        return this;
-    }
-
 
     /**
      * 初始化mail的基础数据
      */
     private MimeMessage mailInit() throws Exception {
+
+        //设置邮件发送基础配置
         // Get system properties
         Properties properties = System.getProperties();
         // Setup mail server
-        properties.setProperty("mail.smtp.host", host);
-        // Get the default Session object.
-        Session session = Session.getDefaultInstance(properties);
-        // Create a default MimeMessage object.
-        MimeMessage message = new MimeMessage(session);
-        // Set From: header field of the header.
-        message.setFrom(new InternetAddress(from));
-        // Set To: header field of the header.
-        message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-        // Set Subject: header field
-        message.setSubject(subject);
+        properties.setProperty("mail.transport.protocol", GlobalConfig.getProperties(Common.MAIL_PROTOCOL));
+        properties.setProperty("mail.smtp.host", GlobalConfig.getProperties(Common.MAIL_HOST));
+        properties.setProperty("mail.smtp.port", GlobalConfig.getProperties(Common.MAIL_PORT));
+        // 指定验证为true
+        properties.setProperty("mail.smtp.auth", GlobalConfig.getProperties(Common.MAIL_AUTH));
+        properties.setProperty("mail.smtp.timeout", GlobalConfig.getProperties(Common.MAIL_TIMEOUT));
 
+        //开启安全协议
+        MailSSLSocketFactory sf = null;
+        try {
+            sf = new MailSSLSocketFactory();
+            sf.setTrustAllHosts(true);
+        } catch (GeneralSecurityException e) {
+            MailHelper.logger.error("mailInit use MailSSLSocketFactory error: ", e);
+        }
+        properties.put("mail.smtp.ssl.enable", "true");
+        properties.put("mail.smtp.ssl.socketFactory", sf);
+
+        // 验证账号及密码，密码需要是第三方授权码
+        Authenticator auth = new Authenticator() {
+            public PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(GlobalConfig.getProperties(Common.MAIL_FROM),
+                        AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.MAIL_PASS)));
+            }
+        };
+        //设置发送操作变量
+        Session session = Session.getInstance(properties, auth);
+        MimeMessage message = new MimeMessage(session);
+        //设置发送者名称，不然会account的@之前部分作为发送者名称
+        String username = MimeUtility.encodeText(GlobalConfig.getProperties(Common.MAIL_USERNAME))+
+                "<"+GlobalConfig.getProperties(Common.MAIL_FROM)+">";
+        message.setFrom(new InternetAddress(username));
+        message.setSubject(mailEntity.getSubject());
+
+        //设置接收邮件用户地址
+        if (mailEntity.getMultiTo() != null && mailEntity.getMultiTo().size() > 0) {
+            //发送邮件给多用户操作
+            InternetAddress[] address = null;
+            try {
+                address = mailEntity.getMultiTo().toArray(new InternetAddress[mailEntity.getMultiTo().size()]);
+                message.addRecipients(Message.RecipientType.TO, address);
+
+            } catch (AddressException e) {
+                MailHelper.logger.debug("mailInit parse multi email exception: ", e);
+            }
+        } else {
+            //邮件发给单用户操作
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(mailEntity.getTo()));
+        }
         return message;
     }
-
-    /**
-     * 发送邮件方法
-     */
-    public void send() {
-        try {
-            MimeMessage message = mailInit();
-
-            if (attachment != null && !attachment.isEmpty()) {
-
-                Multipart multipart = attachmentEmail();
-                //设置multipart的body体
-                message.setContent(multipart);
-
-            } else {
-                //发送普通的text或html的邮件
-                if (type.equals("text")) {
-                    //发送text类型邮件
-                    message.setText(textAndContent);
-
-                } else if (type.equals("html")) {
-                    //发送html类型邮件
-                    message.setContent(textAndContent, "text/html");
-
-                } else {
-                    throw new Exception("Get type exception" + type);
-                }
-            }
-
-            //发送message
-            Transport.send(message);
-
-        } catch (Exception e) {
-
-        }
-    }
-
 
 
     /**
@@ -168,21 +108,21 @@ public class MailHelper {
         //设置text或html的body体
         BodyPart textAndContentPart = new MimeBodyPart();
         // Fill the message
-        if (type.equals("text")) {
+        if (mailEntity.getType().equals("text")) {
             //发送text类型邮件
-            textAndContentPart.setText(textAndContent);
+            textAndContentPart.setText(mailEntity.getTextAndContent());
 
-        } else if (type.equals("html")) {
+        } else if (mailEntity.getType().equals("html")) {
             //发送html类型邮件
-            textAndContentPart.setContent(textAndContent, "text/html");
+            textAndContentPart.setContent(mailEntity.getTextAndContent(), "text/html");
 
         } else {
-            throw new Exception("Get type exception" + type);
+            throw new Exception("attachmentEmail Get type exception" + mailEntity.getType());
         }
 
         // attachment部分
         BodyPart messageBodyPart = new MimeBodyPart();
-        String filename = attachment;
+        String filename = mailEntity.getAttachment();
         DataSource source = new FileDataSource(filename);
         messageBodyPart.setDataHandler(new DataHandler(source));
         messageBodyPart.setFileName(filename);
@@ -213,22 +153,42 @@ public class MailHelper {
             }
 
         } catch (Exception e) {
-            // print log with logger TODO
-            e.printStackTrace();
+            MailHelper.logger.error("getHtmlData error: ", e);
         }
         return html;
     }
 
 
-    @Override
-    public String toString() {
-        return "MailHelper{" +
-                "to='" + to + '\'' +
-                ", from='" + from + '\'' +
-                ", host='" + host + '\'' +
-                ", type='" + type + '\'' +
-                ", attachment='" + attachment + '\'' +
-                '}';
-    }
+    /**
+     * 发送邮件方法
+     */
+    public void send() {
+        try {
+            MimeMessage message = mailInit();
+            if (mailEntity.getAttachment() != null && !mailEntity.getAttachment().isEmpty()) {
+                Multipart multipart = attachmentEmail();
+                //设置multipart的body体
+                message.setContent(multipart);
 
+            } else {
+                //发送普通的text或html的邮件
+                if (mailEntity.getType().equals("text")) {
+                    //发送text类型邮件
+                    message.setText(mailEntity.getTextAndContent());
+
+                } else if (mailEntity.getType().equals("html")) {
+                    //发送html类型邮件
+                    message.setContent(mailEntity.getTextAndContent(), "text/html; charset=UTF-8");
+
+                } else {
+                    throw new Exception("Get type exception" + mailEntity.getType());
+                }
+            }
+            //发送message
+            Transport.send(message);
+
+        } catch (Exception e) {
+            MailHelper.logger.error("send error: ", e);
+        }
+    }
 }

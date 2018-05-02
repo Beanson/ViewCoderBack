@@ -110,34 +110,6 @@ public class CommonService {
 
 
     /**
-     * 查看在redis数据库中该文件的引用如果为0则删除该资源在OSS中的文件
-     *
-     * @param userUploadFile 上传的文件
-     */
-//    @Deprecated
-//    public static void deleteResourceOSSFile(UserUploadFile userUploadFile, OSSClient ossClient) {
-//        //查看该文件在redis中的引用数
-//        Jedis jedis = RedisJava.getInstance();
-//        int refCount = Integer.parseInt(jedis.get(userUploadFile.getTime_stamp())) - 1;
-//
-//        if (refCount > 0) {
-//            //如果引用数大于零说明还有其他项目引用该资源，则直接更新该条目数目即可
-//            jedis.set(userUploadFile.getTime_stamp(), String.valueOf(refCount));
-//
-//        } else {
-//            //如果引用数小于等于零，则直接在redis中删除该条目，并且删除OSS中对应文件
-//            jedis.del(userUploadFile.getTime_stamp());
-//            //删除OSS对应文件
-//            String deleteFileName = GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES) +
-//                    userUploadFile.getTime_stamp() + "." + userUploadFile.getSuffix();
-//            OssOpt.deleteFileInOss(deleteFileName,ossClient);
-//        }
-//    }
-
-
-
-
-    /**
      * 进行http的request和response数据的断言
      *
      * @param map         发送请求数据
