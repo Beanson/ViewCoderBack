@@ -42,11 +42,8 @@ public class MsgHelper {
         System.setProperty(defaultConnectTimeout, Common.TIMEOUT_10000);
         System.setProperty(defaultReadTimeout, Common.TIMEOUT_10000);
 
-        //accessKeyId,和KEY_SECRET
-        String accessKeyId = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_ID));
-        String accessKeySecret = AESEncryptor.AESDncode(Common.ACCESS_KEY_SECRET, GlobalConfig.getProperties(Common.ACCESS_KEY_SECRET));
         //初始化ascClient,暂时不支持多region（请勿修改）
-        IClientProfile profile = DefaultProfile.getProfile(regionId, accessKeyId, accessKeySecret);
+        IClientProfile profile = DefaultProfile.getProfile(regionId, Common.ALI_ACCESSKEY_ID, Common.ALI_ACCESSKEY_SECRET);
         DefaultProfile.addEndpoint(endPointName, regionId, product, domain);
         return new DefaultAcsClient(profile);
     }

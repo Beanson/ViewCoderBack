@@ -127,7 +127,7 @@ public class ProjectList {
 
         try {
             //解析请求数据
-            HashMap<String, Object> data = FormData.getParam(msg, Common.PROJECT_ID, Common.USER_ID);
+            HashMap<String, Object> data = FormData.getParam(msg);
             if (data != null && data.get(Common.PROJECT_ID) != null && data.get(Common.PROJECT_ID) != "" &&
                     data.get(Common.USER_ID) != null && data.get(Common.USER_ID) != "") {
 
@@ -156,7 +156,7 @@ public class ProjectList {
                     map.put("id", projectCopy.getId());
                     map.put("project_name", projectCopy.getProject_name());
                     map.put("last_modify_time", projectCopy.getLast_modify_time());
-                    map.put("project_file_name", projectCopy.getProject_file_name());
+                    map.put("timestamp", projectCopy.getTimestamp());
                     Assemble.responseSuccessSetting(responseData, map);
                 } else {
                     Assemble.responseErrorSetting(responseData, 401,
@@ -195,7 +195,7 @@ public class ProjectList {
         //初始化新项目project表数据
         projectCopy.setUser_id(userId);
         projectCopy.setProject_name(projectOrigin.getProject_name() + "_Copy");
-        projectCopy.setProject_file_name(CommonService.getTimeStamp() + "-index.html");
+        projectCopy.setTimestamp(CommonService.getTimeStamp());
         projectCopy.setLast_modify_time(CommonService.getDateTime());
         projectCopy.setProject_data(projectOrigin.getProject_data());
         projectCopy.setResource_size(projectOrigin.getResource_size());
@@ -246,8 +246,8 @@ public class ProjectList {
      * @param projectCopy   拷贝的新项目
      */
     private static void ossProjectHtmlCopy(OSSClient ossClient, Project projectOrigin, Project projectCopy) {
-        String sourceFileName = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + projectOrigin.getProject_file_name();
-        String destFileName = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + projectCopy.getProject_file_name();
+        String sourceFileName = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + projectOrigin.getTimestamp() + Common.PROJECT_FILE_SUBFFIX;
+        String destFileName = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + projectCopy.getTimestamp() + Common.PROJECT_FILE_SUBFFIX;
         boolean found = OssOpt.getObjectExist(ossClient, sourceFileName);
         if (found) {
             OssOpt.copyProject(ossClient, sourceFileName, destFileName);
@@ -324,7 +324,7 @@ public class ProjectList {
                                                   List<UserUploadFile> list, Project project, OSSClient ossClient,
                                                   SqlSession sqlSession) {
         //删除OSS中HTML文件
-        String deleteHtmlFileInOss = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + project.getProject_file_name();
+        String deleteHtmlFileInOss = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + project.getTimestamp() + Common.PROJECT_FILE_SUBFFIX;
         OssOpt.deleteFileInOss(deleteHtmlFileInOss, ossClient);
 
         //批量删除OSS中对应user_upload_file引用为0的组件文件

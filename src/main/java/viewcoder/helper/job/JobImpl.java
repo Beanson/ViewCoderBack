@@ -14,7 +14,7 @@ public class JobImpl {
 
     static {
         //每天午夜task去update用户的信息数据
-        midNightTask();
+        //midNightTask();
     }
 
 

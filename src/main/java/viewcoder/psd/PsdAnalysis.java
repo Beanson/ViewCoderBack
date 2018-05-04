@@ -145,6 +145,22 @@ public class PsdAnalysis {
                     //填充font类型的图层数据数据
                     LayerInfo.InitLayerTextInfo(layer_info, layer, fontData);
                     psdInfo.getAll_tools().get(Common.COMMON_TEXT).put(String.valueOf(layer.getLayerId()), layer_info);
+
+                    //对字体的height进行修正，Photoshop获取不到正确的字体height。
+                    layer_info.put("height",40);
+
+                    //对字体大于20的文字进行修正，分别对font的size和font的width进行调节，磨平Photoshop和网页之间的视觉差距
+                    if((int) (Float.parseFloat(fontData[4]))>20){
+                        //重新设置font-size
+                        int font_size = (int) (Float.parseFloat(fontData[4]));
+                        int font_size_beautify = (int)((font_size - 20)*0.7*0.7 + 20);
+                        layer_info.put("font-size",font_size_beautify);
+
+                        //重新设置font的width
+                        int font_width = layer.getWidth();
+                        int font_width_beautify = (int)(font_width*1.3*1.3);
+                        layer_info.put("width",font_width_beautify);
+                    }
                 } else {
                     //如果解析不出文字大小则证明无法识别该字体，转到最后的默认保存为图片设置，
                     saveAsImage(layer, layer_info);

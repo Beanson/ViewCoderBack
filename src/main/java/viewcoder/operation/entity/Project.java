@@ -10,7 +10,7 @@ public class Project {
     private int id;
     private int user_id;
     private String project_name;
-    private String project_file_name;
+    private String timestamp;
     private String last_modify_time;
     private int is_mobile;
     private String project_data;
@@ -35,20 +35,20 @@ public class Project {
     }
 
     //拷贝非psd项目时用到此构造函数
-    public Project(int user_id, String project_name, String project_file_name, String last_modify_time, String project_data, String resource_size) {
+    public Project(int user_id, String project_name, String timestamp, String last_modify_time, String project_data, String resource_size) {
         this.user_id = user_id;
         this.project_name = project_name;
-        this.project_file_name = project_file_name;
+        this.timestamp = timestamp;
         this.last_modify_time = last_modify_time;
         this.project_data = project_data;
         this.resource_size = resource_size;
     }
 
-    public Project(int id, int user_id, String project_name, String project_file_name, String last_modify_time, String project_data, FileUpload psd_file) {
+    public Project(int id, int user_id, String project_name, String timestamp, String last_modify_time, String project_data, FileUpload psd_file) {
         this.id = id;
         this.user_id = user_id;
         this.project_name = project_name;
-        this.project_file_name = project_file_name;
+        this.timestamp = timestamp;
         this.last_modify_time = last_modify_time;
         this.project_data = project_data;
         this.psd_file = psd_file;
@@ -78,12 +78,12 @@ public class Project {
         this.project_name = project_name;
     }
 
-    public String getProject_file_name() {
-        return project_file_name;
+    public String getTimestamp() {
+        return timestamp;
     }
 
-    public void setProject_file_name(String project_file_name) {
-        this.project_file_name = project_file_name;
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getLast_modify_time() {
@@ -180,7 +180,7 @@ public class Project {
                 "id=" + id +
                 ", user_id=" + user_id +
                 ", project_name='" + project_name + '\'' +
-                ", project_file_name='" + project_file_name + '\'' +
+                ", timestamp='" + timestamp + '\'' +
                 ", last_modify_time='" + last_modify_time + '\'' +
                 ", is_mobile=" + is_mobile +
                 ", project_data='" + project_data + '\'' +

@@ -1,6 +1,8 @@
 package viewcoder.tool.common;
 
 import org.apache.log4j.Logger;
+import viewcoder.tool.config.GlobalConfig;
+import viewcoder.tool.encrypt.AESEncryptor;
 
 /**
  * Created by Administrator on 2018/2/12.
@@ -29,10 +31,10 @@ public class Common {
     public final static int NOT_FOLDER_FILE = 0;
 
     //timeout配置
-    public final static String TIMEOUT_10000="10000";
+    public final static String TIMEOUT_10000 = "10000";
 
     //XML的配置文件类型
-    public final static String XML_MSG_TYPE="msg";
+    public final static String XML_MSG_TYPE = "msg";
 
     //各种配置文件的key值
     //阿里云key
@@ -179,6 +181,9 @@ public class Common {
     public static final String BASE_HTTP_URL = "http://127.0.0.1:8080/";
 
 
-
+    //获取阿里域账号的accessKey和accessSecret
+    public static String ALI_ACCESSKEY_ID = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_ID));
+    public static String ALI_ACCESSKEY_SECRET = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_SECRET));
+    public static String PROJECT_FILE_SUBFFIX = "-index.html"; //项目文件的后缀名
 
 }

@@ -48,7 +48,7 @@ public class AliPay {
         try {
             //准备订单数据
             JSONObject json = new JSONObject();
-            json.put(Common.PAY_ALI_KEY_TRADE_NO, orders.getOrder_id());
+            json.put(Common.PAY_ALI_KEY_TRADE_NO, orders.getTimestamp());
             json.put(Common.PAY_ALI_KEY_PRODUCT_CODE, GlobalConfig.getProperties(Common.PAY_ALI_PRODUCT_CODE));
             json.put(Common.PAY_ALI_KEY_TOTAL_AMOUNT, orders.getPrice());
             json.put(Common.PAY_ALI_KEY_SUBJECT, orders.getSubject()); //商品描述标题

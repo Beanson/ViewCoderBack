@@ -178,7 +178,7 @@ public class Purchase {
      */
     public static void doPayment(ResponseData responseData, Orders orders) throws Exception {
         //设置支付日期等
-        orders.setOrder_id(CommonService.getTimeStamp());//保证order_id的唯一性
+        orders.setTimestamp(CommonService.getTimeStamp());//保证order_id的唯一性
         orders.setOrder_date(CommonService.getDateTime());
 
         //根据不同支付方式进行不同逻辑处理
@@ -286,7 +286,7 @@ public class Purchase {
     //测试AliPay的方法
     public static String testAliPay(Object msg) {
         Orders orders = new Orders();
-        orders.setOrder_id("121233454657656345d");
+        orders.setTimestamp("121233454657656345d");
         orders.setUser_id(1);
         orders.setService_id(2);
         orders.setService_num(2);

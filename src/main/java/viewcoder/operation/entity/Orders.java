@@ -6,7 +6,7 @@ package viewcoder.operation.entity;
 public class Orders {
 
     private int id;
-    private String order_id;
+    private String timestamp;
     private int user_id;
     private int service_id;
     private int service_num;
@@ -21,9 +21,9 @@ public class Orders {
     public Orders() {
     }
 
-    public Orders(int id, String order_id, int user_id, int service_id, int service_num, String order_date, String pay_date, String expire_date, int pay_status, int pay_way, String price,String subject) {
+    public Orders(int id, String timestamp, int user_id, int service_id, int service_num, String order_date, String pay_date, String expire_date, int pay_status, int pay_way, String price,String subject) {
         this.id = id;
-        this.order_id=order_id;
+        this.timestamp=timestamp;
         this.user_id = user_id;
         this.service_id = service_id;
         this.service_num=service_num;
@@ -44,12 +44,12 @@ public class Orders {
         this.id = id;
     }
 
-    public String getOrder_id() {
-        return order_id;
+    public String getTimestamp() {
+        return timestamp;
     }
 
-    public void setOrder_id(String order_id) {
-        this.order_id = order_id;
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public int getUser_id() {
@@ -136,7 +136,7 @@ public class Orders {
     public String toString() {
         return "Orders{" +
                 "id=" + id +
-                ", order_id=" + order_id +
+                ", timestamp=" + timestamp +
                 ", user_id=" + user_id +
                 ", service_id=" + service_id +
                 ", service_num=" + service_num +

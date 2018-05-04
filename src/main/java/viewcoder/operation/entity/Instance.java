@@ -7,6 +7,7 @@ package viewcoder.operation.entity;
 public class Instance {
 
     private int id;
+    private String timestamp;
     private int user_id;
     private int service_id;
     private String space;  //单位是KByte
@@ -23,6 +24,14 @@ public class Instance {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public int getUser_id() {
@@ -77,6 +86,7 @@ public class Instance {
     public String toString() {
         return "Instance{" +
                 "id=" + id +
+                ", timestamp=" + timestamp +
                 ", user_id=" + user_id +
                 ", service_id=" + service_id +
                 ", space=" + space +

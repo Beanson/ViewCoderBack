@@ -29,7 +29,6 @@ public class OssOpt {
     // 云账号AccessKey有所有API访问权限，建议遵循阿里云安全最佳实践，创建并使用RAM子账号进行API访问或日常运维，请登录 https://ram.console.aliyun.com 创建
     private static final String VIEWCODER_BUCKET = "viewcoder-bucket";
 
-
     /************************ 初始化和关闭ossClient流 *********************/
     /**
      * 初始化OSSClient客户端
@@ -37,14 +36,7 @@ public class OssOpt {
      * @return 返回OSSClient的实例
      */
     public static OSSClient initOssClient() {
-        //accessKeyId,和KEY_SECRET
-        String accessKeyId = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_ID));
-        String accessKeySecret = AESEncryptor.AESDncode(Common.ACCESS_KEY_SECRET, GlobalConfig.getProperties(Common.ACCESS_KEY_SECRET));
-        if (CommonService.checkNotNull(accessKeyId) && CommonService.checkNotNull(accessKeySecret)) {
-            return new OSSClient(GlobalConfig.getProperties(END_POINT), accessKeyId, accessKeySecret);
-        }else{
-            throw new OSSException("Aliyun accesskey and keySecret null error");
-        }
+        return new OSSClient(GlobalConfig.getProperties(END_POINT), Common.ALI_ACCESSKEY_ID, Common.ALI_ACCESSKEY_SECRET);
     }
 
     /**
