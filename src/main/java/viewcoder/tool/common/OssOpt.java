@@ -26,6 +26,7 @@ public class OssOpt {
     // endpoint以杭州为例，其它region请按实际情况填写
     //TODO 上ECS后把 END_POINT 设置为ECS处的连接
     private static final String END_POINT = "com.viewcoder.oss.endpoint.outer";
+    //private static final String END_POINT = "com.viewcoder.oss.endpoint.inner";
     // 云账号AccessKey有所有API访问权限，建议遵循阿里云安全最佳实践，创建并使用RAM子账号进行API访问或日常运维，请登录 https://ram.console.aliyun.com 创建
     private static final String VIEWCODER_BUCKET = "viewcoder-bucket";
 

@@ -48,8 +48,7 @@ public class WebBackGroundServer {
 
             Channel ch = b.bind(PORT).sync().channel();
 
-            System.err.println("Open your web browser and navigate to " +
-                    (SSL? "https" : "http") + "://127.0.0.1:" + PORT + '/');
+            System.err.println("Service access through port on:" + PORT + '/');
 
             ch.closeFuture().sync();
 
