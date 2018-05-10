@@ -97,11 +97,11 @@ public class CommonService {
         if (object != null) {
             if (object instanceof String) {
                 if (!((String) object).isEmpty()) {
-                    CommonService.logger.debug("checkNotNull: " + object + " come to String check, result is true");
+                    //CommonService.logger.debug("checkNotNull: " + object + " come to String check, result is true");
                     status = true;
                 }
             } else {
-                CommonService.logger.debug("checkNotNull: " + object + " come to Object check, result is true");
+                //CommonService.logger.debug("checkNotNull: " + object + " come to Object check, result is true");
                 status = true;
             }
         }

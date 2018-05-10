@@ -206,7 +206,7 @@ public class PsdAnalysis {
         //该image的http请求src
         String src = GlobalConfig.getHttpFileUrl(Common.UPLOAD_FILES) + timeStampName + Common.IMG_PNG;
         //填充image类型的图层数据
-        LayerInfo.InitLayerImageInfo(layer_info, layer.getName(), src);
+        LayerInfo.InitLayerImageInfo(layer_info, layer, src);
         //把image数据设置进psdInfo中的allTools里
         psdInfo.getAll_tools().get(Common.COMMON_IMAGE).put(String.valueOf(layer.getLayerId()), layer_info);
 

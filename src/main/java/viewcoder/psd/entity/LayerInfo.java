@@ -39,7 +39,8 @@ public class LayerInfo {
         layer_info.put("font-family","Microsoft YaHei");
         layer_info.put("font-style","normal");
         layer_info.put("text-decoration","none");
-        layer_info.put("font-color","rgba(" + (int) (Float.parseFloat(fontData[1]) * 255) + "," + (int) (Float.parseFloat(fontData[2]) * 255) + "," + (int) (Float.parseFloat(fontData[3]) * 255) + "," +  (Float.parseFloat(fontData[0]) * 255/255)+")");
+        layer_info.put("font-color","rgba(" + (int) (Float.parseFloat(fontData[1]) * 255) + "," + (int) (Float.parseFloat(fontData[2]) * 255)
+                + "," + (int) (Float.parseFloat(fontData[3]) * 255) + "," +  (Float.parseFloat(fontData[0]) * 255/255)+")");
 
     }
 
@@ -64,9 +65,9 @@ public class LayerInfo {
     }
 
     /*图像图层信息*/
-    public static void InitLayerImageInfo(HashMap<String,Object> layer_info,String name,String src){
+    public static void InitLayerImageInfo(HashMap<String,Object> layer_info,PsdLayer layer,String src){
         layer_info.put("type","Common_Image");
-        layer_info.put("name",name);
+        layer_info.put("name","img_" + layer.getLayerId());
         layer_info.put("image_reposition",false); //为true时可以通过鼠标移动图片到在框内不同位置，滚轮可以扩大缩小图片等
 
         /*图片设置*/
