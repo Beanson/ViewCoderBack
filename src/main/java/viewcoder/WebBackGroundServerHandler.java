@@ -226,6 +226,12 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     httpResponse(ctx, msg, response);
                 }
 
+                /*Create Simulate页面*******************/
+                else if (uri.equals("/createSimulateProject")) {
+                    ResponseData response = CreateProject.createEmptyProject(msg);
+                    httpResponse(ctx, msg, response);
+                }
+
                 /***************************************************************/
                 /*Render专区 *************************/
                 /*Table/List 获取数据*/

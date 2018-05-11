@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.aliyun.oss.OSSClient;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
+import viewcoder.url.Simulate;
 
 import java.io.File;
 import java.util.HashMap;
@@ -241,6 +242,27 @@ public class CreateProject {
         return sqlSession.insert(Mapper.INSERT_NEW_RESOURCE, new UserUploadFile(projectId, userId, widgetType, fileType, isFolder, timeStamp,
                 suffix, fileName, relativePath, fileSize, videoImage, createTime));
 
+    }
+
+
+    /**
+     * ****************************************************************************
+     * 生成Simulate类型的project
+     * @param msg 传递的消息类型
+     */
+    public static void createSimulateProject(Object msg){
+
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        SqlSession sqlSession = MybatisUtils.getSession();
+
+        try{
+
+        }catch (Exception e){
+            CreateProject.logger.debug("createSimulateProject error:", e);
+
+        }finally {
+            CommonService.databaseCommitClose(sqlSession,responseData,true);
+        }
     }
 
 }
