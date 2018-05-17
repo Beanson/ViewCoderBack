@@ -1,4 +1,5 @@
 //装载数据的容器
+var windowsWidth = $(window).width();
 var data = {
     /*空项目需用到的数据*/
     'all_tools': {
@@ -31,7 +32,7 @@ var data = {
     },
     /*空项目和PSD项目会用到的数据*/
     'overall': {
-        'width': $(window).width(), //会依据屏幕宽度而重新赋值该width，默认是1300，修改默认值时级联修改BasicDataSer.defaultConfig['width']['computer']
+        'width': windowsWidth, //会依据屏幕宽度而重新赋值该width，默认是1300，修改默认值时级联修改BasicDataSer.defaultConfig['width']['computer']
         'height': $(document).height(),
         'is_mobile': false, //标识是否是mobile网页，默认是PC网页
         'scale': false,
@@ -160,7 +161,6 @@ for (var i = 0; i < textareas.length; i++) {
             objTextArea['placeholder'] = $(textareas[i]).attr('placeholder');
         }
         data['all_tools']['TextArea'][objTextArea['layer_id']] = objTextArea; //装载TextArea类型数据
-        break;
     }
 }
 
@@ -224,7 +224,8 @@ for (var i = 0; i < inputs.length; i++) {
 }
 
 function checkEleVisible(ele) {
-    if (ele.css('display') != 'none' && ele.css('visibility') != 'hidden' && ele.width() * ele.height() > 0) {
+    var rect = ele[0].getBoundingClientRect();
+    if (ele.css('display') != 'none' && ele.css('visibility') != 'hidden' && (rect.width * rect.height) > 0) {
         return true;
     } else {
         return false;
@@ -249,15 +250,20 @@ function checkBackground(ele) {
 }
 
 function generalProperty(ele, originEle, obj, rate, type) {
-
     obj['layer_id'] = num++;
     obj['layer_rate'] = rate;
     obj['type'] = type;
     obj['name'] = type + '_' + num;
+
+    //获取元素的top, left, width, height, 确保left, top大于零
     var rect = originEle.getBoundingClientRect();
-    obj['left'] = Math.round(rect.left + window.scrollX);
-    obj['top'] = Math.round(rect.top + window.scrollY);
-    obj['width'] = rect.width;
+    var left = Math.round(rect.left + window.scrollX);
+    var top = Math.round(rect.top + window.scrollY);
+    obj['left'] = left > 0 ? left : 0;
+    obj['top'] = top > 0 ? top : 0;
+
+    var width = rect.width;
+    obj['width'] = width > windowsWidth ? (windowsWidth - 10) : width; //留10个像素给border
     obj['height'] = rect.height;
     obj['show'] = true;
     obj['opacity'] = parseFloat(ele.css('opacity'));
@@ -269,7 +275,12 @@ function getImgProperty(ele, obj, src) {
     if (src.startsWith('http')) {
         obj['src'] = src;
     } else {
-        obj['src'] = $(location).attr('host') + src;
+        //获取host数据
+        var host = $(location).attr('host');
+        if (!host.startsWith('http')) {
+            host = $(location).attr('protocol') + '//' + host;
+        }
+        obj['src'] = host + src;
     }
 
     obj['bg-position-left'] = parseInt(ele.css('background-position-x'));
@@ -300,7 +311,7 @@ function getTextProperty(ele, obj, text) {
     obj['font-weight'] = parseInt(ele.css('font-weight'));
     obj['line-height'] = 150;
     obj['text-align'] = ele.css('text-align');
-    obj['font-family'] = ele.css('font-family').replace(/"/g,'');
+    obj['font-family'] = ele.css('font-family').replace(/"/g, '');
     obj['font-style'] = ele.css('font-style');
     obj['font-color'] = ele.css('color');
     obj['text-decoration'] = ele.css('text-decoration-line');
