@@ -1,11 +1,9 @@
 package viewcoder.operation.impl.project;
 
 import viewcoder.exception.project.ProjectListException;
-import viewcoder.tool.common.Common;
-import viewcoder.tool.common.Mapper;
-import viewcoder.tool.common.OssOpt;
+import viewcoder.operation.entity.ProjectProgress;
+import viewcoder.tool.common.*;
 import viewcoder.tool.config.GlobalConfig;
-import viewcoder.tool.common.Assemble;
 import viewcoder.tool.parser.form.FormData;
 import viewcoder.tool.util.MybatisUtils;
 import viewcoder.operation.entity.Project;
@@ -41,14 +39,15 @@ public class ProjectList {
 
         try {
             //接收前台传过来关于数据需要查询的userId
-            String userId = FormData.getParam(msg, "user_id");
+            Map<String, Object> map = FormData.getParam(msg);
+            Integer userId = Integer.parseInt((String) map.get(Common.USER_ID)) ;
             sqlSession = MybatisUtils.getSession();
-
             //查找数据库返回projects数据
-            List<Project> projects = sqlSession.selectList(Mapper.GET_PROJECT_LIST_DATA, Integer.parseInt(userId));
+            List<Project> projects = sqlSession.selectList(Mapper.GET_PROJECT_LIST_DATA, userId);
+            List<ProjectProgress> preProjects = CommonObject.getProgressByUserId(userId);
 
             //进行projects数据,并打包成ResponseData格式并回传
-            getProjectDataLogic(projects, responseData);
+            getProjectDataLogic(projects, preProjects, responseData);
 
         } catch (Exception e) {
             ProjectList.logger.error("getProjectData catch exception", e);
@@ -68,12 +67,15 @@ public class ProjectList {
      * @param projects     所有项目对象信息
      * @param responseData 返回数据打包
      */
-    private static void getProjectDataLogic(List<Project> projects, ResponseData responseData) {
+    private static void getProjectDataLogic(List<Project> projects, List<ProjectProgress> preProjects,  ResponseData responseData) {
 
-        //如果projects不为null则数据库查询projects成功，返回该projects数据到前端
+        //如果projects不为null则数据库查询projects成功，返回该projects数据到前端。 preProjects已经初始化，不为null
         //projects.size()为0也是可以的，说明该用户尚未创建任何项目
         if (projects != null) {
-            Assemble.responseSuccessSetting(responseData, projects);
+            Map<String, Object> map = new HashMap<>(2);
+            map.put("myProjects", projects);
+            map.put("preProjects", preProjects);
+            Assemble.responseSuccessSetting(responseData, map);
         } else {
             ProjectList.logger.error("Get ProjectList Data with Database Error");
             Assemble.responseErrorSetting(responseData, 401, "Get ProjectList Data with Database Error");

@@ -11,11 +11,13 @@ public class Mapper {
     public static final String GET_PROJECT_DATA = "getProjectData";
     public static final String GET_PROJECT_RESOURCE_SIZE = "getProjectResourceSize";
     public static final String GET_TARGET_STORE_DATA = "getTargetStoreData";
+    public static final String GET_PROJECT_BY_TIMESTAMP = "getProjectDataByTimestamp";
 
     //insert
     public static final String CREATE_EMPTY_PROJECT = "createEmptyProject";
     public static final String CREATE_PSD_PROJECT = "createPSDProject";
     public static final String CREATE_COPY_PROJECT = "createCopyProject";
+    public static final String CREATE_SIMULATE_PROJECT = "createSimulateProject";
 
     //delete
     public static final String DELETE_PROJECT_BY_ID = "deleteProjectById";

@@ -75,14 +75,16 @@ public class CommonService {
      * @param toCommit     是否做了需要数据库提交的操作
      */
     public static void databaseCommitClose(SqlSession sqlSession, ResponseData responseData, boolean toCommit) {
-        //传入参数定义是否需要提交操作，纯粹数据库查询则不需提交操作
-        if (toCommit) {
-            //如果整个流程准确无误地实现则对数据库操作进行提交，否则不提交
-            if (responseData != null && responseData.getStatus_code() == StatusCode.OK.getValue()) {
-                sqlSession.commit();
+        if (sqlSession != null) {
+            //传入参数定义是否需要提交操作，纯粹数据库查询则不需提交操作
+            if (toCommit) {
+                //如果整个流程准确无误地实现则对数据库操作进行提交，否则不提交
+                if (responseData != null && responseData.getStatus_code() == StatusCode.OK.getValue()) {
+                    sqlSession.commit();
+                }
             }
+            sqlSession.close(); //数据库操作完毕，关闭连接，释放资源
         }
-        sqlSession.close(); //数据库操作完毕，关闭连接，释放资源
     }
 
 

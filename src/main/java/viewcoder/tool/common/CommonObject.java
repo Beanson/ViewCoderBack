@@ -1,6 +1,10 @@
 package viewcoder.tool.common;
 
+import viewcoder.operation.entity.ProjectProgress;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,6 +18,7 @@ public class CommonObject {
     private static final Map<String, Double> extendPrice = new HashMap<String, Double>();
     private static final Map<String, String> xmlMap = new HashMap<>();
     private static final Map<Integer, String> serviceName = new HashMap<>();
+    private static final List<ProjectProgress> progressList = new ArrayList<ProjectProgress>(); //装载后台渲染生成页面的进度
 
     static {
         //初始化积分兑换套餐的数据
@@ -52,5 +57,25 @@ public class CommonObject {
 
     public static String getServiceName(int serviceId) {
         return serviceName.get(serviceId);
+    }
+
+    public static List<ProjectProgress> getProgressList() {
+        return progressList;
+    }
+
+    /**
+     * 根据userId获取所有正在后台解析操作的project信息
+     * @param userId
+     * @return
+     */
+    public static List<ProjectProgress> getProgressByUserId(int userId){
+        List<ProjectProgress> list = new ArrayList<>();
+        for (ProjectProgress progress :
+                progressList) {
+            if(progress.getUserId()==userId){
+                list.add(progress);
+            }
+        }
+        return list;
     }
 }

@@ -22,31 +22,31 @@ public class InitTools {
 
     private void initData(){
         //数据流组件
-        all_tools.put("Table",new HashMap<String,Object>());
-        all_tools.put("List",new HashMap<String,Object>());
+        all_tools.put("Table",new HashMap<String,Object>(0));
+        all_tools.put("List",new HashMap<String,Object>(0));
         //通用组件
         all_tools.put("Common_Image",new HashMap<String,Object>());
         all_tools.put("Common_Text",new HashMap<String,Object>());
         all_tools.put("Common_Background",new HashMap<String,Object>());
-        all_tools.put("Common_Button",new HashMap<String,Object>());
+        all_tools.put("Common_Button",new HashMap<String,Object>(0));
         //表单组件
-        all_tools.put("TextInput",new HashMap<String,Object>());
-        all_tools.put("Password",new HashMap<String,Object>());
-        all_tools.put("TextArea",new HashMap<String,Object>());
-        all_tools.put("CheckBox",new HashMap<String,Object>());
-        all_tools.put("RadioBox",new HashMap<String,Object>());
-        all_tools.put("SelectOptions",new HashMap<String,Object>());
-        all_tools.put("DatePicker",new HashMap<String,Object>());
-        all_tools.put("File",new HashMap<String,Object>());
-        all_tools.put("Submit",new HashMap<String,Object>());
+        all_tools.put("TextInput",new HashMap<String,Object>(0));
+        all_tools.put("Password",new HashMap<String,Object>(0));
+        all_tools.put("TextArea",new HashMap<String,Object>(0));
+        all_tools.put("CheckBox",new HashMap<String,Object>(0));
+        all_tools.put("RadioBox",new HashMap<String,Object>(0));
+        all_tools.put("SelectOptions",new HashMap<String,Object>(0));
+        all_tools.put("DatePicker",new HashMap<String,Object>(0));
+        all_tools.put("File",new HashMap<String,Object>(0));
+        all_tools.put("Submit",new HashMap<String,Object>(0));
         //多媒体组件
-        all_tools.put("Video",new HashMap<String,Object>());
-        all_tools.put("Sound",new HashMap<String,Object>());
-        all_tools.put("Carousel",new HashMap<String,Object>());
+        all_tools.put("Video",new HashMap<String,Object>(0));
+        all_tools.put("Sound",new HashMap<String,Object>(0));
+        all_tools.put("Carousel",new HashMap<String,Object>(0));
         //其他组件
-        all_tools.put("DownLoad",new HashMap<String,Object>());
-        all_tools.put("List_Navigation",new HashMap<String,Object>());
-        all_tools.put("CusCode",new HashMap<String,Object>());
+        all_tools.put("DownLoad",new HashMap<String,Object>(0));
+        all_tools.put("List_Navigation",new HashMap<String,Object>(0));
+        all_tools.put("CusCode",new HashMap<String,Object>(0));
     }
 
 }

@@ -1,11 +1,9 @@
 package viewcoder.operation.impl.project;
 
 import viewcoder.exception.project.PSDAnalysisException;
-import viewcoder.tool.common.Common;
-import viewcoder.tool.common.Mapper;
-import viewcoder.tool.common.OssOpt;
+import viewcoder.operation.entity.ProjectProgress;
+import viewcoder.tool.common.*;
 import viewcoder.tool.config.GlobalConfig;
-import viewcoder.tool.common.Assemble;
 import viewcoder.tool.parser.form.FormData;
 import viewcoder.tool.util.MybatisUtils;
 import viewcoder.operation.entity.Project;
@@ -21,9 +19,12 @@ import com.aliyun.oss.OSSClient;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import viewcoder.url.Simulate;
+import viewcoder.url.barrer.SimulateBarrer;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -111,7 +112,7 @@ public class CreateProject {
                 if (insert_num > 0) {
                     //解析file文件数据并保存到指定位置，如果解析成功将删除该psd文件，如果解析失败将保留作为后续程序调优参考文件
                     parsePSDFileLogic(responseData, project.getPsd_file().getFile(), project, sqlSession, ossClient,
-                             preRemainSize);
+                            preRemainSize);
 
                 } else {
                     //数据库插入失败
@@ -201,7 +202,7 @@ public class CreateProject {
     private static void uploadErrorPsdFile(ResponseData responseData, Project project, SqlSession sqlSession, OSSClient ossClient) {
         //对status code进行判断处理
         if (responseData.getStatus_code() != 200 && responseData.getException_code() != 402) {
-            ProjectList.deleteProjectOpt(project.getId(),project.getUser_id());
+            ProjectList.deleteProjectOpt(project.getId(), project.getUser_id());
             try {
                 //上传该特殊的不能解析的PSD文件到OSS中
                 String psdFile = GlobalConfig.getOssFileUrl(Common.PSD_PARSE_ERROR) +
@@ -247,22 +248,167 @@ public class CreateProject {
 
     /**
      * ****************************************************************************
-     * 生成Simulate类型的project
+     * 生成Simulate类型的project，根据URL地址，生成和其类似的网页
+     *
      * @param msg 传递的消息类型
      */
-    public static void createSimulateProject(Object msg){
+    public static ResponseData createSimulateProject(Object msg) {
 
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
-        SqlSession sqlSession = MybatisUtils.getSession();
+        try {
+            //获取从前端传递过来的数据
+            Map<String, Object> map = FormData.getParam(msg);
+            String projectName = (String) map.get(Common.PROJECT_NAME);
+            String webUrl = (String) map.get(Common.WEB_URL);
+            String timestamp = (String) map.get(Common.TIME_STAMP);
+            Integer userId = Integer.parseInt((String) map.get(Common.USER_ID));
+            Integer browserWidth = Integer.parseInt((String) map.get(Common.BROWSER_WIDTH));
+            Integer browserHeight = Integer.parseInt((String) map.get(Common.BROWSER_HEIGHT));
 
-        try{
+            //初始化项目创建的进度
+            ProjectProgress projectProgress = new ProjectProgress(userId, Common.PROJECT_SIMULATE, projectName, timestamp, 0);
+            CommonObject.getProgressList().add(projectProgress);
+            //异步解析URL网站元素操作
+            createSimulateOpt(webUrl, projectProgress, browserWidth, browserHeight, userId, projectName);
+            //正确解析传递的参数及其类型，并成功调用URL解析网站元素操作，返回正确数据
+            Assemble.responseSuccessSetting(responseData, null);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             CreateProject.logger.debug("createSimulateProject error:", e);
-
-        }finally {
-            CommonService.databaseCommitClose(sqlSession,responseData,true);
         }
+        return responseData;
+    }
+
+
+    /**
+     * 异步解析URL网站元素操作
+     * TODO 后面采用云主机进行请求响应，而慢操作放在物理主机中运行
+     */
+    public static void createSimulateOpt(String webUrl, ProjectProgress projectProgress, int browserWidth, int browserHeight,
+                                         int userId, String projectName) throws Exception {
+        //创建解析URL网站元素的线程
+        Thread simulateParseThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SqlSession sqlSession = null;
+                ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());//用来记录程序执行状态
+                try {
+                    //获取URL资源项目元数据
+                    String projectData = Simulate.createProject(webUrl, projectProgress, browserWidth, browserHeight);
+
+                    //如果获取解析后项目数据不为空则进行插入数据库等操作，否则全局变量中记录错误消息
+                    if (projectData != null) {
+                        //准备project实体类数据
+                        Project project = new Project();
+                        project.setUser_id(userId);
+                        project.setProject_name(projectName);
+                        project.setTimestamp(projectProgress.getTimeStamp()); //设置该timestamp操作后数据库和缓存同步
+                        project.setLast_modify_time(CommonService.getDateTime());
+                        project.setProject_data(projectData);
+                        //把新创建的simulate的project插入数据库, 在这里启动数据库操作，不然可能会报超时错
+                        sqlSession = MybatisUtils.getSession();
+                        int num = sqlSession.insert(Mapper.CREATE_SIMULATE_PROJECT, project);
+                        if (num > 0) {
+                            Assemble.responseSuccessSetting(responseData, null);
+                            CreateProject.logger.debug("createSimulateOpt success, project id is: " + project.getId());
+                            projectProgress.setProgress(100);
+                        } else {
+                            projectProgress.setProgress(-1); //设置进度信息，插入数据库操作失败
+                            CreateProject.logger.debug("createSimulateOpt with DB error, num<=0 ");
+                        }
+                    } else {
+                        projectProgress.setProgress(-2); //设置进度信息，打开指定网站超时失败
+                        CreateProject.logger.debug("createSimulateOpt with error, get projectData null ");
+                    }
+                } catch (Exception e) {
+                    CreateProject.logger.debug("createSimulateOpt error:", e);
+                    projectProgress.setProgress(-3); //设置进度信息，系统发生错误
+
+                } finally {
+                    CommonService.databaseCommitClose(sqlSession, responseData, true);
+                }
+            }
+        });
+
+        try {
+            //启动线程开始运行解析网站元素操作
+            simulateParseThread.start();
+
+        } catch (Exception e) {
+            //线程运行出现问题后马上停止
+            CreateProject.logger.debug("createSimulateOpt error:", e);
+            simulateParseThread.interrupt();
+            simulateParseThread = null;
+        }
+    }
+
+
+    /**
+     * 获取PSD或URL项目元素的解析进度
+     *
+     * @param msg 传递的参数
+     * @return
+     */
+    public static ResponseData getProjectRate(Object msg) {
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+
+        try {
+            //获取解析的项目标识参数
+            Map<String, Object> map = FormData.getParam(msg);
+            String timestamp = (String) map.get(Common.TIME_STAMP);
+
+            //遍历所有正在创建的PSD或URL项目，根据timestamp获取其对应进度
+            List<ProjectProgress> list = CommonObject.getProgressList();
+            Iterator<ProjectProgress> iterator = list.iterator();
+            while (iterator.hasNext()) {
+                ProjectProgress progress = iterator.next();
+                if (progress.getTimeStamp() != null && progress.getTimeStamp().equals(timestamp)) {
+                    //找到条目，则返回进度信息
+                    Assemble.responseSuccessSetting(responseData, progress.getProgress());
+
+                    //如果解析URL的元素比例已经到达100，则把该缓存参数去掉
+                    //如果进度出现负数，则说明程序执行出现问题，返回前端后，后台数据进行删除
+                    if (progress.getProgress() == 100) {
+                        iterator.remove();
+
+                    } else if (progress.getProgress() < 0) {
+                        iterator.remove();
+                    }
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            CreateProject.logger.debug("getSimulateRate error:", e);
+        }
+        return responseData;
+    }
+
+
+    /**
+     * 根据timestamp来获取项目数据
+     *
+     * @param msg http请求数据
+     * @return
+     */
+    public static ResponseData getProjectByTimeStamp(Object msg) {
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        SqlSession sqlSession = MybatisUtils.getSession();
+        try {
+            //获取解析的项目标识参数
+            Map<String, Object> map = FormData.getParam(msg);
+            String timestamp = (String) map.get(Common.TIME_STAMP);
+            Project project = sqlSession.selectOne(Mapper.GET_PROJECT_BY_TIMESTAMP, timestamp);
+            //如果项目数据不为空则返回该数据
+            if (project != null) {
+                Assemble.responseSuccessSetting(responseData, project);
+            }
+        } catch (Exception e) {
+            CreateProject.logger.debug("getProjectByTimeStamp error:", e);
+
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
+        }
+        return responseData;
     }
 
 }

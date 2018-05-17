@@ -1,13 +1,15 @@
-package viewcoder.url;
+package viewcoder.url.test;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.apache.log4j.Logger;
-import org.openqa.selenium.*;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import viewcoder.operation.entity.ProjectProgress;
 import viewcoder.operation.impl.common.CommonService;
+import viewcoder.url.SimulateTime;
 
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -16,12 +18,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by Administrator on 2018/5/8.
  */
-public class Simulate {
-    private static Logger logger = Logger.getLogger(Simulate.class);
+public class SimulateMock {
+    private static Logger logger = Logger.getLogger(SimulateMock.class);
 
     public static void main(String[] args) throws Exception {
-//        createProject("https://baike.baidu.com/item/%E4%B8%AD%E5%9B%BD%E5%A5%BD%E9%A1%B9%E7%9B%AE/15888364?fr=aladdin",
-//                new ProjectProgress(),1300, 700);
+        createProject("https://baike.baidu.com/item/%E4%B8%AD%E5%9B%BD%E5%A5%BD%E9%A1%B9%E7%9B%AE/15888364?fr=aladdin",
+                new ProjectProgress(),1300, 700);
     }
 
     /**
@@ -34,7 +36,7 @@ public class Simulate {
      * @return
      * @throws Exception
      */
-    public static String createProject(String webUrl, ProjectProgress projectProgress, int totalWidth, int totalHeight) throws Exception {
+    public static void createProject(String webUrl, ProjectProgress projectProgress, int totalWidth, int totalHeight) throws Exception {
         //基础数据准备
         SimulateTime simulateTime = new SimulateTime(); //统计时间对象
         simulateTime.setTotalBeginTime(CommonService.getDateTime());
@@ -42,7 +44,7 @@ public class Simulate {
 
         //如果driver启动失败则返回null
         if (driver == null) {
-            return null;
+            return;
         }
 
         //开始页面元素渲染，嵌入执行JavaScript脚本
@@ -52,7 +54,9 @@ public class Simulate {
         String jqueryText = Resources.toString(jqueryUrl, Charsets.UTF_8);
         js.executeScript(jqueryText);
         //加载提取网站元素的js文件
-        URL simulateURL = Resources.getResource("js/simulate.js");
+        new Thread().sleep(5000);
+
+        URL simulateURL = Resources.getResource("js/simulateTest.js");
         String simulateScript = Resources.toString(simulateURL, Charsets.UTF_8);
         String projectData = (String) js.executeScript(simulateScript);
         simulateTime.setTotalEndTime(CommonService.getDateTime());
@@ -62,7 +66,7 @@ public class Simulate {
         driver.close();//关闭释放资源
         driver.quit();
 
-        return projectData;
+        System.out.println(projectData);
     }
 
     /**
@@ -98,7 +102,7 @@ public class Simulate {
             //尝试连接两次，如果两次超时30秒则返回错误消息
             if (simulateTime.getGetUrlTimes() >= 2) {
                 //超过两次30秒请求失败，返回错误消息
-                Simulate.logger.warn("Simulate wait exceed 30 seconds twice error", e);
+                SimulateMock.logger.warn("Simulate wait exceed 30 seconds twice error", e);
                 driver = null;
             } else {
                 connectToUrl(driver, projectProgress, webUrl, simulateTime);

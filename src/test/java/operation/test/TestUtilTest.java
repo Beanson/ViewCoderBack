@@ -1,5 +1,10 @@
 package operation.test;
 
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import viewcoder.operation.entity.ProjectProgress;
+import viewcoder.tool.common.CommonObject;
 import viewcoder.tool.util.HttpUtil;
 import viewcoder.operation.impl.common.CommonService;
 import org.apache.log4j.Logger;
@@ -8,6 +13,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Administrator on 2018/2/19.
@@ -33,8 +39,8 @@ public class TestUtilTest {
         HttpUtil.httpClientPureText("http://127.0.0.1:8080/testWechatPay","hello world");
     }
 
-    @Test
-    public void testOrderList(){
-        System.out.println(CommonService.getTimeStamp());
+
+    public static void main(String args[]){
+
     }
 }

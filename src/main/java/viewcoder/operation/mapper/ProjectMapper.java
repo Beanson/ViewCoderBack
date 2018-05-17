@@ -21,6 +21,10 @@ public interface ProjectMapper {
     @Select("select * from project where id=#{id}")
     public Project getProjectData(int id);
 
+    //根据项目timestamp获取该项目数据信息, 需要返回所有，因为project_data返回后node服务端生成HTML页面
+    @Select("select * from project where timestamp=#{timestamp}")
+    public Project getProjectDataByTimestamp(String timestamp);
+
     //根据项目id获取对应project的resource_size数据信息
     @Select("select resource_size from project where id=#{id}")
     public String getProjectResourceSize(int id);
@@ -51,6 +55,11 @@ public interface ProjectMapper {
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createCopyProject(Project project);
 
+    //通过URL，创建一个和source URL类似的project
+    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,project_data) " +
+            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{project_data})")
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
+    public int createSimulateProject(Project project);
 
 
     /********************以下是删除项目操作***********************/

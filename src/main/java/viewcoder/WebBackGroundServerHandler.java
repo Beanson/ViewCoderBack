@@ -4,6 +4,7 @@ package viewcoder;
  * Created by Administrator on 2017/2/8.
  */
 
+import com.mysql.fabric.Response;
 import viewcoder.tool.common.Common;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.common.CommonService;
@@ -137,19 +138,19 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                 else if (uri.equals("/insertNewOrderItem")) {
                     ResponseData response = Purchase.insertNewOrderItem(msg);
                     if (response.getStatus_code() == Common.STATUS_CODE_OK) {
-                        if(response.getMark()==1){
+                        if (response.getMark() == 1) {
                             //支付宝类型返回数据
-                            httpResponsePureHtml(ctx,msg,response.getData().toString());
+                            httpResponsePureHtml(ctx, msg, response.getData().toString());
 
-                        }else if(response.getMark()==2){
+                        } else if (response.getMark() == 2) {
                             //微信支付类型返回数据
-                            httpResponse(ctx,msg,response);
+                            httpResponse(ctx, msg, response);
 
-                        }else if(response.getMark()==3){
+                        } else if (response.getMark() == 3) {
                             //积分兑换套餐返回数据
                             httpResponse(ctx, msg, response);
                         }
-                    }else{
+                    } else {
                         httpResponse(ctx, msg, response);
                     }
                 }
@@ -226,10 +227,20 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     httpResponse(ctx, msg, response);
                 }
 
-                /*Create Simulate页面*******************/
+                //Create Simulate页面（根据URL创建一个类似的网页）
                 else if (uri.equals("/createSimulateProject")) {
-                    ResponseData response = CreateProject.createEmptyProject(msg);
-                    httpResponse(ctx, msg, response);
+                    ResponseData response = CreateProject.createSimulateProject(msg);
+                    httpResponse(ctx, msg, response); //成功接收到请求，正常返回
+                }
+                //获取Simulate项目渲染进度页面
+                else if (uri.equals("/getProjectRate")) {
+                    ResponseData responseData = CreateProject.getProjectRate(msg);
+                    httpResponse(ctx, msg, responseData); //成功接收到请求，正常返回
+                }
+                //通过timestamp获取project数据，用在PSD和URL项目中
+                else if (uri.equals("/getProjectByTimeStamp")) {
+                    ResponseData responseData = CreateProject.getProjectByTimeStamp(msg);
+                    httpResponse(ctx, msg, responseData); //成功接收到请求，正常返回
                 }
 
                 /***************************************************************/
@@ -280,10 +291,9 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     Purchase.testWechatPay(msg);
 
                 } else if (uri.equals("/testAliPay")) {
-                    httpResponsePureHtml(ctx, msg,Purchase.testAliPay(msg));
+                    httpResponsePureHtml(ctx, msg, Purchase.testAliPay(msg));
 
-                }
-                else if (uri.equals("/netty")) {
+                } else if (uri.equals("/netty")) {
                     httpResponse(ctx, msg, JSON.toJSONString("hello world"));
 
                 } else {

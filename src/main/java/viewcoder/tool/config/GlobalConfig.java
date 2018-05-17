@@ -16,6 +16,7 @@ public class GlobalConfig {
     private final static String CONFIG_PATH = "/config/config_prod.properties";
     private final static String PAY_PATH = "/config/pay_prod.properties";
     private static Properties props = new Properties();
+    private static int cores= Runtime.getRuntime().availableProcessors();
 
     //加载properties文件信息
     static {
@@ -89,4 +90,7 @@ public class GlobalConfig {
         return props.getProperty(Common.FILE_HTTP_BASE_URL_KEY) + props.getProperty(key)+"/";
     }
 
+    public static int getCores() {
+        return cores;
+    }
 }

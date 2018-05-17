@@ -92,7 +92,7 @@ public class PsdAnalysis {
             }
 
             //解析PSD图层完毕后，默认情况在前端显示在项目名为文件夹目录下进行上传文件
-            if (psdInfo.getAll_tools().get(Common.COMMON_IMAGE).size() > 0) {
+//            if (psdInfo.getAll_tools().get(Common.COMMON_IMAGE).size() > 0) {
 //                int emptyFolderInsertNum = CreateProject.insertWidgetToDB(projectId, userId, null, Common.FILE_TYPE_IMAGE,
 //                        Common.FOLDER_FILE, null, null, projectName, "", null, null,
 //                        Common.getDateTime(), sqlSession);
@@ -101,7 +101,7 @@ public class PsdAnalysis {
 //                    PsdAnalysis.logger.debug("===Insert empty folder to DB error, num is: " + emptyFolderInsertNum);
 //                    throw new PSDAnalysisException("Insert empty folder to DB error: ");
 //                }
-            }
+//            }
 
             //打印最终psd消息
             PsdAnalysis.logger.debug("===Final PSD parse layers info: ");
