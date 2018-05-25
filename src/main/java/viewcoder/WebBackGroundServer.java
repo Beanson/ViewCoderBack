@@ -15,6 +15,8 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
+import org.apache.log4j.Logger;
+import viewcoder.tool.pool.WebDriverPool;
 
 /**
  * An HTTP server that sends back the content of the received HTTP request
@@ -22,6 +24,7 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
  */
 
 public class WebBackGroundServer {
+    static final Logger logger = Logger.getLogger(WebBackGroundServer.class);
     static final boolean SSL = System.getProperty("ssl") != null;
     static final int PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
 
@@ -47,14 +50,23 @@ public class WebBackGroundServer {
                     .childHandler(new WebBackGroundServerInitializer(sslCtx));
 
             Channel ch = b.bind(PORT).sync().channel();
-
-            System.err.println("Service access through port on:" + PORT + '/');
-
+            WebBackGroundServer.logger.debug("Service access through port on:" + PORT + '/');
+            initFunc();
             ch.closeFuture().sync();
 
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
+    }
+
+    /**
+     * 一些初始化数据加载
+     */
+    private static void initFunc(){
+        //初始化该静态方法中某些信息
+        WebBackGroundServer.logger.debug("idle: " + WebDriverPool.getPool().getNumIdle() +
+                        " num total:" + WebDriverPool.getPool().getNumActive() +
+                        " waiter:" + WebDriverPool.getPool().getNumWaiters());
     }
 }

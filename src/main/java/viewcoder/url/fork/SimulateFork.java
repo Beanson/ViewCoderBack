@@ -291,7 +291,7 @@ public class SimulateFork  {
     public static void printLog(SimulateTime simulateTime, String webUrl, List<WebElement> allElements,
                                 HashMap<String, HashMap<String, Object>> map) {
 
-        SimulateFork.logger.debug("simulate web url: " + webUrl);
+        SimulateFork.logger.debug("simulate browser url: " + webUrl);
 
         SimulateFork.logger.debug("total begin time: " + simulateTime.getTotalBeginTime() +
                 " ,end time: " + simulateTime.getTotalEndTime() + " ,use:" + simulateTime.getTotalTimeLength());

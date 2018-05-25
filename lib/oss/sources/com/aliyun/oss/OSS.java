@@ -36,9 +36,9 @@ import com.aliyun.oss.model.SetBucketCORSRequest.CORSRule;
  * <p>
  * Object Store Service (a.k.a OSS) is the massive, secure, low cost
  * and highly reliable public storage which could be accessed from anywhere at anytime via REST APIs,
- * SDKs or web console. <br />
+ * SDKs or browser console. <br />
  * Developers could use OSS to create any services that need huge data storage and access throughput,
- * such as media sharing web apps, cloud storage service or enterprise or personal data backup.
+ * such as media sharing browser apps, cloud storage service or enterprise or personal data backup.
  * </p>
  */
 public interface OSS {

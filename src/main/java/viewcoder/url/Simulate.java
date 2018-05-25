@@ -4,24 +4,22 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import viewcoder.operation.entity.ProjectProgress;
-import viewcoder.operation.impl.common.CommonService;
+import viewcoder.tool.pool.WebDriverPool;
 
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
 
 /**
  * Created by Administrator on 2018/5/8.
+ * 创建URL项目的操作核心类
  */
 public class Simulate {
     private static Logger logger = Logger.getLogger(Simulate.class);
 
     public static void main(String[] args) throws Exception {
-//        createProject("https://baike.baidu.com/item/%E4%B8%AD%E5%9B%BD%E5%A5%BD%E9%A1%B9%E7%9B%AE/15888364?fr=aladdin",
-//                new ProjectProgress(),1300, 700);
+        createProject("http://www.hao365.org.cn/",
+                new ProjectProgress(), 1300, 700);
     }
 
     /**
@@ -34,91 +32,83 @@ public class Simulate {
      * @return
      * @throws Exception
      */
-    public static String createProject(String webUrl, ProjectProgress projectProgress, int totalWidth, int totalHeight) throws Exception {
-        //基础数据准备
-        SimulateTime simulateTime = new SimulateTime(); //统计时间对象
-        simulateTime.setTotalBeginTime(CommonService.getDateTime());
-        WebDriver driver = browserInit(simulateTime, projectProgress, webUrl, totalWidth, totalHeight); //初始化web driver
+    public static String createProject(String webUrl, ProjectProgress projectProgress, int totalWidth, int totalHeight)
+            throws Exception {
 
-        //如果driver启动失败则返回null
-        if (driver == null) {
+        WebDriver driver = null;
+        String projectData = null;
+        try {
+            //从pool中获取PhantomJS driver对象
+            driver = getWebDriver();
+            if (driver == null) {
+                return null;
+            }
+            projectProgress.setProgress(20);
+
+            //打开网页
+            connectToUrl(driver, webUrl, totalWidth, totalHeight);
+            projectProgress.setProgress(80);
+
+            //加载提取网站元素的js文件
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            URL simulateURL = Resources.getResource("js/pure_simulate/simulate2.js");
+            String simulateScript = Resources.toString(simulateURL, Charsets.UTF_8);
+            projectData = (String) js.executeScript(simulateScript);
+            //使用完driver后返回pool
+            WebDriverPool.getPool().returnObject(driver);
+            Simulate.logger.debug("Get project data: " + projectData);
+
+        } catch (Exception e) {
+            //操作过程发生错误，销毁该driver对象并返回null
+            Simulate.logger.error("createProject with error: ", e);
+            WebDriverPool.getPool().invalidateObject(driver);
             return null;
         }
-
-        //开始页面元素渲染，嵌入执行JavaScript脚本
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        //加载jQuery文件
-        URL jqueryUrl = Resources.getResource("js/jquery.min.js");
-        String jqueryText = Resources.toString(jqueryUrl, Charsets.UTF_8);
-        js.executeScript(jqueryText);
-        //加载提取网站元素的js文件
-        URL simulateURL = Resources.getResource("js/simulate.js");
-        String simulateScript = Resources.toString(simulateURL, Charsets.UTF_8);
-        String projectData = (String) js.executeScript(simulateScript);
-        simulateTime.setTotalEndTime(CommonService.getDateTime());
-
-        System.out.println("Total time: " + simulateTime.getTotalTimeLength() + " ,Open browser time: " + simulateTime.getBrowserTimeLength() +
-                " ,Open url time:" + simulateTime.getGetUrlTimeLength() + " and open url try times:" + simulateTime.getGetUrlTimes());
-        driver.close();//关闭释放资源
-        driver.quit();
 
         return projectData;
     }
 
+
     /**
-     * 调用打开浏览器并返回一个driver对象
+     * 从pool中获取webDriver方法，最多连续尝试获取3次，3次无果后返回null
      *
-     * @param simulateTime 监测记录时间的对象
-     * @param webUrl       目标网站的网址
-     * @return
+     * @return 返回driver实例对象
      */
-    public static WebDriver browserInit(SimulateTime simulateTime, ProjectProgress projectProgress, String webUrl,
-                                        int totalWidth, int totalHeight) {
-        //初始化浏览器driver
-        simulateTime.setBrowserBeginTime(CommonService.getDateTime());
-        System.setProperty("webdriver.chrome.driver", "src/main/resources/driver/chromedriver.exe");
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--disable-extensions");
-        options.addArguments("--headless");
-        options.addArguments("--no-sandbox");
-        options.addArguments("window-size=" + totalWidth + "x" + totalHeight);
-        WebDriver driver = new ChromeDriver(options);
-        simulateTime.setBrowserEndTime(CommonService.getDateTime());
-        projectProgress.setProgress(40); //设置到达40%进度
+    private static WebDriver getWebDriver() {
+        WebDriver driver = null;
+        int getDriverTimes = 0;
 
-        simulateTime.setGetUrlBeginTime(CommonService.getDateTime());
-        driver.manage().timeouts().pageLoadTimeout(35, TimeUnit.SECONDS);
-        driver.manage().timeouts().setScriptTimeout(30, TimeUnit.SECONDS);
+        //从pool中获取webDriver实例
+        while (getDriverTimes < 3) {
+            try {
+                driver = WebDriverPool.getPool().borrowObject();
+                break;
 
-        //通过webDriver尝试连接该网站，连续两次超过30秒则返回错误信息。
-        try {
-            connectToUrl(driver, projectProgress, webUrl, simulateTime);
-
-        } catch (Exception e) {
-            //尝试连接两次，如果两次超时30秒则返回错误消息
-            if (simulateTime.getGetUrlTimes() >= 2) {
-                //超过两次30秒请求失败，返回错误消息
-                Simulate.logger.warn("Simulate wait exceed 30 seconds twice error", e);
-                driver = null;
-            } else {
-                connectToUrl(driver, projectProgress, webUrl, simulateTime);
+            } catch (Exception e) {
+                getDriverTimes++;
+                Simulate.logger.error("Get web driver from pool error times: " + getDriverTimes, e);
             }
         }
         return driver;
     }
 
+
     /**
-     * 用headless浏览器连接网站的操作
+     * 通过webDriver尝试连接该网站，超过20秒未完成加载则停止网页loading。
      *
-     * @param driver       浏览器的driver程序
-     * @param webUrl       目标网站网址
-     * @param simulateTime 记录操作时间对象
+     * @param webUrl 目标网站的url
      */
-    public static void connectToUrl(WebDriver driver, ProjectProgress projectProgress, String webUrl, SimulateTime simulateTime) {
-        simulateTime.setGetUrlTimes(simulateTime.getGetUrlTimes() + 1);
-        driver.get(webUrl);
-        driver.manage().window().maximize();
-        simulateTime.setGetUrlEndTime(CommonService.getDateTime());
-        projectProgress.setProgress(80);//成功打开并加载完成网站，到达80%进度
+    private static void connectToUrl(WebDriver driver, String webUrl, int totalWidth, int totalHeight) {
+        try {
+            Dimension dimension = new Dimension(totalWidth, totalHeight);
+            //设置屏幕宽高
+            driver.manage().window().setSize(dimension);
+            //打开指定网址
+            driver.get(webUrl);
+
+        } catch (Exception e) {
+            //打开网页错误或超时，结束加载网页, 继续后续js操作
+            Simulate.logger.warn("Simulate connectToUrl error:", e);
+        }
     }
 }

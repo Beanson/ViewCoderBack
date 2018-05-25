@@ -71,7 +71,7 @@ public class DivSimulate {
         simulateTime.setTotalEndTime(CommonService.getDateTime());
 
 
-        DivSimulate.logger.debug("simulate web url: " + webUrl);
+        DivSimulate.logger.debug("simulate browser url: " + webUrl);
         DivSimulate.logger.debug("total begin time: " + simulateTime.getTotalBeginTime() + " ,end time: " + simulateTime.getTotalEndTime() + " ,use:" + simulateTime.getTotalTimeLength());
         DivSimulate.logger.debug("browser begin time: " + simulateTime.getBrowserBeginTime() + " ,end time: " + simulateTime.getBrowserEndTime() + " ,use:" + simulateTime.getBrowserTimeLength());
         DivSimulate.logger.debug("div size: " + divElements.size() + " ,begin time:" + simulateTime.getDivBeginTime() + " ,end time:" + simulateTime.getDivEndTime() + " ,use:" + simulateTime.getDivTimeLength());

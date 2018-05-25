@@ -133,6 +133,16 @@ public class Common {
     public static final String PAY_WECHAT_NOTIFY_ERROR_DEPICT = "err_code_des"; //支付错误描述
 
 
+    //Web driver pool消息获取
+    public static final String DRIVER_LOCATION = "com.viewcoder.webdriver.location";
+    public static final String PAGELOAD_TIMEOUT = "com.viewcoder.webdriver.timeout.pageload";
+    public static final String DRIVER_MAX_ACTIVE = "com.viewcoder.webdriver.max.active";
+    public static final String DRIVER_MAX_WAIT = "com.viewcoder.webdriver.max.wait";
+    public static final String DRIVER_MIN_IDLE = "com.viewcoder.webdriver.min.idle";
+    public static final String DRIVER_CHECK_TIME = "com.viewcoder.webdriver.check.time";
+    public static final String DRIVER_CHECK_NUM = "com.viewcoder.webdriver.check.num";
+
+
     //一些数据库定义的字段
     public static final String ID = "id";
     public static final String PROJECT_ID = "project_id";

@@ -400,7 +400,7 @@ public class SimulateBarrer {
     private static void logAnalyze(String webUrl, SimulateTime simulateTime, List<WebElement> divElements,
                                    List<WebElement> spanElements, List<WebElement> imgElements) {
 
-        SimulateBarrer.logger.debug("simulate web url: " + webUrl);
+        SimulateBarrer.logger.debug("simulate browser url: " + webUrl);
 
         SimulateBarrer.logger.debug("total begin time: " + simulateTime.getTotalBeginTime() +
                 " ,end time: " + simulateTime.getTotalEndTime() + " ,use:" + simulateTime.getTotalTimeLength());

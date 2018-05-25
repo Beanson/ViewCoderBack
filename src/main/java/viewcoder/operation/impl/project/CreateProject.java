@@ -317,7 +317,7 @@ public class CreateProject {
                             CreateProject.logger.debug("createSimulateOpt with DB error, num<=0 ");
                         }
                     } else {
-                        projectProgress.setProgress(-2); //设置进度信息，打开指定网站超时失败
+                        projectProgress.setProgress(-2); //设置进度信息，获取project信息失败
                         CreateProject.logger.debug("createSimulateOpt with error, get projectData null ");
                     }
                 } catch (Exception e) {
