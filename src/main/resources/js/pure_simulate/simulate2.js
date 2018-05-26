@@ -41,14 +41,14 @@ var data = {
         'max_rate': 1,
         'public': false, //是否为public
         'industry': '', //所属行业
-        'usage_amount': 0,  //使用次数
+        'usage_amount': 0  //使用次数
     }
 };
 
 
-var divs = document.getElementsByTagName('div'); //所有div组件获取数据
+var divs = document.querySelectorAll('div, header, footer'); //所有容器类型元素
 var imgs = document.getElementsByTagName('img'); //获取所有image组件
-var spans = document.querySelectorAll('span, a, p, h1, h2, h3, h4, h5, h6, dt, dd, caption, th, td'); //获取所有装载text组件
+var spans = document.querySelectorAll('span, a, p, h1, h2, h3, h4, h5, h6, dt, dd, caption, th, td, address'); //获取所有装载text组件
 var buttons = document.getElementsByTagName('button');
 var textareas = document.getElementsByTagName('textarea');
 var inputs = document.getElementsByTagName('input');
@@ -278,15 +278,28 @@ function generalProperty(ele, obj, rate, type) {
     obj['name'] = type + '_' + num;
 
     //获取元素的top, left, width, height, 确保left, top大于零
+    //设置width和height值, width和height大于0 在checkEleVisible处已经校验过了，无需再次校验
     var rect = ele.getBoundingClientRect();
+    var width = rect.width;
+    obj['width'] = width > windowsWidth ? windowsWidth : width;
+    obj['height'] = rect.height;
+
+    //设置left和top值
     var left = Math.round(rect.left + window.scrollX);
     var top = Math.round(rect.top + window.scrollY);
-    obj['left'] = left > 0 ? left : 0;
     obj['top'] = top > 0 ? top : 0;
+    //确保左偏移大于0
+    if (left > 0) {
+        //保证元素都在页面上，不用左右滚动条目查找组件
+        if (left + obj['width'] > windowsWidth) {
+            obj['left'] = windowsWidth - obj['width'];
+        } else {
+            obj['left'] = left;
+        }
+    } else {
+        obj['left'] = 0;
+    }
 
-    var width = rect.width;
-    obj['width'] = width > (windowsWidth-10) ? (windowsWidth - 10) : width; //留10个像素给border
-    obj['height'] = rect.height < 35 ? 35 : rect.height; //height需不小于35像素
     obj['show'] = true;
     obj['opacity'] = parseFloat(css(ele, 'opacity'));
 }
@@ -330,13 +343,13 @@ function getTextProperty(ele, obj, text) {
         obj['text-length'] = text.length;
     }
     obj['font-size'] = parseInt(css(ele, 'font-size').replace('px', ''));
-    obj['font-weight'] = parseInt(css(ele, 'font-weight'));
+    obj['font-weight'] = css(ele, 'font-weight');
     obj['line-height'] = 150;
     obj['text-align'] = css(ele, 'text-align');
     obj['font-family'] = css(ele, 'font-family').replace(/"/g, '');
     obj['font-style'] = css(ele, 'font-style');
     obj['font-color'] = css(ele, 'color');
-    obj['text-decoration'] = css(ele, 'text-decoration-line');
+    obj['text-decoration'] = css(ele, 'text-decoration');
 }
 
 function getPaddingProperty(ele, obj) {
