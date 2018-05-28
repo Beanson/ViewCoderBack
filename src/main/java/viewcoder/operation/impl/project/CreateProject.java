@@ -1,14 +1,11 @@
 package viewcoder.operation.impl.project;
 
 import viewcoder.exception.project.PSDAnalysisException;
-import viewcoder.operation.entity.ProjectProgress;
+import viewcoder.operation.entity.*;
 import viewcoder.tool.common.*;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.parser.form.FormData;
 import viewcoder.tool.util.MybatisUtils;
-import viewcoder.operation.entity.Project;
-import viewcoder.operation.entity.User;
-import viewcoder.operation.entity.UserUploadFile;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.entity.response.StatusCode;
 import viewcoder.operation.impl.common.CommonService;
@@ -22,10 +19,7 @@ import viewcoder.url.Simulate;
 import viewcoder.url.barrer.SimulateBarrer;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Administrator on 2018/2/4.
@@ -46,6 +40,7 @@ public class CreateProject {
 
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
+        OSSClient ossClient = OssOpt.initOssClient();
 
         try {
             Project project = (Project) FormData.getParam(msg, Project.class);
@@ -55,6 +50,11 @@ public class CreateProject {
 
             //插入数据库结果分析，如果插入条目大于0则成功，否则失败
             if (num > 0) {
+                //OSS创建空项目的project的数据文件
+                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
+                OssOpt.uploadFileToOss(projectDataFile, project.getProject_data().getBytes(), ossClient);
+
+                //返回新建项目的project_id数据
                 Map<String, Integer> map = new HashMap<>();
                 map.put("id", project.getId());
                 Assemble.responseSuccessSetting(responseData, map);
@@ -71,10 +71,9 @@ public class CreateProject {
         } finally {
             CreateProject.logger.debug("createEmptyProject responseData" + responseData);
             //如果整个流程准确无误地实现则对数据库操作进行提交，否则不提交
-            if (responseData.getStatus_code() == StatusCode.OK.getValue()) {
-                sqlSession.commit();
-            }
-            sqlSession.close();
+            CommonService.databaseCommitClose(sqlSession, responseData, true);
+            //关闭oss对象
+            OssOpt.shutDownOssClient(ossClient);
         }
         return responseData;
     }
@@ -132,7 +131,7 @@ public class CreateProject {
             //如果该PSD文件无法解析则上传到OSS云端
             uploadErrorPsdFile(responseData, project, sqlSession, ossClient);
             //资源关闭和释放
-            sqlSession.close();
+            CommonService.databaseCommitClose(sqlSession, responseData, true);
             OssOpt.shutDownOssClient(ossClient);
             CreateProject.logger.debug("createPSDProject responseData" + responseData);
         }
@@ -150,9 +149,7 @@ public class CreateProject {
      * @throws PSDAnalysisException
      */
     private static void parsePSDFileLogic(ResponseData responseData, File file, Project project, SqlSession sqlSession,
-                                          OSSClient ossClient, long preRemainSize)
-            throws PSDAnalysisException {
-
+                                          OSSClient ossClient, long preRemainSize) throws PSDAnalysisException {
         try {
             //如果保存成功则进行解析PSD文件数据信息并返回内容数据
             PsdAnalysis psdAnalysis = new PsdAnalysis(project.getId(), project.getUser_id(), project.getProject_name(),
@@ -163,24 +160,21 @@ public class CreateProject {
             //如果解析后有项目数据则进行保存更新到数据库
             if (psdInfo != null) {
 
-                //设置psdInfo的project_data数据
+                //设置psdInfo的project_data数据到OSS中
                 project.setProject_data(JSON.toJSONString(psdInfo));
-                int num = sqlSession.update(Mapper.UPDATE_PSD_PROJECT_DATA, project);
+                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getTimestamp() +
+                        Common.PROJECT_DATA_SUFFIX;
+                OssOpt.uploadFileToOss(projectDataFile, project.getProject_data().getBytes(), ossClient);
 
-                if (num > 0) {
-                    //插入成功，返回新生成的project_id和project_data数据
-                    Map<String, Object> map = new HashMap<String, Object>();
-                    map.put("id", project.getId());
-                    map.put("project_data", project.getProject_data());
-                    Assemble.responseSuccessSetting(responseData, map);
-                    //更新用户新的可用空间，减去resource size后的大小
-                    sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(project.getUser_id(),
-                            String.valueOf(preRemainSize)));
+                //插入成功，返回新生成的project_id和project_data数据
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("id", project.getId());
+                map.put("project_data", project.getProject_data());
+                Assemble.responseSuccessSetting(responseData, map);
+                //更新用户新的可用空间，减去resource size后的大小
+                sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(project.getUser_id(),
+                        String.valueOf(preRemainSize)));
 
-                } else {
-                    //数据库更新PSD项目解析后的数据失败
-                    throw new PSDAnalysisException("parsePSDFileLogic: Update new PSD project data to database error");
-                }
             } else {
                 //解析PSD文件失败
                 throw new PSDAnalysisException("parsePSDFileLogic: Parse PSD file error");
@@ -261,6 +255,7 @@ public class CreateProject {
             String projectName = (String) map.get(Common.PROJECT_NAME);
             String webUrl = (String) map.get(Common.WEB_URL);
             String timestamp = (String) map.get(Common.TIME_STAMP);
+            String versions = (String) map.get(Common.VERSIONS);
             Integer userId = Integer.parseInt((String) map.get(Common.USER_ID));
             Integer browserWidth = Integer.parseInt((String) map.get(Common.BROWSER_WIDTH));
             Integer browserHeight = Integer.parseInt((String) map.get(Common.BROWSER_HEIGHT));
@@ -269,7 +264,7 @@ public class CreateProject {
             ProjectProgress projectProgress = new ProjectProgress(userId, Common.PROJECT_SIMULATE, projectName, timestamp, 0);
             CommonObject.getProgressList().add(projectProgress);
             //异步解析URL网站元素操作
-            createSimulateOpt(webUrl, projectProgress, browserWidth, browserHeight, userId, projectName);
+            createSimulateOpt(webUrl, projectProgress, browserWidth, browserHeight, userId, projectName, versions);
             //正确解析传递的参数及其类型，并成功调用URL解析网站元素操作，返回正确数据
             Assemble.responseSuccessSetting(responseData, null);
 
@@ -285,13 +280,14 @@ public class CreateProject {
      * TODO 后面采用云主机进行请求响应，而慢操作放在物理主机中运行
      */
     public static void createSimulateOpt(String webUrl, ProjectProgress projectProgress, int browserWidth, int browserHeight,
-                                         int userId, String projectName) throws Exception {
+                                         int userId, String projectName, String versions) throws Exception {
         //创建解析URL网站元素的线程
         Thread simulateParseThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 SqlSession sqlSession = null;
                 ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());//用来记录程序执行状态
+                OSSClient ossClient = OssOpt.initOssClient();
                 try {
                     //获取URL资源项目元数据
                     String projectData = Simulate.createProject(webUrl, projectProgress, browserWidth, browserHeight);
@@ -302,13 +298,19 @@ public class CreateProject {
                         Project project = new Project();
                         project.setUser_id(userId);
                         project.setProject_name(projectName);
-                        project.setTimestamp(projectProgress.getTimeStamp()); //设置该timestamp操作后数据库和缓存同步
+                        //设置该timestamp操作后数据库和缓存同步, 也是后续single_export和project_data的文件名
+                        project.setTimestamp(projectProgress.getTimeStamp());
                         project.setLast_modify_time(CommonService.getDateTime());
-                        project.setProject_data(projectData);
+
                         //把新创建的simulate的project插入数据库, 在这里启动数据库操作，不然可能会报超时错
                         sqlSession = MybatisUtils.getSession();
                         int num = sqlSession.insert(Mapper.CREATE_SIMULATE_PROJECT, project);
                         if (num > 0) {
+                            //project_data数据同步到OSS中
+                            String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
+                                    project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
+                            OssOpt.uploadFileToOss(projectDataFile, projectData.getBytes(), ossClient);
+
                             Assemble.responseSuccessSetting(responseData, null);
                             CreateProject.logger.debug("createSimulateOpt success, project id is: " + project.getId());
                             projectProgress.setProgress(100);
@@ -325,6 +327,7 @@ public class CreateProject {
                     projectProgress.setProgress(-3); //设置进度信息，系统发生错误
 
                 } finally {
+                    OssOpt.shutDownOssClient(ossClient);
                     CommonService.databaseCommitClose(sqlSession, responseData, true);
                 }
             }
@@ -368,13 +371,26 @@ public class CreateProject {
 
                     //如果解析URL的元素比例已经到达100，则把该缓存参数去掉
                     //如果进度出现负数，则说明程序执行出现问题，返回前端后，后台数据进行删除
-                    if (progress.getProgress() == 100) {
-                        iterator.remove();
-
-                    } else if (progress.getProgress() < 0) {
-                        iterator.remove();
+                    //如果出现0,20,80,100之外的，删除该progress
+                    switch (progress.getProgress()) {
+                        case 0: {
+                            break;
+                        }
+                        case 20: {
+                            break;
+                        }
+                        case 80: {
+                            break;
+                        }
+                        case 100: {
+                            iterator.remove();
+                            break;
+                        }
+                        default: {
+                            iterator.remove();
+                            break;
+                        }
                     }
-                    break;
                 }
             }
         } catch (Exception e) {
@@ -393,6 +409,7 @@ public class CreateProject {
     public static ResponseData getProjectByTimeStamp(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
+        OSSClient ossClient = OssOpt.initOssClient();
         try {
             //获取解析的项目标识参数
             Map<String, Object> map = FormData.getParam(msg);
@@ -400,13 +417,26 @@ public class CreateProject {
             Project project = sqlSession.selectOne(Mapper.GET_PROJECT_BY_TIMESTAMP, timestamp);
             //如果项目数据不为空则返回该数据
             if (project != null) {
-                Assemble.responseSuccessSetting(responseData, project);
+                //从OSS中获取timestamp版本的project data
+                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
+                        timestamp + Common.PROJECT_DATA_SUFFIX;
+                String projectData = OssOpt.getOssFile(ossClient, projectDataFile);
+
+                //检测OSS中读取的数据是否有效
+                if (CommonService.checkNotNull(projectData)) {
+                    project.setProject_data(projectData);
+                    Assemble.responseSuccessSetting(responseData, project);
+                } else {
+                    Assemble.responseErrorSetting(responseData, 400,
+                            "getProjectByTimeStamp: project data from oss null");
+                }
             }
         } catch (Exception e) {
             CreateProject.logger.debug("getProjectByTimeStamp error:", e);
 
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, false);
+            OssOpt.shutDownOssClient(ossClient);
         }
         return responseData;
     }

@@ -1,4 +1,4 @@
-package viewcoder.helper.msg;
+package viewcoder.tool.msg;
 
 import com.alibaba.fastjson.JSON;
 import com.aliyuncs.DefaultAcsClient;
@@ -13,7 +13,6 @@ import com.aliyuncs.profile.IClientProfile;
 import org.apache.log4j.Logger;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.config.GlobalConfig;
-import viewcoder.tool.encrypt.AESEncryptor;
 
 
 import java.util.Map;

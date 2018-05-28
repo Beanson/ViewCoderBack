@@ -1,6 +1,8 @@
 package viewcoder.tool.common;
 
+import com.sun.javaws.progress.Progress;
 import viewcoder.operation.entity.ProjectProgress;
+import viewcoder.operation.impl.common.CommonService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,19 +65,4 @@ public class CommonObject {
         return progressList;
     }
 
-    /**
-     * 根据userId获取所有正在后台解析操作的project信息
-     * @param userId
-     * @return
-     */
-    public static List<ProjectProgress> getProgressByUserId(int userId){
-        List<ProjectProgress> list = new ArrayList<>();
-        for (ProjectProgress progress :
-                progressList) {
-            if(progress.getUserId()==userId){
-                list.add(progress);
-            }
-        }
-        return list;
-    }
 }

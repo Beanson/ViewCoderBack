@@ -1,5 +1,6 @@
 package viewcoder.operation.mapper;
 
+import viewcoder.operation.entity.Project;
 import viewcoder.tool.common.Common;
 import viewcoder.operation.impl.common.CommonService;
 
@@ -49,7 +50,6 @@ public class SqlProvider {
         return stringBuilder.toString();
     }
 
-
     /**
      * 根据项目传递过来参数进行更新项目公开程度状态
      *
@@ -76,6 +76,31 @@ public class SqlProvider {
             }
             stringBuilder.append(" where id=" + map.get(Common.PROJECT_ID) + " and user_id=" + map.get(Common.USER_ID));
         }
+        return stringBuilder.toString();
+    }
+
+
+    /**
+     * 保存项目操作，根据不同传递的版本号参数更新不同内容
+     *
+     * @param project 项目数据
+     * @return
+     */
+    public String saveProjectData(Project project) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        //初始化固定更新部分
+        stringBuilder.append("update project set last_modify_time='" + project.getLast_modify_time() + "'");
+        stringBuilder.append(" ,timestamp='" + project.getTimestamp() + "'");
+
+        //根据传递的版本类型而对应更新不同版本数据
+        if (CommonService.checkNotNull(project.getMo_version())) {
+            stringBuilder.append(" ,mo_version='" + project.getTimestamp() + "'");
+        } else {
+            stringBuilder.append(" ,pc_version='" + project.getTimestamp() + "'");
+        }
+        stringBuilder.append(" where id=" + project.getId());
+
         return stringBuilder.toString();
     }
 

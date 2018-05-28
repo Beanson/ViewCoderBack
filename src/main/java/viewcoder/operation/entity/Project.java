@@ -10,10 +10,11 @@ public class Project {
     private int id;
     private int user_id;
     private String project_name;
-    private String timestamp;
     private String last_modify_time;
-    private int is_mobile;
-    private String project_data;
+    private String timestamp; //标识最终选择的版本
+    private String pc_version; //电脑版在oss中的文件名
+    private String mo_version; //手机版在oss中的文件名
+    private String project_data; //项目数据， 用于接收项目数据，进行OSS操作，不进行数据库操作
     private String resource_size;
     private int is_public;
     private String industry_code;
@@ -21,7 +22,6 @@ public class Project {
     private int usage_amount;
     private int points;
     private int ref_id;
-
     private FileUpload psd_file;
 
 
@@ -78,6 +78,14 @@ public class Project {
         this.project_name = project_name;
     }
 
+    public String getLast_modify_time() {
+        return last_modify_time;
+    }
+
+    public void setLast_modify_time(String last_modify_time) {
+        this.last_modify_time = last_modify_time;
+    }
+
     public String getTimestamp() {
         return timestamp;
     }
@@ -86,12 +94,20 @@ public class Project {
         this.timestamp = timestamp;
     }
 
-    public String getLast_modify_time() {
-        return last_modify_time;
+    public String getPc_version() {
+        return pc_version;
     }
 
-    public void setLast_modify_time(String last_modify_time) {
-        this.last_modify_time = last_modify_time;
+    public void setPc_version(String pc_version) {
+        this.pc_version = pc_version;
+    }
+
+    public String getMo_version() {
+        return mo_version;
+    }
+
+    public void setMo_version(String mo_version) {
+        this.mo_version = mo_version;
     }
 
     public String getProject_data() {
@@ -102,28 +118,12 @@ public class Project {
         this.project_data = project_data;
     }
 
-    public FileUpload getPsd_file() {
-        return psd_file;
-    }
-
-    public void setPsd_file(FileUpload psd_file) {
-        this.psd_file = psd_file;
-    }
-
     public String getResource_size() {
         return resource_size;
     }
 
     public void setResource_size(String resource_size) {
         this.resource_size = resource_size;
-    }
-
-    public int getIs_mobile() {
-        return is_mobile;
-    }
-
-    public void setIs_mobile(int is_mobile) {
-        this.is_mobile = is_mobile;
     }
 
     public int getIs_public() {
@@ -174,15 +174,24 @@ public class Project {
         this.ref_id = ref_id;
     }
 
+    public FileUpload getPsd_file() {
+        return psd_file;
+    }
+
+    public void setPsd_file(FileUpload psd_file) {
+        this.psd_file = psd_file;
+    }
+
     @Override
     public String toString() {
         return "Project{" +
                 "id=" + id +
                 ", user_id=" + user_id +
                 ", project_name='" + project_name + '\'' +
-                ", timestamp='" + timestamp + '\'' +
                 ", last_modify_time='" + last_modify_time + '\'' +
-                ", is_mobile=" + is_mobile +
+                ", timestamp='" + timestamp + '\'' +
+                ", pc_version='" + pc_version + '\'' +
+                ", mo_version='" + mo_version + '\'' +
                 ", project_data='" + project_data + '\'' +
                 ", resource_size='" + resource_size + '\'' +
                 ", is_public=" + is_public +

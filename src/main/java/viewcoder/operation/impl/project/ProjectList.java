@@ -1,14 +1,12 @@
 package viewcoder.operation.impl.project;
 
+import com.alibaba.fastjson.JSON;
 import viewcoder.exception.project.ProjectListException;
-import viewcoder.operation.entity.ProjectProgress;
+import viewcoder.operation.entity.*;
 import viewcoder.tool.common.*;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.parser.form.FormData;
 import viewcoder.tool.util.MybatisUtils;
-import viewcoder.operation.entity.Project;
-import viewcoder.operation.entity.User;
-import viewcoder.operation.entity.UserUploadFile;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.entity.response.StatusCode;
 import viewcoder.operation.impl.common.CommonService;
@@ -18,6 +16,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,14 +39,13 @@ public class ProjectList {
         try {
             //接收前台传过来关于数据需要查询的userId
             Map<String, Object> map = FormData.getParam(msg);
-            Integer userId = Integer.parseInt((String) map.get(Common.USER_ID)) ;
+            Integer userId = Integer.parseInt((String) map.get(Common.USER_ID));
             sqlSession = MybatisUtils.getSession();
             //查找数据库返回projects数据
             List<Project> projects = sqlSession.selectList(Mapper.GET_PROJECT_LIST_DATA, userId);
-            List<ProjectProgress> preProjects = CommonObject.getProgressByUserId(userId);
 
             //进行projects数据,并打包成ResponseData格式并回传
-            getProjectDataLogic(projects, preProjects, responseData);
+            getProjectDataLogic(projects, responseData);
 
         } catch (Exception e) {
             ProjectList.logger.error("getProjectData catch exception", e);
@@ -67,14 +65,13 @@ public class ProjectList {
      * @param projects     所有项目对象信息
      * @param responseData 返回数据打包
      */
-    private static void getProjectDataLogic(List<Project> projects, List<ProjectProgress> preProjects,  ResponseData responseData) {
+    private static void getProjectDataLogic(List<Project> projects, ResponseData responseData) {
 
         //如果projects不为null则数据库查询projects成功，返回该projects数据到前端。 preProjects已经初始化，不为null
         //projects.size()为0也是可以的，说明该用户尚未创建任何项目
         if (projects != null) {
-            Map<String, Object> map = new HashMap<>(2);
+            Map<String, Object> map = new HashMap<>(1);
             map.put("myProjects", projects);
-            map.put("preProjects", preProjects);
             Assemble.responseSuccessSetting(responseData, map);
         } else {
             ProjectList.logger.error("Get ProjectList Data with Database Error");
@@ -143,13 +140,12 @@ public class ProjectList {
                 String resourceRemain = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, userId);
                 int preRestSpace = Integer.parseInt(resourceRemain) - Integer.parseInt(projectOrigin.getResource_size());
                 if (preRestSpace > 0) {
-                    //3. 更新新项目的project表格
                     Project projectCopy = new Project();
-                    copyProjectUpdateProjectTable(sqlSession, userId, projectCopy, projectOrigin);
+                    //3. 更新新项目的project表格、OSS中single_export和project_data文件拷贝
+                    copyProjectUpdateProjectTableAndOss(sqlSession, userId, projectCopy, projectOrigin, ossClient);
                     //4. 更新新项目user_upload_file表格
                     copyProjectUpdateUserUploadFileTable(sqlSession, projectId, projectCopy);
-                    //5. 文件拷贝project_file（single_export）
-                    ossProjectHtmlCopy(ossClient, projectOrigin, projectCopy);
+
                     //6. 更新用户剩余空间
                     sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(userId,
                             String.valueOf(preRestSpace)));
@@ -159,6 +155,9 @@ public class ProjectList {
                     map.put("project_name", projectCopy.getProject_name());
                     map.put("last_modify_time", projectCopy.getLast_modify_time());
                     map.put("timestamp", projectCopy.getTimestamp());
+                    map.put("pc_version", projectCopy.getPc_version());
+                    map.put("mo_version", projectCopy.getMo_version());
+
                     Assemble.responseSuccessSetting(responseData, map);
                 } else {
                     Assemble.responseErrorSetting(responseData, 401,
@@ -187,8 +186,8 @@ public class ProjectList {
      * @param projectCopy 请求拷贝的项目对象
      * @throws ProjectListException
      */
-    private static void copyProjectUpdateProjectTable(SqlSession sqlSession, int userId, Project projectCopy,
-                                                      Project projectOrigin) throws ProjectListException {
+    private static void copyProjectUpdateProjectTableAndOss(SqlSession sqlSession, int userId, Project projectCopy,
+                                                            Project projectOrigin, OSSClient ossClient) throws ProjectListException {
         //获取原项目project表数据
         if (projectOrigin == null || projectOrigin.getId() == 0) {
             throw new ProjectListException("Get Original Project Info From DB \"Project Table\" Null Exception");
@@ -197,15 +196,32 @@ public class ProjectList {
         //初始化新项目project表数据
         projectCopy.setUser_id(userId);
         projectCopy.setProject_name(projectOrigin.getProject_name() + "_Copy");
-        projectCopy.setTimestamp(CommonService.getTimeStamp());
         projectCopy.setLast_modify_time(CommonService.getDateTime());
-        projectCopy.setProject_data(projectOrigin.getProject_data());
         projectCopy.setResource_size(projectOrigin.getResource_size());
+        projectCopy.setPc_version(projectOrigin.getPc_version() + 1);
+        //timestamp万一不等于任何一个version，则默认赋值pc_version
+        if (projectOrigin.getTimestamp().equals(projectOrigin.getPc_version()) ||
+                projectOrigin.getTimestamp().equals(projectOrigin.getMo_version())) {
+            projectCopy.setTimestamp(projectOrigin.getTimestamp() + 1);
+
+        } else {
+            projectCopy.setTimestamp(projectOrigin.getPc_version() + 1);
+        }
+        //Mo version 如果有则赋值，无则不用
+        if (CommonService.checkNotNull(projectOrigin.getMo_version())) {
+            projectCopy.setMo_version(projectOrigin.getMo_version() + 1);
+        }
 
         //新项目project插入数据库操作
         int num = sqlSession.insert(Mapper.CREATE_COPY_PROJECT, projectCopy);
         if (num <= 0) {
             throw new ProjectListException("Insert Copied Project Data To DB \"Project table\" Exception");
+        }
+
+        /*更新OSS文件拷贝操作*/
+        ossProjectHtmlCopy(ossClient, projectOrigin.getPc_version(), projectCopy.getPc_version());
+        if (CommonService.checkNotNull(projectOrigin.getMo_version())) {
+            ossProjectHtmlCopy(ossClient, projectOrigin.getMo_version(), projectCopy.getMo_version());
         }
     }
 
@@ -243,14 +259,25 @@ public class ProjectList {
     /**
      * 查找OSS中是否存在该HTML文件，如存在则进行拷贝
      *
-     * @param ossClient     oss句柄
-     * @param projectOrigin 源项目
-     * @param projectCopy   拷贝的新项目
+     * @param ossClient oss句柄
+     * @param origin    源项目数据
+     * @param copy      拷贝的新项目数据
      */
-    private static void ossProjectHtmlCopy(OSSClient ossClient, Project projectOrigin, Project projectCopy) {
-        String sourceFileName = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + projectOrigin.getTimestamp() + Common.PROJECT_FILE_SUBFFIX;
-        String destFileName = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + projectCopy.getTimestamp() + Common.PROJECT_FILE_SUBFFIX;
-        boolean found = OssOpt.getObjectExist(ossClient, sourceFileName);
+    private static void ossProjectHtmlCopy(OSSClient ossClient, String origin, String copy) {
+        String sourceFileName, destFileName;
+        Boolean found;
+
+        //拷贝single_export文件
+        sourceFileName = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + origin + Common.PROJECT_FILE_SUFFIX;
+        destFileName = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + copy + Common.PROJECT_FILE_SUFFIX;
+        found = OssOpt.getObjectExist(ossClient, sourceFileName);
+        if (found) {
+            OssOpt.copyProject(ossClient, sourceFileName, destFileName);
+        }
+        //拷贝project_data中文件
+        sourceFileName = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + origin + Common.PROJECT_DATA_SUFFIX;
+        destFileName = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + copy + Common.PROJECT_DATA_SUFFIX;
+        found = OssOpt.getObjectExist(ossClient, sourceFileName);
         if (found) {
             OssOpt.copyProject(ossClient, sourceFileName, destFileName);
         }
@@ -295,7 +322,7 @@ public class ProjectList {
                 int deleteProjectNum = sqlSession.delete(Mapper.DELETE_PROJECT_BY_ID, projectId);
                 int deleteUploadFileNum = sqlSession.delete(Mapper.DELETE_RESOURCE_BY_PROJECT_ID, projectId);
 
-                //删除OSS中single_export中的project_file html文件和所有引用数为0的组件
+                //删除OSS中single_export中的project_file html文件、project_data中项目数据文件和所有user_upload_file引用数为0的组件文件
                 deleteProjectLogicAnalyse(deleteProjectNum, deleteUploadFileNum, responseData, list, project, ossClient,
                         sqlSession);
             } else {
@@ -325,9 +352,24 @@ public class ProjectList {
     private static void deleteProjectLogicAnalyse(int deleteProjectNum, int deleteUploadFileNum, ResponseData responseData,
                                                   List<UserUploadFile> list, Project project, OSSClient ossClient,
                                                   SqlSession sqlSession) {
-        //删除OSS中HTML文件
-        String deleteHtmlFileInOss = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + project.getTimestamp() + Common.PROJECT_FILE_SUBFFIX;
-        OssOpt.deleteFileInOss(deleteHtmlFileInOss, ossClient);
+        //批量删除oss中所有该项目的HTML文件和Project data文件
+
+        List<String> files = new ArrayList<>();
+        //添加删除OSS中PC端HTML文件
+        files.add(GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + project.getPc_version() + Common.PROJECT_FILE_SUFFIX);
+        //添加删除OSS中PC端Project Data中文件
+        files.add(GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getPc_version() + Common.PROJECT_DATA_SUFFIX);
+
+        //如果有手机版则添加手机版数据
+        if (CommonService.checkNotNull(project.getMo_version())) {
+            //添加删除OSS中Mobile端HTML文件
+            files.add(GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + project.getMo_version() + Common.PROJECT_FILE_SUFFIX);
+            //添加删除OSS中Mobile端Project Data中文件
+            files.add(GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getMo_version() + Common.PROJECT_DATA_SUFFIX);
+        }
+        //batch job删除HTML文件和Project Data文件
+        OssOpt.deleteFileInOssBatch(files, ossClient);
+
 
         //批量删除OSS中对应user_upload_file引用为0的组件文件
         OssOpt.deleteResourceBatch(list, sqlSession, ossClient);
@@ -336,7 +378,7 @@ public class ProjectList {
         int updateUserResourceNum = addUserResourceSpace(sqlSession, project.getUser_id(),
                 project.getResource_size());
 
-        //确保各种操作数据库条目大于0后返回成功，无需deleteUploadFileNum的验证，因为可能项目无任何资源widget
+        //确保各种操作数据库条目大于0后返回成功，无需deleteUploadFileNum>0的验证，因为可能项目无任何资源widget
         if (deleteProjectNum > 0 && updateUserResourceNum > 0) {
             //返回删除project_file文件成功删除项目成功
             Assemble.responseSuccessSetting(responseData, null);

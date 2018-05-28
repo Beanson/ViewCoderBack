@@ -98,7 +98,7 @@ public class CommonService {
         boolean status = false;
         if (object != null) {
             if (object instanceof String) {
-                if (!((String) object).isEmpty()) {
+                if (!((String) object).isEmpty() && object != "undefined") {
                     //CommonService.logger.debug("checkNotNull: " + object + " come to String check, result is true");
                     status = true;
                 }

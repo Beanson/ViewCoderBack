@@ -1,22 +1,7 @@
-package viewcoder.helper.mail;
+package viewcoder.tool.mail;
 
-import org.apache.commons.lang3.text.StrSubstitutor;
-import org.jsoup.Jsoup;
-import viewcoder.tool.common.Common;
-import viewcoder.tool.config.GlobalConfig;
-
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.mail.*;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import java.io.File;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * Created by Administrator on 2018/4/28.

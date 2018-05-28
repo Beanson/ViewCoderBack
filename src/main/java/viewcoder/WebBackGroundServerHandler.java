@@ -286,8 +286,13 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                 else if (uri.equals("/saveProjectData")) {
                     ResponseData response = Render.saveProjectData(msg);
                     httpResponse(ctx, msg, response);
-
-                } else if (uri.equals("/testWechatPay")) {
+                }
+                //获取手机版或PC版project_data数据
+                else if (uri.equals("/getVersionsData")) {
+                    ResponseData response = Render.getVersionsData(msg);
+                    httpResponse(ctx, msg, response);
+                }
+                else if (uri.equals("/testWechatPay")) {
                     Purchase.testWechatPay(msg);
 
                 } else if (uri.equals("/testAliPay")) {

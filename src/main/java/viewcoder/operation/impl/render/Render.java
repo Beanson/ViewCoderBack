@@ -41,13 +41,25 @@ public class Render {
     public static ResponseData getProjectRenderData(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
+        OSSClient ossClient = OssOpt.initOssClient();
         try {
             //从http中获取项目id数据
             String projectId = FormData.getParam(msg, Common.ID);
             //从数据库中根据项目Id获取项目渲染数据
-            Project projectData = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, Integer.parseInt(projectId));
-            if (projectData != null) {
-                Assemble.responseSuccessSetting(responseData, projectData);
+            Project project = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, Integer.parseInt(projectId));
+            if (project != null) {
+                //从OSS中获取timestamp版本的project data
+                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
+                        project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
+                String projectData = OssOpt.getOssFile(ossClient, projectDataFile);
+                //检测OSS中读取的数据是否有效
+                if (CommonService.checkNotNull(projectData)) {
+                    project.setProject_data(projectData);
+                    Assemble.responseSuccessSetting(responseData, project);
+                } else {
+                    Assemble.responseErrorSetting(responseData, 400,
+                            "RenderException getProjectRenderData: project data from oss null");
+                }
             } else {
                 Assemble.responseErrorSetting(responseData, 401,
                         "RenderException getProjectRenderData: project null");
@@ -60,6 +72,7 @@ public class Render {
         } finally {
             //对数据库进行后续提交和关闭操作等
             CommonService.databaseCommitClose(sqlSession, responseData, false);
+            OssOpt.shutDownOssClient(ossClient);
         }
         return responseData;
     }
@@ -447,12 +460,28 @@ public class Render {
 
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
+        OSSClient ossClient = OssOpt.initOssClient();
 
         try {
             Project project = (Project) FormData.getParam(msg, Project.class);
+            //获取旧timestamp并设置新的timestamp
+            String oldTimeStamp = project.getTimestamp();
+            project.setTimestamp(CommonService.getTimeStamp());
             int num = sqlSession.update(Mapper.SAVE_PROJECT_DATA, project);
             if (num > 0) {
-                Assemble.responseSuccessSetting(responseData, null);
+                //删除旧的project_data数据，HTML文件数据在node后台中创建和删除
+                String oldProjectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
+                        oldTimeStamp + Common.PROJECT_DATA_SUFFIX;
+                OssOpt.deleteFileInOss(oldProjectDataFile, ossClient);
+
+                //创建新的project_data数据并同步到OSS中
+                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
+                        project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
+                OssOpt.uploadFileToOss(projectDataFile, project.getProject_data().getBytes(), ossClient);
+
+                Map<String, Object> map = new HashMap<>();
+                map.put("timestamp", project.getTimestamp());
+                Assemble.responseSuccessSetting(responseData, map);
             } else {
                 Assemble.responseErrorSetting(responseData, 401,
                         "RenderException saveProjectData: ");
@@ -464,6 +493,53 @@ public class Render {
         } finally {
             //对数据库进行后续提交和关闭操作等
             CommonService.databaseCommitClose(sqlSession, responseData, true);
+            OssOpt.shutDownOssClient(ossClient);
+        }
+        return responseData;
+    }
+
+
+    /**
+     * 获取PC端或Mobile端的数据
+     *
+     * @param msg 传递的msg对象
+     * @return
+     */
+    public static ResponseData getVersionsData(Object msg) {
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        SqlSession sqlSession = MybatisUtils.getSession();
+        OSSClient ossClient = OssOpt.initOssClient();
+
+        try {
+            HashMap<String, Object> map = FormData.getParam(msg);
+            String timestamp = map.get(Common.TIME_STAMP).toString();
+            if (CommonService.checkNotNull(timestamp)) {
+                String versionFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
+                        timestamp + Common.PROJECT_DATA_SUFFIX;
+                if (OssOpt.getObjectExist(ossClient, versionFile)) {
+                    //可以查到pc 或 mobile version文件数据，从oss中读取文件数据
+                    String versionData = OssOpt.getOssFile(ossClient, versionFile);
+                    Map<String, Object> result = new HashMap<>(1);
+                    result.put("project_data", versionData);
+                    Assemble.responseSuccessSetting(responseData, result);
+
+                } else {
+                    //数据库有该mobile version数据，但OSS中无该文件，返回400错误
+                    Assemble.responseErrorSetting(responseData, 400, versionFile + "not found");
+                }
+            } else {
+                //暂无mobile version数据，返回null
+                Assemble.responseSuccessSetting(responseData, null);
+            }
+
+        } catch (Exception e) {
+            Render.logger.error("RenderException getMobileVersion error: ", e);
+            Assemble.responseErrorSetting(responseData, 500,
+                    "RenderException getMobileVersion system error");
+        } finally {
+            //对数据库进行后续提交和关闭操作等
+            CommonService.databaseCommitClose(sqlSession, responseData, true);
+            OssOpt.shutDownOssClient(ossClient);
         }
         return responseData;
     }

@@ -1,7 +1,6 @@
-package viewcoder.helper.mail;
+package viewcoder.tool.mail;
 
 import com.sun.mail.util.MailSSLSocketFactory;
-import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import viewcoder.tool.common.Common;

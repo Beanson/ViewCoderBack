@@ -1,4 +1,4 @@
-package viewcoder.helper.job;
+package viewcoder.tool.job;
 
 import com.aliyun.oss.OSSClient;
 import org.apache.commons.lang3.text.StrSubstitutor;
@@ -6,9 +6,9 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import org.quartz.*;
 import viewcoder.exception.task.TaskException;
-import viewcoder.helper.mail.MailEntity;
-import viewcoder.helper.mail.MailHelper;
-import viewcoder.helper.msg.MsgHelper;
+import viewcoder.tool.mail.MailEntity;
+import viewcoder.tool.mail.MailHelper;
+import viewcoder.tool.msg.MsgHelper;
 import viewcoder.operation.entity.Instance;
 import viewcoder.operation.entity.User;
 import viewcoder.operation.impl.common.CommonService;
@@ -18,7 +18,6 @@ import viewcoder.tool.common.Mapper;
 import viewcoder.tool.common.OssOpt;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.util.MybatisUtils;
-import viewcoder.tool.xml.XmlUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -121,7 +120,7 @@ public class MidNightJob implements Job {
                                 //如果update的number大于0，则进行OSS文件的ACL权限设置操作
                                 //对该用户在OSS中的所有资源文件的ACL设置为私有访问
                                 //文件结构为：viewcoder-bucket/upload_file/{{timestamp}}/
-                                String ossFolderPrefix = Common.UPLOAD_FILES_FOLDER + "/" + user.getTimestamp() + "/";
+                                String ossFolderPrefix = GlobalConfig.getProperties(Common.UPLOAD_FILES) + "/" + user.getTimestamp() + "/";
                                 OssOpt.updateAclConfig(ossClient, ossFolderPrefix, false);
                                 MidNightJob.logger.debug("updateUserSpace successfully, " + instance.toString());
                             }

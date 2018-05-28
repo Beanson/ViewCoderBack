@@ -10,9 +10,7 @@ import viewcoder.tool.encrypt.AESEncryptor;
 import com.aliyun.oss.OSSClient;
 import org.apache.log4j.Logger;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -174,7 +172,6 @@ public class OssOpt {
     }
 
 
-
     /**************************** 拷贝资源文件方法 ***************************/
     /**
      * 拷贝OSS文件
@@ -241,6 +238,38 @@ public class OssOpt {
             }
 
         }
+    }
+
+
+    /***************************** 下载资源文件的操作 *********************************/
+
+    /**
+     * 从oss系统中获取该文件
+     *
+     * @param ossClient oss访问句柄
+     * @param fileName  文件名
+     * @return
+     */
+    public static String getOssFile(OSSClient ossClient, String fileName) {
+        OSSObject ossObject = ossClient.getObject(VIEWCODER_BUCKET, fileName);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(ossObject.getObjectContent()));
+        StringBuilder builder = new StringBuilder();
+        try {
+            //从数据流中读取字符流并用builder装载
+            String line = null;
+            line = reader.readLine();
+            while (CommonService.checkNotNull(line)) {
+                builder.append(line);
+                line = reader.readLine();
+            }
+
+            //数据读取完成后，获取的流一定要显示Close，否则会造成资源泄露。
+            reader.close();
+
+        } catch (IOException e) {
+            OssOpt.logger.error("getOssFile error: ", e);
+        }
+        return builder.toString();
     }
 
 }

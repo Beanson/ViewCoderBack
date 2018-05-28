@@ -42,12 +42,12 @@ public class PsdAnalysis {
     /**
      * 构造函数收录关键数据
      */
-    public PsdAnalysis(int projectId, int userId, String projectName, SqlSession sqlSession,OSSClient ossClient) {
+    public PsdAnalysis(int projectId, int userId, String projectName, SqlSession sqlSession, OSSClient ossClient) {
         this.projectId = projectId;
         this.userId = userId;
         this.projectName = projectName;
         this.sqlSession = sqlSession;
-        this.ossClient=ossClient;
+        this.ossClient = ossClient;
     }
 
 
@@ -63,7 +63,6 @@ public class PsdAnalysis {
             PsdAnalysis.logger.error("Parse PSD file occurs error", e);
             throw new PSDAnalysisException(e);
         }
-
     }
 
 
@@ -90,24 +89,12 @@ public class PsdAnalysis {
                 //图层的number从1开始算起，所以需要i+1
                 PsdAnalysis.logger.debug("=== Parse PSD layer: " + layer.getName() + " - " + ((i + 1) * 100 / maxRate) + "%");
             }
+            //插入该psd项目的文件夹资源
+            //由于查找资源时根据user_id和file_type查找。如file_type为1查不到音频文件。因此，是创建项目-->file_type下的文件夹，不是项目下的文件夹
+            CreateProject.insertWidgetToDB(projectId, userId, null, Common.FILE_TYPE_IMAGE, Common.FOLDER_FILE,
+                    CommonService.getTimeStamp(), null, projectName, "", String.valueOf(0),
+                    null, CommonService.getDateTime(), sqlSession);
 
-            //解析PSD图层完毕后，默认情况在前端显示在项目名为文件夹目录下进行上传文件
-//            if (psdInfo.getAll_tools().get(Common.COMMON_IMAGE).size() > 0) {
-//                int emptyFolderInsertNum = CreateProject.insertWidgetToDB(projectId, userId, null, Common.FILE_TYPE_IMAGE,
-//                        Common.FOLDER_FILE, null, null, projectName, "", null, null,
-//                        Common.getDateTime(), sqlSession);
-//                //对插入数据库影响的条目进行分析
-//                if (emptyFolderInsertNum <= 0) {
-//                    PsdAnalysis.logger.debug("===Insert empty folder to DB error, num is: " + emptyFolderInsertNum);
-//                    throw new PSDAnalysisException("Insert empty folder to DB error: ");
-//                }
-//            }
-
-            //打印最终psd消息
-            PsdAnalysis.logger.debug("===Final PSD parse layers info: ");
-            for (int i = 0; i < maxRate; i++) {
-                PsdAnalysis.logger.info("psd: " + i + " : " + psdFile.getLayer(i).getName() + " type:" + psdFile.getLayer(i).getType());
-            }
         } catch (Exception e) {
             PsdAnalysis.logger.error("===Parse PSD file occurs error: ", e);
             throw new PSDAnalysisException(e);
@@ -147,19 +134,19 @@ public class PsdAnalysis {
                     psdInfo.getAll_tools().get(Common.COMMON_TEXT).put(String.valueOf(layer.getLayerId()), layer_info);
 
                     //对字体的height进行修正，Photoshop获取不到正确的字体height。
-                    layer_info.put("height",40);
+                    layer_info.put("height", 40);
 
                     //对字体大于20的文字进行修正，分别对font的size和font的width进行调节，磨平Photoshop和网页之间的视觉差距
-                    if((int) (Float.parseFloat(fontData[4]))>20){
+                    if ((int) (Float.parseFloat(fontData[4])) > 20) {
                         //重新设置font-size
                         int font_size = (int) (Float.parseFloat(fontData[4]));
-                        int font_size_beautify = (int)((font_size - 20)*0.7*0.7 + 20);
-                        layer_info.put("font-size",font_size_beautify);
+                        int font_size_beautify = (int) ((font_size - 20) * 0.7 * 0.7 + 20);
+                        layer_info.put("font-size", font_size_beautify);
 
                         //重新设置font的width
                         int font_width = layer.getWidth();
-                        int font_width_beautify = (int)(font_width*1.3*1.3);
-                        layer_info.put("width",font_width_beautify);
+                        int font_width_beautify = (int) (font_width * 1.3 * 1.3);
+                        layer_info.put("width", font_width_beautify);
                     }
                 } else {
                     //如果解析不出文字大小则证明无法识别该字体，转到最后的默认保存为图片设置，
@@ -217,11 +204,12 @@ public class PsdAnalysis {
             ImageIO.write(layer.getImage(), IMAGE_PNG_TYPE, byteArrayOutputStream);
             //图层数据写到OSS中
             String ossFileName = GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES) + timeStampName + Common.IMG_PNG;
-            OssOpt.uploadFileToOss(ossFileName,byteArrayOutputStream.toByteArray(),ossClient);
+            OssOpt.uploadFileToOss(ossFileName, byteArrayOutputStream.toByteArray(), ossClient);
 
-            //保存文件信息到数据库,relative_path设置为null，即默认在该项目目录下的一级目录
-            CreateProject.insertWidgetToDB(projectId, userId, Common.COMMON_IMAGE, Common.FILE_TYPE_IMAGE, Common.NOT_FOLDER_FILE, timeStampName,
-                    IMAGE_PNG_TYPE, layer.getName(), "", String.valueOf(byteArrayOutputStream.size()), null, CommonService.getDateTime(), sqlSession);
+            //保存文件信息到数据库,relative_path设置为"该项目名称/"，即默认每个项目都会以项目名称为起始位置的图片资源列表
+            CreateProject.insertWidgetToDB(projectId, userId, Common.COMMON_IMAGE, Common.FILE_TYPE_IMAGE, Common.NOT_FOLDER_FILE,
+                    timeStampName, IMAGE_PNG_TYPE, layer.getName(), projectName + Common.RELATIVE_PATH_SUFFIX,
+                    String.valueOf(byteArrayOutputStream.size()), null, CommonService.getDateTime(), sqlSession);
         } else {
             logger.warn("===PSD Analizer-->saveAsImage null error: " + layer.getName());
         }

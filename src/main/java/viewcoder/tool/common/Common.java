@@ -45,6 +45,7 @@ public class Common {
     public final static String PORTRAIT_IMG = "com.viewcoder.file.portrait_img";
     public final static String MULTI_EXPORT = "com.viewcoder.file.multi_export";
     public final static String SINGLE_EXPORT = "com.viewcoder.file.single_export";
+    public final static String PROJECT_DATA = "com.viewcoder.file.project_data";
     public final static String UPLOAD_FILES = "com.viewcoder.file.upload_files";
     public final static String PSD_PARSE_ERROR = "com.viewcoder.file.psd_parse_error";
 
@@ -150,6 +151,7 @@ public class Common {
     public static final String FILE_TYPE = "file_type";
     public static final String NEW_FILE_NAME = "new_file_name";
     public static final String TIME_STAMP = "timestamp";
+    public static final String VERSIONS = "versions";
     public static final String PROJECT_NAME = "project_name";
     public static final String PROJECT_FILE_NAME = "project_file_name";
     public static final String LAST_MODIFY_TIME = "last_modify_time";
@@ -185,7 +187,8 @@ public class Common {
     public static final String IMG_PNG = ".png";
     public static final String IMG_PSG = ".psd";
     public static final String TIME_FORMAT_1 = "yyyy-MM-dd HH:mm:ss";
-    public static final String UPLOAD_FILES_FOLDER = "upload_files";
+    public static final String RELATIVE_PATH_SUFFIX = "/";
+    public static final String COMPUTER_V = "电脑版";
 
     //mail的其他配置
     public static final String MAIL_HTML_TYPE = "html";
@@ -198,6 +201,7 @@ public class Common {
     //获取阿里域账号的accessKey和accessSecret
     public static String ALI_ACCESSKEY_ID = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_ID));
     public static String ALI_ACCESSKEY_SECRET = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_SECRET));
-    public static String PROJECT_FILE_SUBFFIX = "-index.html"; //项目文件的后缀名
+    public static String PROJECT_FILE_SUFFIX = "-index.html"; //项目文件的后缀名
+    public static String PROJECT_DATA_SUFFIX = ".txt"; //项目数据文件的后缀名
 
 }
