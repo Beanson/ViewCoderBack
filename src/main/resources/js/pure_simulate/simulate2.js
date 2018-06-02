@@ -36,7 +36,7 @@ var data = {
         'height': document.body.scrollHeight,
         'is_mobile': false, //标识是否是mobile网页，默认是PC网页
         'scale': false,
-        'bg-color': 'rgba(250,0,0,0.04)',
+        'bg-color': 'rgba(255,255,255,1)',
         'max_id': 1,
         'max_rate': 1,
         'public': false, //是否为public
@@ -326,6 +326,7 @@ function getImgProperty(ele, obj, src) {
 
 function getBgProperty(ele, obj) {
     obj['bg-color'] = css(ele, 'background-color');
+    obj['responsive'] = false; //默认设置自动响应式为false
     obj['border-color'] = css(ele, 'border-color');
     obj['border-top-width'] = parseInt(css(ele, 'border-top-width').replace('px', ''));
     obj['border-left-width'] = parseInt(css(ele, 'border-left-width').replace('px', ''));

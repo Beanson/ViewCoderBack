@@ -225,7 +225,7 @@ public class PsdAnalysis {
         overall.put("height", totalHeight);
         overall.put("is_mobile", false); //标识是否是mobile网页，默认是PC网页
         overall.put("scale", false);
-        overall.put("bg-color", "rgba(250,0,0,0.04)");
+        overall.put("bg-color", "rgba(255,255,255,1)");
         overall.put("max_id", maxId);
         overall.put("max_rate", maxRate);
         psdInfo.setOverall(overall);

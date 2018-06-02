@@ -49,6 +49,7 @@ public class LayerInfo {
         layer_info.put("type","Common_Background");
         layer_info.put("name","bg_" + layer.getLayerId());
         layer_info.put("bg-color",bg_color);
+        layer_info.put("responsive",false); //默认设置自动响应式为false
 
         /*border边框设置*/
         layer_info.put("border-top-width",0);
@@ -77,6 +78,7 @@ public class LayerInfo {
         layer_info.put("bg-repeat","no-repeat");
         layer_info.put("bg-size",101);
         layer_info.put("bg-color","rgba(238,155,94,0)");
+        layer_info.put("responsive",false); //默认设置自动响应式为false
 
         /*border边框设置*/
         layer_info.put("border-top-width",0);
