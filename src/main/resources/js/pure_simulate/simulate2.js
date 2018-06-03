@@ -48,7 +48,7 @@ var data = {
 
 var divs = document.querySelectorAll('div, header, footer'); //所有容器类型元素
 var imgs = document.getElementsByTagName('img'); //获取所有image组件
-var spans = document.querySelectorAll('span, a, p, h1, h2, h3, h4, h5, h6, dt, dd, caption, th, td, address'); //获取所有装载text组件
+var spans = document.querySelectorAll('span, a, b, p, h1, h2, h3, h4, h5, h6, dt, dd, caption, th, td, address,font'); //获取所有装载text组件
 var buttons = document.getElementsByTagName('button');
 var textareas = document.getElementsByTagName('textarea');
 var inputs = document.getElementsByTagName('input');

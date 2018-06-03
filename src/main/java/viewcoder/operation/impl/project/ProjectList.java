@@ -299,21 +299,20 @@ public class ProjectList {
      * 存在部分定制化需求在此方法中执行
      *
      * @param sqlSession sql句柄
-     * @param optType 操作类型
-     * @param projectId 项目id号
+     * @param optType    操作类型
+     * @param projectId  项目id号
      */
-    private static void optType(SqlSession sqlSession, String optType, int projectId){
-        switch (optType){
-            case Common.STORE_TYPE:{
+    private static void optType(SqlSession sqlSession, String optType, int projectId) {
+        switch (optType) {
+            case Common.STORE_TYPE: {
                 int num = sqlSession.insert(Mapper.UPDATE_USAGE_AMOUNT, projectId);
                 break;
             }
-            default:{
+            default: {
                 break;
             }
         }
     }
-
 
 
     /**
@@ -435,6 +434,7 @@ public class ProjectList {
     private static int addUserResourceSpace(SqlSession sqlSession, int userId, String projectSpace) {
         //获取用户可用resource空间信息
         String originalResourceSize = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, userId);
+        ProjectList.logger.debug("userId: "+userId+" original size:" + originalResourceSize + " projectSpace" + projectSpace);
         int newResourceSize = Integer.parseInt(originalResourceSize) + Integer.parseInt(projectSpace);
         //更新用户resource空间信息
         return sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(userId, String.valueOf(newResourceSize)));
