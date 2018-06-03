@@ -98,11 +98,18 @@ for (var i = 0; i < imgs.length; i++) {
         var objImg = {};
         generalProperty(imgs[i], objImg, 2, "Common_Image");
 
+        //添加其他的data数据也是如此：在['dataset']后面的src/original等其他data类型，分别对应data-src, data-original等属性
         //获取img的src，如果data-src和src均为空或undefined则不添加该image对象
         var src = '';
         if (checkStrNotNull(imgs[i]['dataset']['src'])) {
             //赋值给src后，从src获取的是带有domain头部的全链接地址
             imgs[i]['src'] = imgs[i]['dataset']['src'];
+            src = imgs[i]['src'];
+
+        }
+        else if (checkStrNotNull(imgs[i]['dataset']['original'])) {
+            //赋值给src后，从src获取的是带有domain头部的全链接地址
+            imgs[i]['src'] = imgs[i]['dataset']['original'];
             src = imgs[i]['src'];
 
         } else if (checkStrNotNull(imgs[i]['src'])) {
