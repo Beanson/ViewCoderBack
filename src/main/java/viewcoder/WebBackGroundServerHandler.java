@@ -221,6 +221,10 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     ResponseData response = CreateProject.createEmptyProject(msg);
                     httpResponse(ctx, msg, response);
                 }
+                else if (uri.equals("/createStoreProject")) {
+                    ResponseData response = CreateProject.createStoreProject(msg);
+                    httpResponse(ctx, msg, response);
+                }
                 //新建PSD项目
                 else if (uri.equals("/createPSDProject")) {
                     ResponseData response = CreateProject.createPSDProject(msg);

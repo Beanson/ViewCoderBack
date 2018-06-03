@@ -153,6 +153,7 @@ public class Common {
     public static final String TIME_STAMP = "timestamp";
     public static final String VERSIONS = "versions";
     public static final String PROJECT_NAME = "project_name";
+    public static final String OPT_TYPE = "opt_type";
     public static final String PROJECT_FILE_NAME = "project_file_name";
     public static final String LAST_MODIFY_TIME = "last_modify_time";
     public static final String VIDEO_ID = "video_id";
@@ -171,6 +172,7 @@ public class Common {
     public static final String EXTEND_TYPE = "extend_type"; //是扩容还是续期的类型
     public static final String SPACE_INFO = "space_info"; //资源空间资料
     public static final String INSTANCE_INFO = "instance_info"; //实例资料
+    public static final String REF_ID = "ref_id"; //引用参照的project_id
     public static final String WEB_URL = "web_url"; //通过URL生成网页的操作
     public static final String BROWSER_WIDTH = "browser_width"; //浏览器的宽度
     public static final String BROWSER_HEIGHT = "browser_height"; //浏览器的高度
@@ -189,6 +191,7 @@ public class Common {
     public static final String TIME_FORMAT_1 = "yyyy-MM-dd HH:mm:ss";
     public static final String RELATIVE_PATH_SUFFIX = "/";
     public static final String COMPUTER_V = "电脑版";
+    public static final String STORE_TYPE = "store";
 
     //mail的其他配置
     public static final String MAIL_HTML_TYPE = "html";

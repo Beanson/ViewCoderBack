@@ -118,7 +118,7 @@ public class ProjectList {
      * *************************************************************************
      * 对项目进行拷贝操作，被拷贝的可以是 自己项目/project store中项目
      */
-    public static ResponseData copyProject(Object msg) throws IOException {
+    public static ResponseData copyProject(Object msg) {
 
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
@@ -132,6 +132,9 @@ public class ProjectList {
 
                 int projectId = Integer.parseInt(String.valueOf(data.get(Common.PROJECT_ID)));
                 int userId = Integer.parseInt(String.valueOf(data.get(Common.USER_ID)));
+                int refId = Integer.parseInt(String.valueOf(data.get(Common.REF_ID)));
+                String projectName = String.valueOf(data.get(Common.PROJECT_NAME));
+                String optType = String.valueOf(data.get(Common.OPT_TYPE));
 
                 //1. 获取原项目信息
                 Project projectOrigin = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, projectId);
@@ -142,13 +145,17 @@ public class ProjectList {
                 if (preRestSpace > 0) {
                     Project projectCopy = new Project();
                     //3. 更新新项目的project表格、OSS中single_export和project_data文件拷贝
-                    copyProjectUpdateProjectTableAndOss(sqlSession, userId, projectCopy, projectOrigin, ossClient);
+                    copyProjectUpdateProjectTableAndOss(sqlSession, userId, projectName, refId, projectCopy, projectOrigin, ossClient);
                     //4. 更新新项目user_upload_file表格
                     copyProjectUpdateUserUploadFileTable(sqlSession, projectId, projectCopy);
 
                     //6. 更新用户剩余空间
                     sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(userId,
                             String.valueOf(preRestSpace)));
+
+                    //7. 根据不同操作类型执行相应其他操作
+                    optType(sqlSession, optType, projectId);
+
                     //返回新拷贝的项目的id信息
                     Map<String, Object> map = new HashMap<>();
                     map.put("id", projectCopy.getId());
@@ -186,8 +193,10 @@ public class ProjectList {
      * @param projectCopy 请求拷贝的项目对象
      * @throws ProjectListException
      */
-    private static void copyProjectUpdateProjectTableAndOss(SqlSession sqlSession, int userId, Project projectCopy,
-                                                            Project projectOrigin, OSSClient ossClient) throws ProjectListException {
+    private static void copyProjectUpdateProjectTableAndOss(SqlSession sqlSession, int userId, String projectName, int refId,
+                                                            Project projectCopy, Project projectOrigin, OSSClient ossClient)
+            throws ProjectListException {
+
         //获取原项目project表数据
         if (projectOrigin == null || projectOrigin.getId() == 0) {
             throw new ProjectListException("Get Original Project Info From DB \"Project Table\" Null Exception");
@@ -195,10 +204,15 @@ public class ProjectList {
 
         //初始化新项目project表数据
         projectCopy.setUser_id(userId);
-        projectCopy.setProject_name(projectOrigin.getProject_name() + "_Copy");
+        projectCopy.setProject_name(projectName);
         projectCopy.setLast_modify_time(CommonService.getDateTime());
         projectCopy.setResource_size(projectOrigin.getResource_size());
+        projectCopy.setRef_id(refId);
         projectCopy.setPc_version(projectOrigin.getPc_version() + 1);
+        //Mo version 如果有则赋值，无则不用
+        if (CommonService.checkNotNull(projectOrigin.getMo_version())) {
+            projectCopy.setMo_version(projectOrigin.getMo_version() + 1);
+        }
         //timestamp万一不等于任何一个version，则默认赋值pc_version
         if (projectOrigin.getTimestamp().equals(projectOrigin.getPc_version()) ||
                 projectOrigin.getTimestamp().equals(projectOrigin.getMo_version())) {
@@ -206,10 +220,6 @@ public class ProjectList {
 
         } else {
             projectCopy.setTimestamp(projectOrigin.getPc_version() + 1);
-        }
-        //Mo version 如果有则赋值，无则不用
-        if (CommonService.checkNotNull(projectOrigin.getMo_version())) {
-            projectCopy.setMo_version(projectOrigin.getMo_version() + 1);
         }
 
         //新项目project插入数据库操作
@@ -232,7 +242,7 @@ public class ProjectList {
      * @param projectId   项目id
      * @param projectCopy 请求拷贝的项目对象
      */
-    private static void copyProjectUpdateUserUploadFileTable(SqlSession sqlSession, int projectId, Project projectCopy) {
+    public static void copyProjectUpdateUserUploadFileTable(SqlSession sqlSession, int projectId, Project projectCopy) {
         //获取原项目user_upload_file表数据
         List<UserUploadFile> userUploadFiles = sqlSession.selectList(Mapper.GET_ALL_RESOURCE_BY_PROJECT_ID, projectId);
         for (UserUploadFile file :
@@ -263,7 +273,7 @@ public class ProjectList {
      * @param origin    源项目数据
      * @param copy      拷贝的新项目数据
      */
-    private static void ossProjectHtmlCopy(OSSClient ossClient, String origin, String copy) {
+    public static void ossProjectHtmlCopy(OSSClient ossClient, String origin, String copy) {
         String sourceFileName, destFileName;
         Boolean found;
 
@@ -282,6 +292,28 @@ public class ProjectList {
             OssOpt.copyProject(ossClient, sourceFileName, destFileName);
         }
     }
+
+    /**
+     * 根据不同操作类型执行相应其他处理
+     * 由于copy project和create store project两种操作公用copy project实现方法，
+     * 存在部分定制化需求在此方法中执行
+     *
+     * @param sqlSession sql句柄
+     * @param optType 操作类型
+     * @param projectId 项目id号
+     */
+    private static void optType(SqlSession sqlSession, String optType, int projectId){
+        switch (optType){
+            case Common.STORE_TYPE:{
+                int num = sqlSession.insert(Mapper.UPDATE_USAGE_AMOUNT, projectId);
+                break;
+            }
+            default:{
+                break;
+            }
+        }
+    }
+
 
 
     /**

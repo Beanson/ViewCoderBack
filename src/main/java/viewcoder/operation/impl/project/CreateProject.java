@@ -81,6 +81,18 @@ public class CreateProject {
 
     /**
      * ****************************************************************************
+     * 新建project store项目
+     * 实际操作是拷贝项目的操作
+     *
+     * @param msg http接收的message对象数据
+     */
+    public static ResponseData createStoreProject(Object msg) {
+        return ProjectList.copyProject(msg);
+    }
+
+
+    /**
+     * ****************************************************************************
      * 解析PSD文件，生成新HTML项目，并把新项目数据插入数据库
      *
      * @param msg http接收的message对象数据

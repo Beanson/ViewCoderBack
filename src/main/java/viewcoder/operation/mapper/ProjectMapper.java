@@ -49,8 +49,8 @@ public interface ProjectMapper {
     public int createPSDProject(Project project);
 
     //拷贝后，创建新的project项目
-    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version,resource_size) " +
-            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{timestamp},#{resource_size})")
+    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version,mo_version,resource_size,ref_id) " +
+            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{pc_version},#{mo_version},#{resource_size},#{ref_id})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createCopyProject(Project project);
 
@@ -89,6 +89,10 @@ public interface ProjectMapper {
     //根据项目传递过来参数进行更新项目公开程度状态
     @SelectProvider(type=SqlProvider.class,method="updateProjectOpenness")
     public int updateProjectOpenness(Map<String,Object> map);
+
+    //更新project的引用次数
+    @Update("update project set usage_amount=usage_amount+1 where id=#{projectId}")
+    public int updateUsageAmount(int projectId);
 
 }
 

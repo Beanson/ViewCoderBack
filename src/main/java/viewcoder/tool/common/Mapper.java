@@ -28,6 +28,7 @@ public class Mapper {
     public static final String MODIFY_PROJECT_NAME = "modifyProjectName";
     public static final String UPDATE_PROJECT_RESOURCE_SIZE = "updateProjectResourceSize";
     public static final String UPDATE_PROJECT_OPENNESS = "updateProjectOpenness";
+    public static final String UPDATE_USAGE_AMOUNT = "updateUsageAmount";
 
 
 
