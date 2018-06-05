@@ -247,6 +247,10 @@ for (var i = 0; i < inputs.length; i++) {
     }
 }
 
+//设置overall的max_id和max_rate --------------------------------------------------------------------------
+data['overall']['max_id'] = num;
+data['overall']['max_rate'] = 3;
+
 
 function css(ele, cssProperty) {
     return window.getComputedStyle(ele, null).getPropertyValue(cssProperty)
