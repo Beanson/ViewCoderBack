@@ -1,6 +1,7 @@
 package viewcoder.operation.mapper;
 
 
+import org.apache.logging.log4j.core.config.Order;
 import viewcoder.operation.entity.Orders;
 import org.apache.ibatis.annotations.*;
 
@@ -22,11 +23,19 @@ public interface OrderMapper {
     @SelectProvider(type=SqlProvider.class,method="targetOrdersSqlProvider")
     List<Orders> getTargetOrderList(Map<String,Object> map);
 
+    //根据外部订单号out_trade_no获取数据库记录
+    @Select("select count(*) from orders where out_trade_no=#{outTradeNo}")
+    int getOrderNumByTradeNo(String outTradeNo);
+
+     //根据外部订单号out_trade_no获取数据库记录
+    @Select("select * from orders where out_trade_no=#{out_trade_no} and trade_no=#{trade_no}")
+    Orders getOrderByTradeNo(@Param("out_trade_no") String out_trade_no, @Param("trade_no") String trade_no);
+
 
     /**************************以下是insert操作**********************************/
     //插入新的order数据
-    @Insert("insert into orders(order_id,user_id,service_id,service_num,order_date,pay_date,expire_date,pay_status,pay_way,price)" +
-            " values(#{order_id},#{user_id},#{service_id},#{service_num},#{order_date},#{pay_date},#{expire_date},#{pay_status},#{pay_way},#{price})")
+    @Insert("insert into orders(out_trade_no,trade_no,user_id,service_id,service_num,order_date,pay_date,expire_date,pay_status,pay_way,price)" +
+            " values(#{out_trade_no},#{trade_no},#{user_id},#{service_id},#{service_num},#{order_date},#{pay_date},#{expire_date},#{pay_status},#{pay_way},#{price})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     int insertNewOrderItem(Orders orders);
 

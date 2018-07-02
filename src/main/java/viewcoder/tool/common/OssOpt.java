@@ -36,8 +36,8 @@ public class OssOpt {
      */
     public static OSSClient initOssClient() {
         //OssOpt.logger.debug("access key:" + Common.ALI_ACCESSKEY_ID + " access secret:" + Common.ALI_ACCESSKEY_SECRET);
-        //return new OSSClient(GlobalConfig.getProperties(END_POINT), "q4pjxqabACHK2WE5","yF3L6IbHTma6QbgfopLcJ4JF2cvSbJ");
-        return new OSSClient(GlobalConfig.getProperties(END_POINT), Common.ALI_ACCESSKEY_ID, Common.ALI_ACCESSKEY_SECRET);
+        return new OSSClient(GlobalConfig.getProperties(END_POINT), "q4pjxqabACHK2WE5","yF3L6IbHTma6QbgfopLcJ4JF2cvSbJ");
+        //return new OSSClient(GlobalConfig.getProperties(END_POINT), Common.ALI_ACCESSKEY_ID, Common.ALI_ACCESSKEY_SECRET);
     }
 
     /**

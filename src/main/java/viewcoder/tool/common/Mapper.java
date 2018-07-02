@@ -82,6 +82,8 @@ public class Mapper {
     //select
     public static final String GET_ORDER_LIST = "getOrderList";
     public static final String GET_TARGET_ORDER_LIST = "getTargetOrderList";
+    public static final String GET_ORDER_NUM_BY_TRADE_NO = "getOrderNumByTradeNo";
+    public static final String GET_ORDER_BY_TRADE_NO = "getOrderByTradeNo";
 
     //insert
     public static final String INSERT_NEW_ORDER_ITEM = "insertNewOrderItem";

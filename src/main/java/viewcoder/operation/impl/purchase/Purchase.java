@@ -1,10 +1,12 @@
 package viewcoder.operation.impl.purchase;
 
+import org.apache.commons.codec.binary.Hex;
 import viewcoder.exception.purchase.PayException;
 import viewcoder.tool.common.Assemble;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.common.CommonObject;
 import viewcoder.tool.common.Mapper;
+import viewcoder.tool.encrypt.ECCUtil;
 import viewcoder.tool.parser.form.FormData;
 import viewcoder.tool.parser.text.TextData;
 import viewcoder.tool.util.MybatisUtils;
@@ -45,7 +47,7 @@ public class Purchase {
             //根据user_id获取instance表数据
             List<Instance> instances = sqlSession.selectList(Mapper.GET_INSTANCE_BY_USER_ID, userId);
             //准备返回数据
-            Map<String, Object> map=new HashMap<>();
+            Map<String, Object> map = new HashMap<>();
             map.put(Common.SPACE_INFO, user);
             map.put(Common.INSTANCE_INFO, instances);
             Assemble.responseSuccessSetting(responseData, map);
@@ -53,7 +55,7 @@ public class Purchase {
         } catch (Exception e) {
             Assemble.responseErrorSetting(responseData, 500,
                     "refreshInstance error: " + e);
-        }finally {
+        } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
         return responseData;
@@ -178,7 +180,6 @@ public class Purchase {
      */
     public static void doPayment(ResponseData responseData, Orders orders) throws Exception {
         //设置支付日期等
-        orders.setTimestamp(CommonService.getTimeStamp());//保证order_id的唯一性
         orders.setOrder_date(CommonService.getDateTime());
 
         //根据不同支付方式进行不同逻辑处理
@@ -254,15 +255,15 @@ public class Purchase {
 
         //根据不同的订单类型设置不同的过期时间区间
         switch (serviceId) {
-            case 1: {
+            case 0: {
                 expireDate.add(Calendar.DATE, orders.getService_num());
                 break;
             }
-            case 2: {
+            case 1: {
                 expireDate.add(Calendar.MONTH, orders.getService_num());
                 break;
             }
-            case 3: {
+            case 2: {
                 expireDate.add(Calendar.YEAR, orders.getService_num());
                 break;
             }
@@ -286,7 +287,6 @@ public class Purchase {
     //测试AliPay的方法
     public static String testAliPay(Object msg) {
         Orders orders = new Orders();
-        orders.setTimestamp("121233454657656345d");
         orders.setUser_id(1);
         orders.setService_id(2);
         orders.setService_num(2);
@@ -307,6 +307,77 @@ public class Purchase {
     public static void testWechatPay(Object msg) {
         String str = TextData.getText(msg);
         logger.debug("get response: " + str);
+    }
+
+
+    /**
+     * 获取支付交易信息
+     *
+     * @param msg
+     * @return
+     */
+    public static ResponseData getPayInfo(Object msg) {
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        SqlSession sqlSession = MybatisUtils.getSession();
+
+        try {
+            Map<String, Object> data = FormData.getParam(msg);
+            int userId = Integer.parseInt(String.valueOf(data.get(Common.USER_ID)));
+            String outTradeNo = String.valueOf(data.get(Common.OUT_TRADE_NO));
+            String tradeNo = String.valueOf(data.get(Common.TRADE_NO));
+
+            //根据outTradeNo查询是否有该记录
+            if (CommonService.checkNotNull(outTradeNo) && CommonService.checkNotNull(tradeNo)) {
+                Orders orders = sqlSession.selectOne(Mapper.GET_ORDER_BY_TRADE_NO, data);
+                if (CommonService.checkNotNull(orders)) {
+                    //生成交易信息content
+                    String content = generateTradeContent(orders);
+                    //获取支付交易凭证
+                    Object certStr = ECCUtil.getCertStr(content);
+                    //数据内容装载返回
+                    Map<String, Object> map = new HashMap<>(2);
+                    map.put("cert", certStr);
+                    map.put("order", orders);
+                    Assemble.responseSuccessSetting(responseData, map);
+
+                } else {
+                    //返回数据库中无该交易订单数据
+                    Purchase.logger.debug("getPayInfo--> No such trade number:" + outTradeNo);
+                    Assemble.responseErrorSetting(responseData, 401, "No such trade number");
+                }
+            } else {
+                //返回交易订单号为空错误
+                Purchase.logger.debug("getPayInfo--> trade number empty:" + outTradeNo);
+                Assemble.responseErrorSetting(responseData, 402, "trade number empty");
+            }
+
+        } catch (Exception e) {
+            Assemble.responseErrorSetting(responseData, 500,
+                    "updateOrderPayment error: " + e);
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
+        }
+        return responseData;
+    }
+
+
+    /**
+     * 生成交易信息原文
+     *
+     * @param orders
+     * @return
+     */
+    public static String generateTradeContent(Orders orders) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(orders.getOut_trade_no()); //13 bits
+        builder.append(orders.getTrade_no()); //28 bits
+        builder.append(orders.getId());
+        builder.append(orders.getPay_date());
+        builder.append(orders.getPay_way());
+        builder.append(orders.getPrice());
+        builder.append(orders.getService_id());
+        builder.append(orders.getService_num());
+        return Hex.encodeHexString(builder.toString().getBytes());
     }
 
 

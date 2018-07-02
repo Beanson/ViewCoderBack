@@ -1,12 +1,10 @@
 package viewcoder.tool.encrypt;
 
 import org.apache.log4j.Logger;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
+import java.util.Base64;
 
 /**
  * Created by Administrator on 2018/2/17.
@@ -33,8 +31,8 @@ public class AESEncryptor {
             //1.构造密钥生成器，指定为AES算法,不区分大小写
             KeyGenerator keygen = KeyGenerator.getInstance("AES");
             //2.根据ecnodeRules规则初始化密钥生成器
-            //生成一个128位的随机源,根据传入的字节数组
-            keygen.init(128, new SecureRandom(encodeRules.getBytes()));
+            //生成一个256位的随机源,根据传入的字节数组
+            keygen.init(256, new SecureRandom(encodeRules.getBytes()));
             //3.产生原始对称密钥
             SecretKey original_key = keygen.generateKey();
             //4.获得原始对称密钥的字节数组
@@ -48,12 +46,8 @@ public class AESEncryptor {
             //8.获取加密内容的字节数组(这里要设置为utf-8)不然内容中如果有中文和英文混合中文就会解密为乱码
             byte[] byte_encode = content.getBytes("utf-8");
             //9.根据密码器的初始化方式--加密：将数据加密
-            byte[] byte_AES = cipher.doFinal(byte_encode);
-            //10.将加密后的数据转换为字符串
-            //这里用Base64Encoder中会找不到包
-            //解决办法：
-            //在项目的Build path中先移除JRE System Library，再添加库JRE System Library，重新编译后就一切正常了。
-            String AES_encode = new BASE64Encoder().encode(byte_AES);
+            Base64.Encoder encoder = Base64.getEncoder();
+            String AES_encode = encoder.encodeToString(byte_encode);
             //11.将字符串返回
             return AES_encode;
         } catch (Exception e) {
@@ -80,8 +74,8 @@ public class AESEncryptor {
             //1.构造密钥生成器，指定为AES算法,不区分大小写
             KeyGenerator keygen = KeyGenerator.getInstance("AES");
             //2.根据ecnodeRules规则初始化密钥生成器
-            //生成一个128位的随机源,根据传入的字节数组
-            keygen.init(128, new SecureRandom(encodeRules.getBytes()));
+            //生成一个256位的随机源,根据传入的字节数组
+            keygen.init(256, new SecureRandom(encodeRules.getBytes()));
             //3.产生原始对称密钥
             SecretKey original_key = keygen.generateKey();
             //4.获得原始对称密钥的字节数组
@@ -93,10 +87,9 @@ public class AESEncryptor {
             //7.初始化密码器，第一个参数为加密(Encrypt_mode)或者解密(Decrypt_mode)操作，第二个参数为使用的KEY
             cipher.init(Cipher.DECRYPT_MODE, key);
             //8.将加密并编码后的内容解码成字节数组
-            byte[] byte_content = new BASE64Decoder().decodeBuffer(content);
-            /*解密*/
-            byte[] byte_decode = cipher.doFinal(byte_content);
-            String AES_decode = new String(byte_decode, "utf-8");
+            Base64.Decoder decoder = Base64.getDecoder();
+            byte[] buffer = decoder.decode(content);
+            String AES_decode = new String(buffer, "utf-8");
             return AES_decode;
         } catch (Exception e) {
             AESEncryptor.logger.error("===AESDncode with error: ", e);

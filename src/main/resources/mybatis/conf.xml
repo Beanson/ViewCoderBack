@@ -9,7 +9,7 @@
     -->
 
     <!--引用的配置文件: db-dev或db-prod-->
-    <properties resource="mybatis/db-dev.properties"/>
+    <properties resource="mybatis/db-prod.properties"/>
     <!-- 配置实体类的别名 -->
     <typeAliases>
         <package name="viewcoder/mybatis/entity"/> <!--配置包即可，会到对应的包下查找实体类-->

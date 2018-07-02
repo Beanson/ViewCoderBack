@@ -1,3 +1,4 @@
+import org.apache.commons.codec.binary.Hex;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.common.OssOpt;
 import viewcoder.tool.config.GlobalConfig;
@@ -16,10 +17,10 @@ public class CommonTest {
 
     @Test
     public void testAESEncryptor() {
-        String encodeStr = AESEncryptor.AESEncode("@Admin123*Go", "yF3L6IbHTma6QbgfopLcJ4JF2cvSbJ");
+        String encodeStr = AESEncryptor.AESEncode(Common.AES_KEY, "");
         System.out.println("encrypted data is:" + encodeStr);
 
-        String decodeStr = AESEncryptor.AESDncode("@Admin123*Go", encodeStr);
+        String decodeStr = AESEncryptor.AESDncode(Common.AES_KEY, encodeStr);
         System.out.println("decoded data is:" + decodeStr);
     }
 
@@ -30,6 +31,7 @@ public class CommonTest {
         System.out.println(AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(ACCESS_KEY_ID)));
         System.out.println(AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(ACCESS_KEY_SECRET)));
     }
+
 
     @Test
     public void testOssUpload() {
@@ -77,6 +79,24 @@ public class CommonTest {
         } finally {
             OssOpt.shutDownOssClient(ossClient);
         }
+    }
+
+
+    @Test
+    public void parseData(){
+        String a[] = new String[2];
+        a[0]="123";
+        a[1]="456";
+        Object b = a;
+        String c [] = (String[]) b;
+        System.out.println(c[0]+","+c[1]);
+    }
+
+    @Test
+    public void testHex() throws Exception{
+        String str = "31353330343935343239353234323031383037303232313030313030343335303538323333393332333331323031382d30372d30322030393a33373a343731302e3130316e756c6c";
+        byte[] decode = Hex.decodeHex(str.toCharArray());
+        System.out.println(new String(decode,"UTF-8"));
     }
 }
 

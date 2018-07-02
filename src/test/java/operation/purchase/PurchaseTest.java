@@ -1,13 +1,26 @@
 package operation.purchase;
 
+import com.alipay.api.internal.util.StringUtils;
+import com.alipay.api.internal.util.codec.Base64;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import viewcoder.operation.entity.Orders;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.operation.impl.purchase.AliPay;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.alipay.api.internal.util.AlipaySignature.getPublicKeyFromX509;
 
 /**
  * Created by Administrator on 2018/3/11.
@@ -64,5 +77,57 @@ public class PurchaseTest {
         }
     }
 
+
+
+    @Test
+    public void testPay() throws Exception{
+        PublicKey e = getPublicKeyFromX509("RSA", new ByteArrayInputStream("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsIsTWDSGq69oZnAliQfWZqIsU2KVNOG1GK3/4ePGgjttb0vuU5WYArGhXbmQWYfYLA3b4dW5xtcke8fzZDcBluoJzYrOJQbKKLwxsxUAMsQWA6CKu7gWlQZoLrKONlclT+IBCv2BCLNA8FMNvlPisrxyo/sgnznDTbQKsi2lFjgLS0Hq8Z1w0VZfbdHgXRWSIvWg8N7SQcYBzhapaO6jmzb3NFhwMxjSpMWP4+saMCthARwcsXWtfCdPx0OLqH7uEUQdttfJ0c6Df8xZAHdB9vlhNk7zhILOkbCUZBc5Rq9cv163IxsjdACG0dVv5pmR/KRMji8Ao7Nppip2q3RYKwIDAQAB".getBytes()));
+        Signature signature = Signature.getInstance("SHA256WithRSA");
+        signature.initVerify(e);
+        signature.update("app_id=2018042660038244&auth_app_id=2018042660038244&body=Iphone6 16G, body&buyer_id=2088212004043356&buyer_pay_amount=0.01&charset=UTF-8&fund_bill_list=[{\"amount\":\"0.01\",\"fundChannel\":\"ALIPAYACCOUNT\"}]&gmt_create=2018-06-29 11:31:42&gmt_payment=2018-06-29 11:32:14&invoice_amount=0.01&notify_id=6dd350302a6d5a39cfe2142aacc699aipd&notify_time=2018-06-29 11:32:14&notify_type=trade_status_sync&out_trade_no=1530243042670&passback_params=merchantBizType%3d3C%26merchantBizNo%3d2016010101111&point_amount=0.00&receipt_amount=0.01&seller_id=2088131043865379&subject=Iphone6 16G&total_amount=0.01&trade_no=2018062921001004350569761553&trade_status=TRADE_SUCCESS&version=1.0".getBytes());
+//        if(StringUtils.isEmpty(charset)) {
+//            signature.update(content.getBytes());
+//        } else {
+//            signature.update(content.getBytes(charset));
+//        }
+
+        System.out.println(signature.verify(Base64.decodeBase64("RYFUrLeE0cPI7XHYPjqOx0jsbI7PXh6nbmwYN7g1OU2zBHBaCnhEw03Lj6YUVFKALM9u33m8XKOJ8bCRupeH3Xkj3WIQu0AxKVL+1CXeMjmzUUR9x817cjlaYZX0a1uHRbyNm2vdaQwkg/0sioxIBJRl+79vjgbomBo7JK0jA7DKnE4pttCiZKFPYvZd+ChQfN7ymqHEdRVtgmA0og0aewcL+Q/RDLd8CNwVVEvvCLBYvXWqu+GEXh9vwNmHNFZyfM16CRzXDoZGZdUYQaLJNLs3yEeB/46YHePrbUDM5SpP3w1DSgTW+2mja3panUDZywsBa+D4z0dTH5DGO+T4YQ==".getBytes()))); ;
+    }
+
+
+//    @Test
+//    public void testSing() throws  Exception{
+//
+//        //2.执行签名
+//        PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(base642Byte(ecPrivateKey));
+//        KeyFactory keyFactory = KeyFactory.getInstance("RSA2");
+//        PrivateKey privateKey = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
+//        Signature signature = Signature.getInstance("SHA256WithRSA");
+//        signature.initSign(privateKey);
+//        signature.update(src.getBytes());
+//        byte[] result = signature.sign();
+//        System.out.println("jdk ecdsa sign : " + Hex.encodeHexString(result));
+//
+//        PublicKey e = getPublicKeyFromX509("RSA", new ByteArrayInputStream("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsIsTWDSGq69oZnAliQfWZqIsU2KVNOG1GK3/4ePGgjttb0vuU5WYArGhXbmQWYfYLA3b4dW5xtcke8fzZDcBluoJzYrOJQbKKLwxsxUAMsQWA6CKu7gWlQZoLrKONlclT+IBCv2BCLNA8FMNvlPisrxyo/sgnznDTbQKsi2lFjgLS0Hq8Z1w0VZfbdHgXRWSIvWg8N7SQcYBzhapaO6jmzb3NFhwMxjSpMWP4+saMCthARwcsXWtfCdPx0OLqH7uEUQdttfJ0c6Df8xZAHdB9vlhNk7zhILOkbCUZBc5Rq9cv163IxsjdACG0dVv5pmR/KRMji8Ao7Nppip2q3RYKwIDAQAB".getBytes()));
+//        Signature signature = Signature.getInstance("SHA256WithRSA");
+//        signature.initVerify(e);
+//        signature.update("app_id=2018042660038244&auth_app_id=2018042660038244&body=Iphone6 16G, body&buyer_id=2088212004043356&buyer_pay_amount=0.01&charset=UTF-8&fund_bill_list=[{\"amount\":\"0.01\",\"fundChannel\":\"ALIPAYACCOUNT\"}]&gmt_create=2018-06-29 11:31:42&gmt_payment=2018-06-29 11:32:14&invoice_amount=0.01&notify_id=6dd350302a6d5a39cfe2142aacc699aipd&notify_time=2018-06-29 11:32:14&notify_type=trade_status_sync&out_trade_no=1530243042670&passback_params=merchantBizType%3d3C%26merchantBizNo%3d2016010101111&point_amount=0.00&receipt_amount=0.01&seller_id=2088131043865379&subject=Iphone6 16G&total_amount=0.01&trade_no=2018062921001004350569761553&trade_status=TRADE_SUCCESS&version=1.0".getBytes());
+////        if(StringUtils.isEmpty(charset)) {
+////            signature.update(content.getBytes());
+////        } else {
+////            signature.update(content.getBytes(charset));
+////        }
+//
+//        System.out.println(signature.verify(Base64.decodeBase64("RYFUrLeE0cPI7XHYPjqOx0jsbI7PXh6nbmwYN7g1OU2zBHBaCnhEw03Lj6YUVFKALM9u33m8XKOJ8bCRupeH3Xkj3WIQu0AxKVL+1CXeMjmzUUR9x817cjlaYZX0a1uHRbyNm2vdaQwkg/0sioxIBJRl+79vjgbomBo7JK0jA7DKnE4pttCiZKFPYvZd+ChQfN7ymqHEdRVtgmA0og0aewcL+Q/RDLd8CNwVVEvvCLBYvXWqu+GEXh9vwNmHNFZyfM16CRzXDoZGZdUYQaLJNLs3yEeB/46YHePrbUDM5SpP3w1DSgTW+2mja3panUDZywsBa+D4z0dTH5DGO+T4YQ==".getBytes()))); ;
+//
+//    }
+
+    @Test
+    public void testHex() throws DecoderException {
+        String content = "hello world";
+        byte[]a = content.getBytes();
+        System.out.println(new String(a));
+        //System.out.println(Base64.decodeBase64());
+    }
 
 }

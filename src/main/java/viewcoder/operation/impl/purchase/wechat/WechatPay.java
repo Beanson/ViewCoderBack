@@ -1,5 +1,6 @@
 package viewcoder.operation.impl.purchase.wechat;
 
+import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.parser.text.TextData;
@@ -66,7 +67,7 @@ public class WechatPay {
 
         //设置的参数 ************************************************************
         //商户系统内部订单号，要求32个字符内，只能是数字、大小写字母_-|*@ ，且在同一个商户号下唯一
-        packageParams.put(Common.PAY_WECHAT_KEY_OUT_TRADE_NO, orders.getTimestamp());
+        packageParams.put(Common.PAY_WECHAT_KEY_OUT_TRADE_NO, CommonService.getTimeStamp());
         //随机字符串，长度要求在32位以内。
         packageParams.put(Common.PAY_WECHAT_KEY_NONCE_STR, nonce_str);
         //商品简单描述

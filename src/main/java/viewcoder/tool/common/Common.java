@@ -163,7 +163,9 @@ public class Common {
     public static final String ORDER_END_DATE = "order_end_date"; //订单结束时间
     public static final String PAY_STATUS = "pay_status"; //支付状态
     public static final String PAY_WAY = "pay_way"; //支付方式
+    public static final String PRICE = "price"; //价格
     public static final String SERVICE_ID = "service_id"; //服务类型
+    public static final String SERVICE_NUM = "service_num"; //服务类型
     public static final String IS_PUBLIC = "is_public"; //该项目是否为公开项目
     public static final String INDUSTRY_CODE = "industry_code"; //行业一级代号
     public static final String INDUSTRY_SUB_CODE = "industry_sub_code"; //行业一级代号
@@ -177,6 +179,15 @@ public class Common {
     public static final String BROWSER_WIDTH = "browser_width"; //浏览器的宽度
     public static final String BROWSER_HEIGHT = "browser_height"; //浏览器的高度
     public static final String PROJECT_SIMULATE = "simulate"; //项目类型是simulate类型
+
+    //数字证书
+    public static final String SIGN_FILE = "sign_file"; //数字签名文件
+    public static final String SIGN_STR = "sign_str"; //数字签名文件内容
+    public static final String OUT_TRADE_NO = "out_trade_no"; //商户订单号
+    public static final String TRADE_NO = "trade_no"; //支付宝交易号
+    public static final String SIGN_PRIVATE_KEY = "com.pay.sign.private_key";
+    public static final String SIGN_PUBLIC_KEY = "com.pay.sign.public_key";
+    public static final String STATUS = "status";//支付凭证验证情况
 
     //的AES加解密的key
     public static final String AES_KEY = "@Admin123*Go";

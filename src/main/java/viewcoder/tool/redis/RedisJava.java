@@ -22,13 +22,13 @@ public class RedisJava {
 
     static {
         //初始化连接redis数据库
-        jedis = new Jedis(GlobalConfig.getProperties(REDIS_HOST),
-                GlobalConfig.getIntProperties(REDIS_PORT),
-                GlobalConfig.getIntProperties(REDIS_TIMEOUT));
-        String redisAuth = AESEncryptor.AESDncode(redisAuthEncryptedKey,
-                GlobalConfig.getProperties(REDIS_PASS));
-        String redisPingReply = jedis.auth(redisAuth);
-        RedisJava.logger.debug("connect to redis: " + redisPingReply);
+//        jedis = new Jedis(GlobalConfig.getProperties(REDIS_HOST),
+//                GlobalConfig.getIntProperties(REDIS_PORT),
+//                GlobalConfig.getIntProperties(REDIS_TIMEOUT));
+//        String redisAuth = AESEncryptor.AESDncode(redisAuthEncryptedKey,
+//                GlobalConfig.getProperties(REDIS_PASS));
+//        String redisPingReply = jedis.auth(redisAuth);
+//        RedisJava.logger.debug("connect to redis: " + redisPingReply);
     }
 
     /**

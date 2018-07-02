@@ -4,7 +4,6 @@ package viewcoder;
  * Created by Administrator on 2017/2/8.
  */
 
-import com.mysql.fabric.Response;
 import viewcoder.tool.common.Common;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.common.CommonService;
@@ -29,6 +28,8 @@ import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import org.apache.log4j.Logger;
+import viewcoder.tool.config.GlobalConfig;
+import viewcoder.tool.encrypt.ECCUtil;
 
 import static com.aliyun.oss.internal.OSSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 //import static io.netty.handler.codec.http.HttpHeaders.Names.*;
@@ -156,14 +157,25 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                 }
                 //更新order信息到数据库
                 else if (uri.equals("/aliPayNotify")) {
-                    AliPay.aliPayNotify(msg);
+                    String response = AliPay.aliPayNotify(msg);
+                    httpResponse(ctx, msg, response);
                 }
                 //更新order信息到数据库
                 else if (uri.equals("/wechatPayNotify")) {
                     WechatPay.weChatPayNotify(msg);
                 }
+                //下载支付哈希凭证信息
+                else if (uri.equals("/getPayInfo")) {
+                    ResponseData response = Purchase.getPayInfo(msg);
+                    httpResponse(ctx, msg, response);
+                }
+                //验证支付哈希凭证信息
+                else if (uri.equals("/verifyCert")) {
+                    ResponseData response = ECCUtil.verifyCert(msg);
+                    httpResponse(ctx, msg, response);
+                }
 
-                //删除order数据表表中条目
+                //删除order数据表中条目
                 else if (uri.equals("/deleteOrderItem")) {
                     ResponseData response = Purchase.deleteOrderItem(msg);
                     httpResponse(ctx, msg, response);
@@ -303,6 +315,7 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     httpResponsePureHtml(ctx, msg, Purchase.testAliPay(msg));
 
                 } else if (uri.equals("/netty")) {
+                    logger.debug(GlobalConfig.getProperties("com.viewcoder.file.system.base.url"));
                     httpResponse(ctx, msg, JSON.toJSONString("hello world"));
 
                 } else {
@@ -406,7 +419,7 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
 
         boolean keepAlive = HttpUtil.isKeepAlive((HttpMessage) msg);
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(htmlData.getBytes()));
-        response.headers().set(CONTENT_TYPE, "text/html;charset=utf-8"); //when set json string should be like json format
+        response.headers().set(CONTENT_TYPE, "text/html;charset=UTF-8"); //when set json string should be like json format
         response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
         response.headers().set(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
         response.headers().set(ACCESS_CONTROL_ALLOW_METHODS, "POST");

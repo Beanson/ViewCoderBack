@@ -1,9 +1,6 @@
 package viewcoder.tool.common;
 
-import com.sun.javaws.progress.Progress;
 import viewcoder.operation.entity.ProjectProgress;
-import viewcoder.operation.impl.common.CommonService;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

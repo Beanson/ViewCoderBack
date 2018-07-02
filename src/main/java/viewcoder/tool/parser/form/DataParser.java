@@ -18,6 +18,7 @@ public class DataParser {
             case "float":resultData=Float.parseFloat(data);break;
             case "double":resultData=Double.parseDouble(data);break;
             case "boolean":resultData=Boolean.parseBoolean(data);break;
+            default:resultData=data; break;
         }
         return resultData;
     }
