@@ -1,6 +1,12 @@
 package viewcoder.operation.impl.test;
 
+import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.model.OSSObject;
+import com.aliyun.oss.model.OSSObjectSummary;
+import com.aliyun.oss.model.ObjectListing;
+import org.junit.Test;
 import viewcoder.tool.common.Assemble;
+import viewcoder.tool.common.OssOpt;
 import viewcoder.tool.parser.form.FormData;
 import viewcoder.tool.util.MybatisUtils;
 import viewcoder.operation.entity.User;
@@ -9,6 +15,9 @@ import viewcoder.operation.impl.common.CommonService;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Administrator on 2018/2/19.
  */
@@ -16,30 +25,46 @@ public class TestUtil {
 
     private static Logger logger = Logger.getLogger(TestUtil.class);
 
-    public static ResponseData testEntity(Object msg) {
+    public static ResponseData getAllOss() {
         ResponseData responseData = new ResponseData();
-        SqlSession sqlSession = MybatisUtils.getSession();
+        List<String> list = new ArrayList<>();
+        OSSClient ossClient = OssOpt.initOssClient();
+        // 列举文件。 如果不设置KeyPrifex，则列举存储空间下所有的文件。如果设置了KeyPrifex，则列举包含指定前缀的文件。
+        ObjectListing objectListing = ossClient.listObjects("viewcoder-bucket", "single_export");
+        List<OSSObjectSummary> sums = objectListing.getObjectSummaries();
+        for (OSSObjectSummary s : sums) {
+            list.add(s.getKey().split("-")[0]);
+        }
+        Assemble.responseSuccessSetting(responseData, list);
+        OssOpt.shutDownOssClient(ossClient);
+        return responseData;
+    }
+
+
+    public static ResponseData deleteOssFile(Object msg) {
+        ResponseData responseData = new ResponseData();
+        OSSClient ossClient = OssOpt.initOssClient();
 
         try {
-            //测试用hashmap接收数据
-//            Map<String, Object> data= FormData.getParam(msg, "id","user_name","portrait_file");
-//            for (Map.Entry<String, Object> entry : data.entrySet()) {
-//                System.out.println("key= " + entry.getKey() + " and value= " + entry.getValue());
-//            }
-            //测试用对象数据接收数据
-            User user = (User) FormData.getParam(msg, User.class);
-            TestUtil.logger.debug("get user data: " + user);
-
-            Assemble.responseSuccessSetting(responseData, null);
+            String str = FormData.getParam(msg, "src");
+            ossClient.deleteObject("viewcoder-bucket", "single_export/" + str + "-index.html");
+            ossClient.deleteObject("viewcoder-bucket", "project_data/" + str + ".txt");
+            Assemble.responseSuccessSetting(responseData,null);
 
         } catch (Exception e) {
-            Assemble.responseErrorSetting(responseData, 500, "Sys Error");
-            TestUtil.logger.error("testEntity error: ", e);
+            Assemble.responseErrorSetting(responseData, 500, "delete file occurs error");
 
         } finally {
-            //对数据库进行后续提交和关闭操作等
-            CommonService.databaseCommitClose(sqlSession, responseData, false);
+            OssOpt.shutDownOssClient(ossClient);
         }
         return responseData;
     }
 }
+
+
+
+
+
+
+
+

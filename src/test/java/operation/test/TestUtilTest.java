@@ -1,13 +1,19 @@
 package operation.test;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.ibatis.session.SqlSession;
+import viewcoder.tool.common.Common;
+import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.util.HttpUtil;
 import org.apache.log4j.Logger;
 import org.junit.Test;
+import viewcoder.tool.util.MybatisUtils;
 
 import java.io.File;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 
 /**
@@ -60,7 +66,9 @@ public class TestUtilTest {
         return buffer;
     }
 
-    public static void main(String args[]){
+
+    @Test
+    public void tryConfig() throws Exception{
 
     }
 }

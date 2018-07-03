@@ -11,6 +11,9 @@ public class Common {
 
     private static Logger logger = Logger.getLogger(Common.class.getName());
 
+    //不同环境共享的配置
+    public static String TARGET_ENVIRONMENT = "com.viewcoder.target.environement"; //设定目标环境
+
     //后台返回status_code
     public final static int STATUS_CODE_OK = 200;
     public final static String STATUS_OK = "OK";
@@ -217,5 +220,4 @@ public class Common {
     public static String ALI_ACCESSKEY_SECRET = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_SECRET));
     public static String PROJECT_FILE_SUFFIX = "-index.html"; //项目文件的后缀名
     public static String PROJECT_DATA_SUFFIX = ".txt"; //项目数据文件的后缀名
-
 }

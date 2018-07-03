@@ -4,6 +4,7 @@ package viewcoder;
  * Created by Administrator on 2017/2/8.
  */
 
+import viewcoder.operation.impl.test.TestUtil;
 import viewcoder.tool.common.Common;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.common.CommonService;
@@ -308,17 +309,27 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     ResponseData response = Render.getVersionsData(msg);
                     httpResponse(ctx, msg, response);
                 }
+                /*以下是测试请求链接*/
                 else if (uri.equals("/testWechatPay")) {
                     Purchase.testWechatPay(msg);
 
                 } else if (uri.equals("/testAliPay")) {
                     httpResponsePureHtml(ctx, msg, Purchase.testAliPay(msg));
 
+                } else if (uri.equals("/getAllOss")) {
+                    ResponseData responseData = TestUtil.getAllOss();
+                    httpResponse(ctx, msg, responseData);
+
+                } else if (uri.equals("/deleteOssFile")) {
+                    ResponseData responseData = TestUtil.deleteOssFile(msg);
+                    httpResponse(ctx, msg, responseData);
+
                 } else if (uri.equals("/netty")) {
                     logger.debug(GlobalConfig.getProperties("com.viewcoder.file.system.base.url"));
                     httpResponse(ctx, msg, JSON.toJSONString("hello world"));
 
-                } else {
+                }
+                else {
                     httpResponse(ctx, msg, "server do not serve such request");
                     System.out.println("----------------------------come to invalid request-----------------------");
                 }

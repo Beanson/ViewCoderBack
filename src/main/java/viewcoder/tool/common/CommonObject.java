@@ -38,8 +38,7 @@ public class CommonObject {
         serviceName.put(3,"年套餐");
 
         //xml的map
-        xmlMap.put("msg", "config/msg.xml");
-        xmlMap.put("general", "xml/general.xml");
+        xmlMap.put("msg", "msg/msg.xml");
     }
 
     public static Map<Integer, Integer> getServiceToPoints() {
