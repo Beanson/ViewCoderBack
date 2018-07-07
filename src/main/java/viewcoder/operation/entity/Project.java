@@ -9,6 +9,7 @@ public class Project {
 
     private int id;
     private int user_id;
+    private int parent;
     private String project_name;
     private String last_modify_time;
     private String timestamp; //标识最终选择的版本
@@ -22,6 +23,7 @@ public class Project {
     private int usage_amount;
     private int points;
     private int ref_id;
+    private int child;
     private FileUpload psd_file;
 
 
@@ -68,6 +70,14 @@ public class Project {
 
     public void setUser_id(int user_id) {
         this.user_id = user_id;
+    }
+
+    public int getParent() {
+        return parent;
+    }
+
+    public void setParent(int parent) {
+        this.parent = parent;
     }
 
     public String getProject_name() {
@@ -182,11 +192,20 @@ public class Project {
         this.psd_file = psd_file;
     }
 
+    public int getChild() {
+        return child;
+    }
+
+    public void setChild(int child) {
+        this.child = child;
+    }
+
     @Override
     public String toString() {
         return "Project{" +
                 "id=" + id +
                 ", user_id=" + user_id +
+                ", parent=" + parent +
                 ", project_name='" + project_name + '\'' +
                 ", last_modify_time='" + last_modify_time + '\'' +
                 ", timestamp='" + timestamp + '\'' +
@@ -200,6 +219,7 @@ public class Project {
                 ", usage_amount=" + usage_amount +
                 ", points=" + points +
                 ", ref_id=" + ref_id +
+                ", child=" + child +
                 ", psd_file=" + psd_file +
                 '}';
     }

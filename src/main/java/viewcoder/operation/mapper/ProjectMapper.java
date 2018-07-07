@@ -3,6 +3,7 @@ package viewcoder.operation.mapper;
 /**
  * Created by Administrator on 2017/2/8.
  */
+
 import viewcoder.operation.entity.Project;
 import org.apache.ibatis.annotations.*;
 
@@ -13,8 +14,8 @@ public interface ProjectMapper {
 
     /********************以下是获取项目信息操作***********************/
     //根据用户user_id获取该用户所有project的数据
-    @Select("select * from project where user_id=#{userId}")
-    public List<Project> getProjectListData(int userId);
+    @Select("select * from project where user_id=#{user_id} and parent=#{parent}")
+    public List<Project> getProjectListData(@Param("user_id") String user_id, @Param("parent") String parent);
 
     //根据项目id获取该项目数据信息
     @Select("select * from project where id=#{id}")
@@ -55,8 +56,8 @@ public interface ProjectMapper {
     public int createCopyProject(Project project);
 
     //通过URL，创建一个和source URL类似的Simulate project
-    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version) " +
-            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{timestamp})")
+    @Insert("insert into project(user_id,parent,project_name,timestamp,last_modify_time,pc_version) " +
+            "values(#{user_id},#{parent},#{project_name},#{timestamp},#{last_modify_time},#{timestamp})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createSimulateProject(Project project);
 
@@ -71,7 +72,6 @@ public interface ProjectMapper {
 //    public int deleteProjectByFileName(String timestamp);
 
 
-
     /********************以下是更新项目名操作***********************/
     //更新project名称
     @Update("update project set project_name=#{project_name} where id=#{id}")
@@ -79,20 +79,24 @@ public interface ProjectMapper {
 
     //更新project条目内容
     //根据项目传递过来参数进行更新项目公开程度状态
-    @SelectProvider(type=SqlProvider.class,method="saveProjectData")
-    public int  saveProjectData(Map<String,Object> map);
+    @SelectProvider(type = SqlProvider.class, method = "saveProjectData")
+    public int saveProjectData(Map<String, Object> map);
 
     //更新project的resource_size的大小
     @Update("update project set resource_size=#{resource_size} where id=#{id}")
     public int updateProjectResourceSize(Project Project);
 
     //根据项目传递过来参数进行更新项目公开程度状态
-    @SelectProvider(type=SqlProvider.class,method="updateProjectOpenness")
-    public int updateProjectOpenness(Map<String,Object> map);
+    @SelectProvider(type = SqlProvider.class, method = "updateProjectOpenness")
+    public int updateProjectOpenness(Map<String, Object> map);
 
     //更新project的引用次数
     @Update("update project set usage_amount=usage_amount+1 where id=#{projectId}")
     public int updateUsageAmount(int projectId);
+
+    //更新child页面的数目
+    @Update("update project set child=child+1 where id=#{projectId}")
+    public int updateChildNum(int projectId);
 
 }
 

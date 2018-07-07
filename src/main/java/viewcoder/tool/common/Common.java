@@ -182,6 +182,7 @@ public class Common {
     public static final String BROWSER_WIDTH = "browser_width"; //浏览器的宽度
     public static final String BROWSER_HEIGHT = "browser_height"; //浏览器的高度
     public static final String PROJECT_SIMULATE = "simulate"; //项目类型是simulate类型
+    public static final String PAGE_PARENT = "parent"; //页面的父页面
 
     //数字证书
     public static final String SIGN_FILE = "sign_file"; //数字签名文件

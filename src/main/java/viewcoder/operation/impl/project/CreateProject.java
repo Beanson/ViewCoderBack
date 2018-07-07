@@ -53,6 +53,8 @@ public class CreateProject {
                 //OSS创建空项目的project的数据文件
                 String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
                 OssOpt.uploadFileToOss(projectDataFile, project.getProject_data().getBytes(), ossClient);
+                //如果该页面为子页面，则增加子页面后，父页面的子页面数目更改
+                addParentChildPageNum(project.getParent(), sqlSession);
 
                 //返回新建项目的project_id数据
                 Map<String, Integer> map = new HashMap<>();
@@ -124,6 +126,8 @@ public class CreateProject {
                     //解析file文件数据并保存到指定位置，如果解析成功将删除该psd文件，如果解析失败将保留作为后续程序调优参考文件
                     parsePSDFileLogic(responseData, project.getPsd_file().getFile(), project, sqlSession, ossClient,
                             preRemainSize);
+                    //如果该页面为子页面，则增加子页面后，父页面的子页面数目更改
+                    addParentChildPageNum(project.getParent(), sqlSession);
 
                 } else {
                     //数据库插入失败
@@ -271,12 +275,13 @@ public class CreateProject {
             Integer userId = Integer.parseInt((String) map.get(Common.USER_ID));
             Integer browserWidth = Integer.parseInt((String) map.get(Common.BROWSER_WIDTH));
             Integer browserHeight = Integer.parseInt((String) map.get(Common.BROWSER_HEIGHT));
+            Integer parent = Integer.parseInt((String) map.get(Common.PAGE_PARENT));
 
             //初始化项目创建的进度
             ProjectProgress projectProgress = new ProjectProgress(userId, Common.PROJECT_SIMULATE, projectName, timestamp, 0);
             CommonObject.getProgressList().add(projectProgress);
             //异步解析URL网站元素操作
-            createSimulateOpt(webUrl, projectProgress, browserWidth, browserHeight, userId, projectName, versions);
+            createSimulateOpt(webUrl, projectProgress, browserWidth, browserHeight, userId, projectName, versions, parent);
             //正确解析传递的参数及其类型，并成功调用URL解析网站元素操作，返回正确数据
             Assemble.responseSuccessSetting(responseData, null);
 
@@ -292,7 +297,7 @@ public class CreateProject {
      * TODO 后面采用云主机进行请求响应，而慢操作放在物理主机中运行
      */
     public static void createSimulateOpt(String webUrl, ProjectProgress projectProgress, int browserWidth, int browserHeight,
-                                         int userId, String projectName, String versions) throws Exception {
+                                         int userId, String projectName, String versions, int parent) throws Exception {
         //创建解析URL网站元素的线程
         Thread simulateParseThread = new Thread(new Runnable() {
             @Override
@@ -309,14 +314,18 @@ public class CreateProject {
                         //准备project实体类数据
                         Project project = new Project();
                         project.setUser_id(userId);
+                        project.setParent(parent);
                         project.setProject_name(projectName);
                         //设置该timestamp操作后数据库和缓存同步, 也是后续single_export和project_data的文件名
+                        //插入sql时该字段分别插入timestamp和pc_version两个字段
                         project.setTimestamp(projectProgress.getTimeStamp());
                         project.setLast_modify_time(CommonService.getDateTime());
 
                         //把新创建的simulate的project插入数据库, 在这里启动数据库操作，不然可能会报超时错
                         sqlSession = MybatisUtils.getSession();
                         int num = sqlSession.insert(Mapper.CREATE_SIMULATE_PROJECT, project);
+                        //如果该页面为子页面，则增加子页面后，父页面的子页面数目更改
+                        addParentChildPageNum(parent, sqlSession);
                         if (num > 0) {
                             //project_data数据同步到OSS中
                             String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
@@ -453,4 +462,26 @@ public class CreateProject {
         return responseData;
     }
 
+
+    /**
+     * 添加该page的父页面的数目
+     */
+    public static void addParentChildPageNum(int parentId, SqlSession sqlSession) {
+        //如果parent不等于0，则对该parent的页面项目进行子页面的添加操作
+        if (parentId != 0) {
+            int num = sqlSession.update(Mapper.UPDATE_CHILD_NUM, parentId);
+        }
+    }
+
+
 }
+
+
+
+
+
+
+
+
+
+

@@ -39,10 +39,11 @@ public class ProjectList {
         try {
             //接收前台传过来关于数据需要查询的userId
             Map<String, Object> map = FormData.getParam(msg);
-            Integer userId = Integer.parseInt((String) map.get(Common.USER_ID));
+//            Integer userId = Integer.parseInt((String) map.get(Common.USER_ID));
+//            Integer parentId = Integer.parseInt((String) map.get(Common.PAGE_PARENT));
             sqlSession = MybatisUtils.getSession();
             //查找数据库返回projects数据
-            List<Project> projects = sqlSession.selectList(Mapper.GET_PROJECT_LIST_DATA, userId);
+            List<Project> projects = sqlSession.selectList(Mapper.GET_PROJECT_LIST_DATA, map);
 
             //进行projects数据,并打包成ResponseData格式并回传
             getProjectDataLogic(projects, responseData);
