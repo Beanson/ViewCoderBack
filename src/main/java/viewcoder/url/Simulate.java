@@ -51,6 +51,19 @@ public class Simulate {
 
             //加载提取网站元素的js文件
             JavascriptExecutor js = (JavascriptExecutor) driver;
+
+            URL jqueryUrl = Resources.getResource("js/simulate_jquery/jquery.min.js");
+            String jqueryText = Resources.toString(jqueryUrl, Charsets.UTF_8);
+            js.executeScript(jqueryText);
+            int contentHeight = ((Number) js.executeScript("return $(document).height()")).intValue();
+            Simulate.logger.debug("get page height: "+contentHeight);
+
+            //慢加载操作，后期前端设置允许用户调节每次滚动的等待时间
+            for (int i = totalHeight; i < contentHeight; i += totalHeight) {
+                js.executeScript("window.scrollBy(0, " + i + ")");
+                Thread.sleep(500);
+            }
+
             URL simulateURL = Resources.getResource("js/pure_simulate/simulate2.js");
             String simulateScript = Resources.toString(simulateURL, Charsets.UTF_8);
             projectData = (String) js.executeScript(simulateScript);
