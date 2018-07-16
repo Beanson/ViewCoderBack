@@ -82,5 +82,9 @@ public interface UserMapper {
     @Update("update user set resource_remain=resource_remain-#{space_expire} where user_id=#{user_id}")
     public int removeExpireInstanceSpace(Instance instance);
 
+    //更新用户framework和package_way的信息
+    @Update("update user set framework=#{framework}, package_way=#{package_way} where id=#{id}")
+    public int updateExportDefaultSetting(User user);
+
 
 }

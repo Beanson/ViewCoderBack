@@ -77,6 +77,7 @@ public class Mapper {
     public static final String UPDATE_USER_LAST_SELECTED_INDUSTRY = "updateLastSelectedIndustry";
     public static final String UPDATE_USER_TOTAL_POINTS = "updateUserTotalPoints";
     public static final String REMOVE_EXPIRE_INSTANCE_SPACE = "removeExpireInstanceSpace";
+    public static final String UPDATE_EXPORT_DEFAULT_SETTING = "updateExportDefaultSetting";
 
 
     //order表数据库操作mapper************************************************************************

@@ -545,4 +545,35 @@ public class Render {
     }
 
 
+    /**
+     * 更新默认的导出设置操作
+     * @param msg 传入的信息体
+     * @return
+     */
+    public static ResponseData updateExportDefaultSetting(Object msg) {
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        SqlSession sqlSession = MybatisUtils.getSession();
+
+        try{
+            User user = (User) FormData.getParam(msg, User.class);
+            int num = sqlSession.update(Mapper.UPDATE_EXPORT_DEFAULT_SETTING, user);
+            if(num>0){
+                //更新成功，则返回成功
+                Assemble.responseSuccessSetting(responseData,null);
+            }else {
+                //更新失败
+                Assemble.responseErrorSetting(responseData,401,"Db update error");
+            }
+        }catch (Exception e){
+            //系统错误
+            Assemble.responseErrorSetting(responseData,500,"system error");
+
+        }finally {
+            //对数据库进行后续提交和关闭操作等
+            CommonService.databaseCommitClose(sqlSession, responseData, true);
+        }
+        return responseData;
+    }
+
+
 }

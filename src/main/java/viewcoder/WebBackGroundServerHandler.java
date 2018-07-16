@@ -309,6 +309,12 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     ResponseData response = Render.getVersionsData(msg);
                     httpResponse(ctx, msg, response);
                 }
+                //网页前端默认的导出设置
+                else if (uri.equals("/updateExportDefaultSetting")) {
+                    ResponseData response = Render.updateExportDefaultSetting(msg);
+                    httpResponse(ctx, msg, response);
+                }
+
                 /*以下是测试请求链接*/
                 else if (uri.equals("/testWechatPay")) {
                     Purchase.testWechatPay(msg);

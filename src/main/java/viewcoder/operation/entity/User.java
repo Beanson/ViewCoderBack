@@ -26,6 +26,8 @@ public class User implements Serializable{
     private String last_store_sub_code;
     private int total_usage_amount;
     private int total_points;
+    private int framework;
+    private int package_way;
 
     public User(){}
 
@@ -184,6 +186,22 @@ public class User implements Serializable{
         this.resource_used = resource_used;
     }
 
+    public int getFramework() {
+        return framework;
+    }
+
+    public void setFramework(int framework) {
+        this.framework = framework;
+    }
+
+    public int getPackage_way() {
+        return package_way;
+    }
+
+    public void setPackage_way(int package_way) {
+        this.package_way = package_way;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -204,6 +222,8 @@ public class User implements Serializable{
                 ", last_store_sub_code='" + last_store_sub_code + '\'' +
                 ", total_usage_amount=" + total_usage_amount +
                 ", total_points=" + total_points +
+                ", framework=" + framework +
+                ", package_way=" + package_way +
                 '}';
     }
 }
