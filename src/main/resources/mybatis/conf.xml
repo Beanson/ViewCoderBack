@@ -64,5 +64,6 @@
         <mapper class="viewcoder.operation.mapper.ChiefMapper"/>
         <mapper class="viewcoder.operation.mapper.UploadFileMapper"/>
         <mapper class="viewcoder.operation.mapper.OrderMapper"/>
+        <mapper class="viewcoder.operation.mapper.FeedbackMapper"/>
     </mappers>
 </configuration>

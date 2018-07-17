@@ -85,11 +85,15 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     ResponseData response = Overall.getUserInfoById(msg);
                     httpResponse(ctx, msg, response);
                 }
+                else if(uri.equals("/sendSuggestion")) {
+                    ResponseData response = Overall.sendSuggestion(msg);
+                    httpResponse(ctx, msg, response);
+                }
 
                 /*Login控制方法里*/
                 /*登录注册方法**************************/
                 //新用户注册请求
-                if (uri.equals("/viewCoderRegister")) {
+                else if (uri.equals("/viewCoderRegister")) {
                     ResponseData response = Logon.ViewCoderRegister(msg);
                     httpResponse(ctx, msg, response);
                 }

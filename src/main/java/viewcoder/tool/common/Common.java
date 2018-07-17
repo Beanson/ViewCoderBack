@@ -51,6 +51,7 @@ public class Common {
     public final static String PROJECT_DATA = "com.viewcoder.file.project_data";
     public final static String UPLOAD_FILES = "com.viewcoder.file.upload_files";
     public final static String PSD_PARSE_ERROR = "com.viewcoder.file.psd_parse_error";
+    public final static String FEEDBACK = "com.viewcoder.file.feedback";
 
     //OSS配置信息
     public static String FILE_SYS_BASE_URL_KEY = "com.viewcoder.file.system.base.url";
@@ -221,4 +222,5 @@ public class Common {
     public static String ALI_ACCESSKEY_SECRET = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_SECRET));
     public static String PROJECT_FILE_SUFFIX = "-index.html"; //项目文件的后缀名
     public static String PROJECT_DATA_SUFFIX = ".txt"; //项目数据文件的后缀名
+    public static String TEXT_FILE_SUFFIX = ".txt"; //txt文件的后缀名
 }

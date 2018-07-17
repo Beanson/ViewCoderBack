@@ -32,7 +32,6 @@ public class Mapper {
     public static final String UPDATE_CHILD_NUM = "updateChildNum";
 
 
-
     //user_upload_file表的数据库操作mapper**************************************************************
     //select
     public static final String GET_ALL_RESOURCE_BY_PROJECT_ID = "getAllResourceByProjectId";
@@ -52,7 +51,6 @@ public class Mapper {
     public static final String UPDATE_RESOURCE_TIMESTAMP = "updateResourceTimeStamp";
     public static final String RENAME_RESOURCE_BY_ID = "renameResourceById";
     public static final String UPDATE_VIDEO_IMAGE = "updateVideoImage";
-
 
 
     //user 表数据库操作mapper************************************************************************
@@ -97,7 +95,6 @@ public class Mapper {
     public static final String DELETE_ORDER_ITEM = "deleteOrderItem";
 
 
-
     //instance表数据库操作mapper************************************************************************
     //select
     public static final String GET_INSTANCE_BY_USER_ID = "getInstanceByUserId";
@@ -110,6 +107,18 @@ public class Mapper {
 
     //delete
     public static final String DELETE_EXPIRE_INSTANCE = "deleteExpireInstance";
+
+
+
+    //feedback数据库操作mapper************************************************************************
+    //select
+
+    //insert
+    public static final String INSERT_NEW_FEEDBACK = "insertNewFeedback";
+
+    //update
+
+    //delete
 
 }
 
