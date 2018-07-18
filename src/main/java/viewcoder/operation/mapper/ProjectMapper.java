@@ -37,21 +37,21 @@ public interface ProjectMapper {
 
     /********************以下是创建项目操作***********************/
     //创建新建project
-    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version,mo_version,resource_size) " +
-            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{pc_version},#{mo_version},#{resource_size})")
+    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version,mo_version,resource_size,parent) " +
+            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{pc_version},#{mo_version},#{resource_size},#{parent})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createEmptyProject(Project project);
 
     //创建新建PSD的project
     //不需insert psd_file_name这条记录，因为psd文件只在内存中解析，如果解析出错保存psd文件到OSS中的error_psd_file中
-    @Insert("insert into project(user_id,project_name,timestamp,pc_version,mo_version,last_modify_time,resource_size) " +
-            "values(#{user_id},#{project_name},#{timestamp},#{pc_version},#{mo_version},#{last_modify_time},#{resource_size})")
+    @Insert("insert into project(user_id,project_name,timestamp,pc_version,mo_version,last_modify_time,resource_size,parent) " +
+            "values(#{user_id},#{project_name},#{timestamp},#{pc_version},#{mo_version},#{last_modify_time},#{resource_size},#{parent})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createPSDProject(Project project);
 
     //拷贝后，创建新的project项目
-    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version,mo_version,resource_size,ref_id) " +
-            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{pc_version},#{mo_version},#{resource_size},#{ref_id})")
+    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version,mo_version,resource_size,ref_id,parent) " +
+            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{pc_version},#{mo_version},#{resource_size},#{ref_id},#{parent})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createCopyProject(Project project);
 
@@ -98,6 +98,10 @@ public interface ProjectMapper {
     //更新child页面的数目
     @Update("update project set child=child+1 where id=#{projectId}")
     public int updateChildNum(int projectId);
+
+    //更新项目的版本：手机版|电脑版
+    @Update("update project set timestamp=#{timestamp} where id=#{id}")
+    public int updateProjectVersion(@Param("id") String id, @Param("timestamp") String timestamp);
 
 }
 

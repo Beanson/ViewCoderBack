@@ -16,6 +16,11 @@ import java.io.File;
 public class CommonTest {
 
     @Test
+    public void testIntegerParse(){
+        System.out.println(Integer.parseInt(null));
+    }
+
+    @Test
     public void testAESEncryptor() {
         String encodeStr = AESEncryptor.AESEncode(Common.AES_KEY, "");
         System.out.println("encrypted data is:" + encodeStr);

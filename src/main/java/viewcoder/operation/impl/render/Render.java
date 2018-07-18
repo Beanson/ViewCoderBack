@@ -500,25 +500,36 @@ public class Render {
         OSSClient ossClient = OssOpt.initOssClient();
 
         try {
+            //参数获取
             HashMap<String, Object> map = FormData.getParam(msg);
             String timestamp = map.get(Common.TIME_STAMP).toString();
-            if (CommonService.checkNotNull(timestamp)) {
-                String versionFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
-                        timestamp + Common.PROJECT_DATA_SUFFIX;
-                if (OssOpt.getObjectExist(ossClient, versionFile)) {
-                    //可以查到pc 或 mobile version文件数据，从oss中读取文件数据
-                    String versionData = OssOpt.getOssFile(ossClient, versionFile);
-                    Map<String, Object> result = new HashMap<>(1);
-                    result.put("project_data", versionData);
-                    Assemble.responseSuccessSetting(responseData, result);
+            int id = Integer.parseInt(map.get(Common.ID).toString());
 
+            //查询项目的project_data数据并更新数据库
+            if (CommonService.checkNotNull(timestamp) && id > 0) {
+                //更新数据库版本号操作
+                int num = sqlSession.update(Mapper.UPDATE_PROJECT_VERSION, map);
+                //只有操作数据库成功后才继续进行其他操作
+                if (num > 0) {
+                    String versionFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + timestamp + Common.PROJECT_DATA_SUFFIX;
+                    if (OssOpt.getObjectExist(ossClient, versionFile)) {
+                        //可以查到pc 或 mobile version文件数据，从oss中读取文件数据
+                        String versionData = OssOpt.getOssFile(ossClient, versionFile);
+                        Map<String, Object> result = new HashMap<>(1);
+                        result.put("project_data", versionData);
+                        Assemble.responseSuccessSetting(responseData, result);
+
+                    } else {
+                        //数据库有该mobile version数据，但OSS中无该文件，返回400错误
+                        Assemble.responseErrorSetting(responseData, 400, versionFile + "not found");
+                    }
                 } else {
-                    //数据库有该mobile version数据，但OSS中无该文件，返回400错误
-                    Assemble.responseErrorSetting(responseData, 400, versionFile + "not found");
+                    //更新数据库操作失败
+                    Assemble.responseErrorSetting(responseData, 401, "update database error");
                 }
             } else {
                 //暂无mobile version数据，返回null
-                Assemble.responseSuccessSetting(responseData, null);
+                Assemble.responseErrorSetting(responseData, 402,"No timestamp or id params error");
             }
 
         } catch (Exception e) {
@@ -536,6 +547,7 @@ public class Render {
 
     /**
      * 更新默认的导出设置操作
+     *
      * @param msg 传入的信息体
      * @return
      */
@@ -543,21 +555,21 @@ public class Render {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
 
-        try{
+        try {
             User user = (User) FormData.getParam(msg, User.class);
             int num = sqlSession.update(Mapper.UPDATE_EXPORT_DEFAULT_SETTING, user);
-            if(num>0){
+            if (num > 0) {
                 //更新成功，则返回成功
-                Assemble.responseSuccessSetting(responseData,null);
-            }else {
+                Assemble.responseSuccessSetting(responseData, null);
+            } else {
                 //更新失败
-                Assemble.responseErrorSetting(responseData,401,"Db update error");
+                Assemble.responseErrorSetting(responseData, 401, "Db update error");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             //系统错误
-            Assemble.responseErrorSetting(responseData,500,"system error");
+            Assemble.responseErrorSetting(responseData, 500, "system error");
 
-        }finally {
+        } finally {
             //对数据库进行后续提交和关闭操作等
             CommonService.databaseCommitClose(sqlSession, responseData, true);
         }
