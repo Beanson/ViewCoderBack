@@ -83,6 +83,7 @@ public class SqlProvider {
     /**
      * 保存项目操作，根据不同传递的版本号参数更新不同内容
      *
+     * @deprecated 无需更新pc_version和mo_version, 一次生成以后都使用通用的version
      * @param project 项目数据
      * @return
      */

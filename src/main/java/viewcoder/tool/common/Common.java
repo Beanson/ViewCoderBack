@@ -156,6 +156,8 @@ public class Common {
     public static final String NEW_FILE_NAME = "new_file_name";
     public static final String TIME_STAMP = "timestamp";
     public static final String VERSIONS = "versions";
+    public static final String PC_VERSION = "pc_version";
+    public static final String MO_VERSION = "mo_version";
     public static final String PROJECT_NAME = "project_name";
     public static final String OPT_TYPE = "opt_type";
     public static final String PROJECT_FILE_NAME = "project_file_name";

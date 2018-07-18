@@ -464,24 +464,13 @@ public class Render {
 
         try {
             Project project = (Project) FormData.getParam(msg, Project.class);
-            //获取旧timestamp并设置新的timestamp
-            String oldTimeStamp = project.getTimestamp();
-            project.setTimestamp(CommonService.getTimeStamp());
             int num = sqlSession.update(Mapper.SAVE_PROJECT_DATA, project);
             if (num > 0) {
-                //删除旧的project_data数据，HTML文件数据在node后台中创建和删除
-                String oldProjectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
-                        oldTimeStamp + Common.PROJECT_DATA_SUFFIX;
-                OssOpt.deleteFileInOss(oldProjectDataFile, ossClient);
-
                 //创建新的project_data数据并同步到OSS中
                 String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
                         project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
                 OssOpt.uploadFileToOss(projectDataFile, project.getProject_data().getBytes(), ossClient);
-
-                Map<String, Object> map = new HashMap<>();
-                map.put("timestamp", project.getTimestamp());
-                Assemble.responseSuccessSetting(responseData, map);
+                Assemble.responseSuccessSetting(responseData, null);
             } else {
                 Assemble.responseErrorSetting(responseData, 401,
                         "RenderException saveProjectData: ");

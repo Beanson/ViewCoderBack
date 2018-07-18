@@ -37,15 +37,15 @@ public interface ProjectMapper {
 
     /********************以下是创建项目操作***********************/
     //创建新建project
-    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version,resource_size) " +
-            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{timestamp},#{resource_size})")
+    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version,mo_version,resource_size) " +
+            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{pc_version},#{mo_version},#{resource_size})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createEmptyProject(Project project);
 
     //创建新建PSD的project
     //不需insert psd_file_name这条记录，因为psd文件只在内存中解析，如果解析出错保存psd文件到OSS中的error_psd_file中
-    @Insert("insert into project(user_id,project_name,timestamp,pc_version,last_modify_time,resource_size) " +
-            "values(#{user_id},#{project_name},#{timestamp},#{timestamp}, #{last_modify_time},#{resource_size})")
+    @Insert("insert into project(user_id,project_name,timestamp,pc_version,mo_version,last_modify_time,resource_size) " +
+            "values(#{user_id},#{project_name},#{timestamp},#{pc_version},#{mo_version},#{last_modify_time},#{resource_size})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createPSDProject(Project project);
 
@@ -56,8 +56,8 @@ public interface ProjectMapper {
     public int createCopyProject(Project project);
 
     //通过URL，创建一个和source URL类似的Simulate project
-    @Insert("insert into project(user_id,parent,project_name,timestamp,last_modify_time,pc_version) " +
-            "values(#{user_id},#{parent},#{project_name},#{timestamp},#{last_modify_time},#{timestamp})")
+    @Insert("insert into project(user_id,parent,project_name,timestamp,last_modify_time,pc_version,mo_version) " +
+            "values(#{user_id},#{parent},#{project_name},#{timestamp},#{last_modify_time},#{pc_version},#{mo_version})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createSimulateProject(Project project);
 
@@ -79,8 +79,9 @@ public interface ProjectMapper {
 
     //更新project条目内容
     //根据项目传递过来参数进行更新项目公开程度状态
-    @SelectProvider(type = SqlProvider.class, method = "saveProjectData")
-    public int saveProjectData(Map<String, Object> map);
+    //@SelectProvider(type = SqlProvider.class, method = "saveProjectData")
+    @Update("update project set last_modify_time=#{last_modify_time} where id=#{id}")
+    public int saveProjectData(Project project);
 
     //更新project的resource_size的大小
     @Update("update project set resource_size=#{resource_size} where id=#{id}")

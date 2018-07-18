@@ -271,7 +271,8 @@ public class CreateProject {
             String projectName = (String) map.get(Common.PROJECT_NAME);
             String webUrl = (String) map.get(Common.WEB_URL);
             String timestamp = (String) map.get(Common.TIME_STAMP);
-            String versions = (String) map.get(Common.VERSIONS);
+            String pcVersion = (String) map.get(Common.PC_VERSION);
+            String moVersion = (String) map.get(Common.MO_VERSION);
             Integer userId = Integer.parseInt((String) map.get(Common.USER_ID));
             Integer browserWidth = Integer.parseInt((String) map.get(Common.BROWSER_WIDTH));
             Integer browserHeight = Integer.parseInt((String) map.get(Common.BROWSER_HEIGHT));
@@ -281,7 +282,7 @@ public class CreateProject {
             ProjectProgress projectProgress = new ProjectProgress(userId, Common.PROJECT_SIMULATE, projectName, timestamp, 0);
             CommonObject.getProgressList().add(projectProgress);
             //异步解析URL网站元素操作
-            createSimulateOpt(webUrl, projectProgress, browserWidth, browserHeight, userId, projectName, versions, parent);
+            createSimulateOpt(webUrl, projectProgress, browserWidth, browserHeight, userId, projectName, pcVersion,moVersion, parent);
             //正确解析传递的参数及其类型，并成功调用URL解析网站元素操作，返回正确数据
             Assemble.responseSuccessSetting(responseData, null);
 
@@ -297,7 +298,7 @@ public class CreateProject {
      * TODO 后面采用云主机进行请求响应，而慢操作放在物理主机中运行
      */
     public static void createSimulateOpt(String webUrl, ProjectProgress projectProgress, int browserWidth, int browserHeight,
-                                         int userId, String projectName, String versions, int parent) throws Exception {
+                                         int userId, String projectName, String pcVersion, String moVersion, int parent) throws Exception {
         //创建解析URL网站元素的线程
         Thread simulateParseThread = new Thread(new Runnable() {
             @Override
@@ -317,8 +318,10 @@ public class CreateProject {
                         project.setParent(parent);
                         project.setProject_name(projectName);
                         //设置该timestamp操作后数据库和缓存同步, 也是后续single_export和project_data的文件名
-                        //插入sql时该字段分别插入timestamp和pc_version两个字段
+                        //插入sql时该字段分别插入timestamp、pc_version和mo_version三个字段
                         project.setTimestamp(projectProgress.getTimeStamp());
+                        project.setPc_version(pcVersion);
+                        project.setMo_version(moVersion);
                         project.setLast_modify_time(CommonService.getDateTime());
 
                         //把新创建的simulate的project插入数据库, 在这里启动数据库操作，不然可能会报超时错
