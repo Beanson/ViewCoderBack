@@ -205,9 +205,9 @@ public class ProjectList {
                 projects.put(project.getParent(), list);
             }
         }
-        for (Map.Entry<Integer, List<Project>> entry : projects.entrySet()) {
-            System.out.println("key= " + entry.getKey() + " and value= " + entry.getValue().toString());
-        }
+//        for (Map.Entry<Integer, List<Project>> entry : projects.entrySet()) {
+//            System.out.println("key= " + entry.getKey() + " and value= " + entry.getValue().toString());
+//        }
 
         return projects;
     }
@@ -268,8 +268,10 @@ public class ProjectList {
                 int num = sqlSession.insert(Mapper.CREATE_COPY_PROJECT, project);
 
                 if (num > 0) {
-                    //获取父元素新id值
-                    int newId = project.getId();
+                    //父元素记录的子元素数目+1
+                    if(project.getParent()!=0){
+                        addParentChildPageNum(project.getParent(), sqlSession);
+                    }
 
                     /*拷贝pc版本项目project data数据*/
                     ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.PROJECT_DATA),
@@ -277,18 +279,17 @@ public class ProjectList {
                     /*拷贝项目导出project file单文件数据*/
                     ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT),
                             Common.PROJECT_FILE_SUFFIX, timeStamp, project.getPc_version());
-                    /*拷贝项目导出project file单文件数据*/
 
                     /*拷贝mobile版本项目project data数据*/
                     ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.PROJECT_DATA),
                             Common.PROJECT_DATA_SUFFIX, moVersion, project.getMo_version());
+                     /*拷贝项目导出project file单文件数据*/
                     ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT),
                             Common.PROJECT_FILE_SUFFIX, timeStamp, project.getMo_version());
 
-                    //该页面在数据库的file记录复制
-                    copyProjectUpdateUserUploadFileTable(sqlSession, oldId, project);
 
                     //每个子元素递归调用
+                    int newId = project.getId();
                     insertCopyRecord(userId, oldId, newId, refId, projects, sqlSession, ossClient);
                 }
             }
@@ -319,35 +320,6 @@ public class ProjectList {
 
 
     /**
-     * 拷贝获取原项目user_upload_file表数据并对新项目插入这些数据
-     *
-     * @param sqlSession  sql句柄
-     * @param projectId   项目id
-     * @param projectCopy 请求拷贝的项目对象
-     */
-    public static void copyProjectUpdateUserUploadFileTable(SqlSession sqlSession, int projectId,
-                                                            Project projectCopy) {
-        //获取原项目user_upload_file表数据
-        List<UserUploadFile> userUploadFiles = sqlSession.selectList(
-                Mapper.GET_ALL_RESOURCE_BY_PROJECT_ID, projectId);
-
-        //把原项目在数据库中的所有上传的记录进行拷贝
-        if (CommonService.checkNotNull(userUploadFiles)) {
-            for (UserUploadFile file : userUploadFiles) {
-                file.setProject_id(projectCopy.getId());
-                file.setUser_id(projectCopy.getUser_id());
-                file.setCreate_time(projectCopy.getLast_modify_time());
-            }
-            //如果该project下的上传文件不为空则把相关记录插入到数据库中
-            if (CommonService.checkNotNull(userUploadFiles) && userUploadFiles.size() > 0) {
-                //把相关文件数据多条同时插入到数据库中
-                sqlSession.insert(Mapper.INSERT_BATCH_NEW_RESOURCE, userUploadFiles);
-            }
-        }
-    }
-
-
-    /**
      * 根据不同操作类型执行相应其他处理
      * 由于copy project和create store project两种操作公用copy project实现方法，
      * 存在部分定制化需求在此方法中执行
@@ -371,7 +343,7 @@ public class ProjectList {
 
 
     /**
-     * *************************************************************************
+     * *********************************************************************************************
      * 删除项目后台操作
      * 数据库需删除project表中对应project_id条目，user_upload_file表中对应project_id条目
      * 文件需删除project_file
@@ -473,25 +445,6 @@ public class ProjectList {
 
 
     /**
-     * 用户可用空间添加到数据库中
-     *
-     * @param sqlSession   sql句柄
-     * @param userId       用户id
-     * @param projectSpace 项目占用空间
-     * @return
-     */
-    private static int addUserResourceSpace(SqlSession sqlSession, int userId, String projectSpace) {
-        //获取用户可用resource空间信息
-        String originalResourceSize = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, userId);
-        ProjectList.logger.debug("userId: " + userId + " original size:" + originalResourceSize + " projectSpace" + projectSpace);
-
-        //更新用户resource空间信息
-        int newResourceSize = Integer.parseInt(originalResourceSize) + Integer.parseInt(projectSpace);
-        return sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(userId, String.valueOf(newResourceSize)));
-    }
-
-
-    /**
      * 级联删除文件
      */
     public static boolean deleteDir(File file) {
@@ -504,6 +457,16 @@ public class ProjectList {
         return file.delete();
     }
 
+
+    /**
+     * 该page的子页面的数目+1
+     */
+    public static void addParentChildPageNum(int parentId, SqlSession sqlSession) {
+        //如果parent不等于0，则对该parent的页面项目进行子页面的添加操作
+        if (parentId != 0) {
+            int num = sqlSession.update(Mapper.UPDATE_CHILD_NUM_PLUS, parentId);
+        }
+    }
 
     /**
      * 该page的子页面的数目-1

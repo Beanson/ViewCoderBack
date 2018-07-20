@@ -54,7 +54,7 @@ public class CreateProject {
                 String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
                 OssOpt.uploadFileToOss(projectDataFile, project.getProject_data().getBytes(), ossClient);
                 //如果该页面为子页面，则增加子页面后，父页面的子页面数目更改
-                addParentChildPageNum(project.getParent(), sqlSession);
+                ProjectList.addParentChildPageNum(project.getParent(), sqlSession);
 
                 //返回新建项目的project_id数据
                 Map<String, Integer> map = new HashMap<>();
@@ -127,7 +127,7 @@ public class CreateProject {
                     parsePSDFileLogic(responseData, project.getPsd_file().getFile(), project, sqlSession, ossClient,
                             preRemainSize);
                     //如果该页面为子页面，则增加子页面后，父页面的子页面数目更改
-                    addParentChildPageNum(project.getParent(), sqlSession);
+                    ProjectList.addParentChildPageNum(project.getParent(), sqlSession);
 
                 } else {
                     //数据库插入失败
@@ -328,7 +328,7 @@ public class CreateProject {
                         sqlSession = MybatisUtils.getSession();
                         int num = sqlSession.insert(Mapper.CREATE_SIMULATE_PROJECT, project);
                         //如果该页面为子页面，则增加子页面后，父页面的子页面数目更改
-                        addParentChildPageNum(parent, sqlSession);
+                        ProjectList.addParentChildPageNum(parent, sqlSession);
                         if (num > 0) {
                             //project_data数据同步到OSS中
                             String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
@@ -465,16 +465,6 @@ public class CreateProject {
         return responseData;
     }
 
-
-    /**
-     * 该page的子页面的数目+1
-     */
-    public static void addParentChildPageNum(int parentId, SqlSession sqlSession) {
-        //如果parent不等于0，则对该parent的页面项目进行子页面的添加操作
-        if (parentId != 0) {
-            int num = sqlSession.update(Mapper.UPDATE_CHILD_NUM_PLUS, parentId);
-        }
-    }
 }
 
 
