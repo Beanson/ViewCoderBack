@@ -9,6 +9,7 @@ public class Mapper {
     //select
     public static final String GET_PROJECT_LIST_DATA = "getProjectListData";
     public static final String GET_PROJECT_DATA = "getProjectData";
+    public static final String GET_ALL_RELATED_PROJECT = "getAllRelatedProject";
     public static final String GET_PROJECT_RESOURCE_SIZE = "getProjectResourceSize";
     public static final String GET_TARGET_STORE_DATA = "getTargetStoreData";
     public static final String GET_PROJECT_BY_TIMESTAMP = "getProjectDataByTimestamp";
@@ -28,8 +29,9 @@ public class Mapper {
     public static final String MODIFY_PROJECT_NAME = "modifyProjectName";
     public static final String UPDATE_PROJECT_RESOURCE_SIZE = "updateProjectResourceSize";
     public static final String UPDATE_PROJECT_OPENNESS = "updateProjectOpenness";
-    public static final String UPDATE_USAGE_AMOUNT = "updateUsageAmount";
-    public static final String UPDATE_CHILD_NUM = "updateChildNum";
+    public static final String UPDATE_USAGE_AMOUNT_PLUS = "updateUsageAmountPlus";
+    public static final String UPDATE_CHILD_NUM_PLUS = "updateChildNumPlus";
+    public static final String UPDATE_CHILD_NUM_MINUS = "updateChildNumMinus";
     public static final String UPDATE_PROJECT_VERSION = "updateProjectVersion";
 
 
@@ -47,6 +49,7 @@ public class Mapper {
 
     //insert
     public static final String INSERT_NEW_RESOURCE = "insertNewResource";
+    public static final String INSERT_BATCH_NEW_RESOURCE = "insertBatchNewResource";
 
     //update
     public static final String UPDATE_RESOURCE_TIMESTAMP = "updateResourceTimeStamp";

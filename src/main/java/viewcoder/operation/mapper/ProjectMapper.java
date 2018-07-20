@@ -13,6 +13,10 @@ import java.util.Map;
 public interface ProjectMapper {
 
     /********************以下是获取项目信息操作***********************/
+    //根据用户user_id获取所有相关联的project信息
+    @Select("select * from project where user_id=#{user_id}")
+    public List<Project> getAllRelatedProject(int user_id);
+
     //根据用户user_id获取该用户所有project的数据
     @Select("select * from project where user_id=#{user_id} and parent=#{parent}")
     public List<Project> getProjectListData(@Param("user_id") String user_id, @Param("parent") String parent);
@@ -50,8 +54,8 @@ public interface ProjectMapper {
     public int createPSDProject(Project project);
 
     //拷贝后，创建新的project项目
-    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version,mo_version,resource_size,ref_id,parent) " +
-            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{pc_version},#{mo_version},#{resource_size},#{ref_id},#{parent})")
+    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version,mo_version,ref_id,parent,child) " +
+            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{pc_version},#{mo_version},#{ref_id},#{parent},#{child})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createCopyProject(Project project);
 
@@ -91,13 +95,17 @@ public interface ProjectMapper {
     @SelectProvider(type = SqlProvider.class, method = "updateProjectOpenness")
     public int updateProjectOpenness(Map<String, Object> map);
 
-    //更新project的引用次数
+    //更新project的引用次数+1
     @Update("update project set usage_amount=usage_amount+1 where id=#{projectId}")
-    public int updateUsageAmount(int projectId);
+    public int updateUsageAmountPlus(int projectId);
 
-    //更新child页面的数目
+    //更新child页面的数目+1
     @Update("update project set child=child+1 where id=#{projectId}")
-    public int updateChildNum(int projectId);
+    public int updateChildNumPlus(int projectId);
+
+    //更新child页面的数目-1
+    @Update("update project set child=child-1 where id=#{projectId}")
+    public int updateChildNumMinus(int projectId);
 
     //更新项目的版本：手机版|电脑版
     @Update("update project set timestamp=#{timestamp} where id=#{id}")

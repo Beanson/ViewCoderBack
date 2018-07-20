@@ -467,16 +467,14 @@ public class CreateProject {
 
 
     /**
-     * 添加该page的父页面的数目
+     * 该page的子页面的数目+1
      */
     public static void addParentChildPageNum(int parentId, SqlSession sqlSession) {
         //如果parent不等于0，则对该parent的页面项目进行子页面的添加操作
         if (parentId != 0) {
-            int num = sqlSession.update(Mapper.UPDATE_CHILD_NUM, parentId);
+            int num = sqlSession.update(Mapper.UPDATE_CHILD_NUM_PLUS, parentId);
         }
     }
-
-
 }
 
 

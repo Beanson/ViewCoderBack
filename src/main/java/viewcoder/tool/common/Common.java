@@ -181,6 +181,7 @@ public class Common {
     public static final String SPACE_INFO = "space_info"; //资源空间资料
     public static final String INSTANCE_INFO = "instance_info"; //实例资料
     public static final String REF_ID = "ref_id"; //引用参照的project_id
+    public static final String PARENT = "parent"; //parent数据
     public static final String WEB_URL = "web_url"; //通过URL生成网页的操作
     public static final String BROWSER_WIDTH = "browser_width"; //浏览器的宽度
     public static final String BROWSER_HEIGHT = "browser_height"; //浏览器的高度

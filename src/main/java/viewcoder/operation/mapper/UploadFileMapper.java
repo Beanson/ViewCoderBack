@@ -54,6 +54,9 @@ public interface UploadFileMapper {
     public int insertNewResource(UserUploadFile userUploadFile);
 
 
+    @SelectProvider(type = SqlProvider.class, method = "insertBatchNewResource")
+    public int insertBatchNewResource(List<UserUploadFile> files);
+
 
     /********************以下是更新文件信息操作***********************/
     //更新文件信息
