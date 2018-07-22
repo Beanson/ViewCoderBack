@@ -16,7 +16,6 @@ import com.aliyun.oss.OSSClient;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import viewcoder.url.Simulate;
-import viewcoder.url.barrer.SimulateBarrer;
 
 import java.io.File;
 import java.util.*;
@@ -69,7 +68,6 @@ public class CreateProject {
             Assemble.responseErrorSetting(responseData, 500,
                     "Server Error");
         } finally {
-            CreateProject.logger.debug("createEmptyProject responseData" + responseData);
             //如果整个流程准确无误地实现则对数据库操作进行提交，否则不提交
             CommonService.databaseCommitClose(sqlSession, responseData, true);
             //关闭oss对象
@@ -265,7 +263,7 @@ public class CreateProject {
             Map<String, Object> map = FormData.getParam(msg);
             String projectName = (String) map.get(Common.PROJECT_NAME);
             String webUrl = (String) map.get(Common.WEB_URL);
-            String timestamp = (String) map.get(Common.TIME_STAMP);
+            String version = (String) map.get(Common.VERSION);
             String pcVersion = (String) map.get(Common.PC_VERSION);
             String moVersion = (String) map.get(Common.MO_VERSION);
             Integer userId = Integer.parseInt((String) map.get(Common.USER_ID));
@@ -274,10 +272,10 @@ public class CreateProject {
             Integer parent = Integer.parseInt((String) map.get(Common.PAGE_PARENT));
 
             //初始化项目创建的进度
-            ProjectProgress projectProgress = new ProjectProgress(userId, Common.PROJECT_SIMULATE, projectName, timestamp, 0);
+            ProjectProgress projectProgress = new ProjectProgress(userId, Common.PROJECT_SIMULATE, projectName, pcVersion, 0);
             CommonObject.getProgressList().add(projectProgress);
             //异步解析URL网站元素操作
-            createSimulateOpt(webUrl, projectProgress, browserWidth, browserHeight, userId, projectName, pcVersion, moVersion, parent);
+            createSimulateOpt(webUrl, projectProgress, browserWidth, browserHeight, userId, projectName, version, pcVersion, moVersion, parent);
             //正确解析传递的参数及其类型，并成功调用URL解析网站元素操作，返回正确数据
             Assemble.responseSuccessSetting(responseData, null);
 
@@ -292,8 +290,8 @@ public class CreateProject {
      * 异步解析URL网站元素操作
      * TODO 后面采用云主机进行请求响应，而慢操作放在物理主机中运行
      */
-    public static void createSimulateOpt(String webUrl, ProjectProgress projectProgress, int browserWidth, int browserHeight,
-                                         int userId, String projectName, String pcVersion, String moVersion, int parent) throws Exception {
+    public static void createSimulateOpt(String webUrl, ProjectProgress projectProgress, int browserWidth, int browserHeight, int userId,
+                                         String projectName, String version, String pcVersion, String moVersion, int parent) throws Exception {
         //创建解析URL网站元素的线程
         Thread simulateParseThread = new Thread(new Runnable() {
             @Override
@@ -312,9 +310,7 @@ public class CreateProject {
                         project.setUser_id(userId);
                         project.setParent(parent);
                         project.setProject_name(projectName);
-                        //设置该timestamp操作后数据库和缓存同步, 也是后续single_export和project_data的文件名
-                        //插入sql时该字段分别插入timestamp、pc_version和mo_version三个字段
-                        project.setTimestamp(projectProgress.getTimeStamp());
+                        project.setVersion(version);
                         project.setPc_version(pcVersion);
                         project.setMo_version(moVersion);
                         project.setProject_data(projectData);
@@ -375,14 +371,14 @@ public class CreateProject {
         try {
             //获取解析的项目标识参数
             Map<String, Object> map = FormData.getParam(msg);
-            String timestamp = (String) map.get(Common.TIME_STAMP);
+            String pcVersion = (String) map.get(Common.PC_VERSION);
 
-            //遍历所有正在创建的PSD或URL项目，根据timestamp获取其对应进度
+            //遍历所有正在创建的PSD或URL项目，根据pcVersion获取其对应进度
             List<ProjectProgress> list = CommonObject.getProgressList();
             Iterator<ProjectProgress> iterator = list.iterator();
             while (iterator.hasNext()) {
                 ProjectProgress progress = iterator.next();
-                if (progress.getTimeStamp() != null && progress.getTimeStamp().equals(timestamp)) {
+                if (progress.getPc_version() != null && progress.getPc_version().equals(pcVersion)) {
                     //找到条目，则返回进度信息
                     Assemble.responseSuccessSetting(responseData, progress.getProgress());
 
@@ -418,25 +414,25 @@ public class CreateProject {
 
 
     /**
-     * 根据timestamp来获取项目数据
+     * 根据pcVersion来获取项目数据
      *
      * @param msg http请求数据
      * @return
      */
-    public static ResponseData getProjectByTimeStamp(Object msg) {
+    public static ResponseData getProjectByPCVersion(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
         try {
             //获取解析的项目标识参数
             Map<String, Object> map = FormData.getParam(msg);
-            String timestamp = (String) map.get(Common.TIME_STAMP);
-            Project project = sqlSession.selectOne(Mapper.GET_PROJECT_BY_TIMESTAMP, timestamp);
+            String pcVersion = (String) map.get(Common.PC_VERSION);
+            Project project = sqlSession.selectOne(Mapper.GET_PROJECT_BY_PCVERSION, pcVersion);
             //如果项目数据不为空则返回该数据
             if (project != null) {
-                //从OSS中获取timestamp版本的project data
+                //从OSS中获取pc version版本的project data
                 String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
-                        timestamp + Common.PROJECT_DATA_SUFFIX;
+                        pcVersion + Common.PROJECT_DATA_SUFFIX;
                 String projectData = OssOpt.getOssFile(ossClient, projectDataFile);
 
                 //检测OSS中读取的数据是否有效
@@ -445,11 +441,11 @@ public class CreateProject {
                     Assemble.responseSuccessSetting(responseData, project);
                 } else {
                     Assemble.responseErrorSetting(responseData, 400,
-                            "getProjectByTimeStamp: project data from oss null");
+                            "getProjectByPCVersion: project data from oss null");
                 }
             }
         } catch (Exception e) {
-            CreateProject.logger.debug("getProjectByTimeStamp error:", e);
+            CreateProject.logger.debug("getProjectByPCVersion error:", e);
 
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, false);
@@ -469,7 +465,7 @@ public class CreateProject {
         String moVersionData = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getMo_version() + Common.PROJECT_DATA_SUFFIX;
 
         //如果选择版本是创建手机版则电脑版的project data为空，否则手机版的project data为空
-        if (Objects.equals(project.getTimestamp(), project.getMo_version())) {
+        if (Objects.equals(project.getVersion(), Common.MOBILE_V)) {
             OssOpt.uploadFileToOss(pcVersionData, new byte[0], ossClient);
             OssOpt.uploadFileToOss(moVersionData, project.getProject_data().getBytes(), ossClient);
         } else {

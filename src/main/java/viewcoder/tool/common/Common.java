@@ -210,7 +210,7 @@ public class Common {
     public static final String IMG_PSG = ".psd";
     public static final String TIME_FORMAT_1 = "yyyy-MM-dd HH:mm:ss";
     public static final String RELATIVE_PATH_SUFFIX = "/";
-    public static final String COMPUTER_V = "pc";
+    public static final String PC_V = "pc";
     public static final String MOBILE_V = "mo";
     public static final String STORE_TYPE = "store";
 

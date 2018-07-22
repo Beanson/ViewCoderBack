@@ -36,8 +36,6 @@ public class ProjectList {
         try {
             //接收前台传过来关于数据需要查询的userId
             Map<String, Object> map = FormData.getParam(msg);
-//            Integer userId = Integer.parseInt((String) map.get(Common.USER_ID));
-//            Integer parentId = Integer.parseInt((String) map.get(Common.PAGE_PARENT));
             sqlSession = MybatisUtils.getSession();
             //查找数据库返回projects数据
             List<Project> projects = sqlSession.selectList(Mapper.GET_PROJECT_LIST_DATA, map);
@@ -139,15 +137,18 @@ public class ProjectList {
                 List<Project> projectsOrigin = sqlSession.selectList(Mapper.GET_ALL_RELATED_PROJECT, userId);
 
                 //3、把list数据打包成map数据
-                Map<Integer, List<Project>> projects = packProjectListToMap(projectsOrigin, projectId,parent);
+                Map<Integer, List<Project>> projects = packProjectListToMap(projectsOrigin, projectId, parent);
 
                 //4、 更新新项目的project表格、OSS中single_export和project_data文件拷贝
                 insertCopyRecord(userId, parent, parent, refId, projects, sqlSession, ossClient);
 
-                //5、根据不同操作类型执行相应其他操作
+                //5、如果不是在root最外层，则其父的子页面个数加1
+                if (parent != 0) addParentChildPageNum(parent, sqlSession);
+
+                //6、根据不同操作类型执行相应其他操作
                 optType(sqlSession, optType, projectId);
 
-                //6、返回200成功信息
+                //7、返回200成功信息
                 Assemble.responseSuccessSetting(responseData, null);
 
             } else {
@@ -170,8 +171,8 @@ public class ProjectList {
      * 把list数据打包成map数据
      *
      * @param projectsOrigin 原始项目数据
-     * @param projectId  目标项目层级id
-     * @param parent 父项目的id值
+     * @param projectId      目标项目层级id
+     * @param parent         父项目的id值
      * @return
      * @throws Exception
      */
@@ -235,21 +236,13 @@ public class ProjectList {
             //每个子元素插入数据库
             for (Project project : children) {
                 //设置新插入记录的数据
-                //分别设置新的timestamp，pc_version 和 mo_version
+                //分别设置新的pc_version 和 mo_version
                 String pcVersion = project.getPc_version();
                 String moVersion = project.getMo_version();
-                String timeStamp = project.getTimestamp();
 
-                //字符串末尾拼接
-                project.setPc_version(pcVersion + 1);
-                project.setMo_version(moVersion + 1);
-
-                //如果timestamp和mobile相等则timestamp赋值mobile版本，否则赋值pc版本
-                if (Objects.equals(project.getTimestamp(), moVersion)) {
-                    project.setTimestamp(project.getMo_version());
-                } else {
-                    project.setTimestamp(project.getPc_version());
-                }
+                //原来pc和mobile的version分别+1
+                project.setPc_version(String.valueOf(Long.parseLong(pcVersion) + 1));
+                project.setMo_version(String.valueOf(Long.parseLong(moVersion) + 1));
 
                 //设置userId, 对于拷贝商城项目是必要的
                 project.setUser_id(userId);
@@ -268,25 +261,19 @@ public class ProjectList {
                 int num = sqlSession.insert(Mapper.CREATE_COPY_PROJECT, project);
 
                 if (num > 0) {
-                    //父元素记录的子元素数目+1
-                    if(project.getParent()!=0){
-                        addParentChildPageNum(project.getParent(), sqlSession);
-                    }
-
                     /*拷贝pc版本项目project data数据*/
                     ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.PROJECT_DATA),
                             Common.PROJECT_DATA_SUFFIX, pcVersion, project.getPc_version());
                     /*拷贝项目导出project file单文件数据*/
                     ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT),
-                            Common.PROJECT_FILE_SUFFIX, timeStamp, project.getPc_version());
+                            Common.PROJECT_FILE_SUFFIX, pcVersion, project.getPc_version());
 
                     /*拷贝mobile版本项目project data数据*/
                     ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.PROJECT_DATA),
                             Common.PROJECT_DATA_SUFFIX, moVersion, project.getMo_version());
                      /*拷贝项目导出project file单文件数据*/
                     ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT),
-                            Common.PROJECT_FILE_SUFFIX, timeStamp, project.getMo_version());
-
+                            Common.PROJECT_FILE_SUFFIX, moVersion, project.getMo_version());
 
                     //每个子元素递归调用
                     int newId = project.getId();
@@ -362,7 +349,7 @@ public class ProjectList {
      * 删除项目的具体操作
      *
      * @param projectId 将要删除的项目id
-     * @param userId 将要删除的项目的user的id
+     * @param userId    将要删除的项目的user的id
      * @return
      */
     public static ResponseData deleteProjectOpt(int projectId, int userId) {
@@ -385,7 +372,7 @@ public class ProjectList {
                 deleteProjectRecordAndFile(project.getParent(), sqlSession, ossClient, projects);
 
                 //返回操作正确码
-                Assemble.responseSuccessSetting(responseData,null);
+                Assemble.responseSuccessSetting(responseData, null);
 
             } else {
                 String message = "User:" + userId + " is not such project:" + projectId + " owner";
@@ -407,18 +394,19 @@ public class ProjectList {
 
     /**
      * 递归删除该项目和其子项目的记录和OSS文件操作
-     * @param parent 父项目
+     *
+     * @param parent     父项目
      * @param sqlSession sql句柄
-     * @param ossClient oss句柄
-     * @param projects map集合的关联project
+     * @param ossClient  oss句柄
+     * @param projects   map集合的关联project
      */
     private static void deleteProjectRecordAndFile(int parent, SqlSession sqlSession, OSSClient ossClient,
-                                                    Map<Integer, List<Project>> projects) {
+                                                   Map<Integer, List<Project>> projects) {
 
         List<String> files = new ArrayList<>();
         List<Project> children = projects.get(parent);
 
-        if(CommonService.checkNotNull(children)){
+        if (CommonService.checkNotNull(children)) {
 
             for (Project project : children) {
                 //1、删除该projectId的数据库条目
@@ -432,7 +420,7 @@ public class ProjectList {
                 files.add(GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getMo_version() + Common.PROJECT_DATA_SUFFIX);
 
                 //3、update父节点的child的记录
-                minusParentChildPageNum(project.getParent(),sqlSession);
+                minusParentChildPageNum(project.getParent(), sqlSession);
 
                 //4、以该projectId为parentId循环递归调用删除子项目记录
                 deleteProjectRecordAndFile(project.getId(), sqlSession, ossClient, projects);

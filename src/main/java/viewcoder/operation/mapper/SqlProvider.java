@@ -83,32 +83,6 @@ public class SqlProvider {
 
 
     /**
-     * 保存项目操作，根据不同传递的版本号参数更新不同内容
-     *
-     * @param project 项目数据
-     * @return
-     * @deprecated 无需更新pc_version和mo_version, 一次生成以后都使用通用的version
-     */
-    public String saveProjectData(Project project) {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        //初始化固定更新部分
-        stringBuilder.append("update project set last_modify_time='" + project.getLast_modify_time() + "'");
-        stringBuilder.append(" ,timestamp='" + project.getTimestamp() + "'");
-
-        //根据传递的版本类型而对应更新不同版本数据
-        if (CommonService.checkNotNull(project.getMo_version())) {
-            stringBuilder.append(" ,mo_version='" + project.getTimestamp() + "'");
-        } else {
-            stringBuilder.append(" ,pc_version='" + project.getTimestamp() + "'");
-        }
-        stringBuilder.append(" where id=" + project.getId());
-
-        return stringBuilder.toString();
-    }
-
-
-    /**
      * 返回插入该文件下所有上传的file记录
      * @param files 插入数据库的list文件
      * @return

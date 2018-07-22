@@ -25,9 +25,9 @@ public interface ProjectMapper {
     @Select("select * from project where id=#{id}")
     public Project getProjectData(int id);
 
-    //根据项目timestamp获取该项目数据信息, 需要返回所有，后node服务端生成HTML页面
-    @Select("select * from project where timestamp=#{timestamp}")
-    public Project getProjectDataByTimestamp(String timestamp);
+    //根据项目pcVersion获取该项目数据信息, 需要返回所有，后node服务端生成HTML页面
+    @Select("select * from project where pc_version=#{pcVersion}")
+    public Project getProjectDataByPCVersion(String pcVersion);
 
     //根据项目id获取对应project的resource_size数据信息
     @Select("select resource_size from project where id=#{id}")
@@ -41,27 +41,27 @@ public interface ProjectMapper {
 
     /********************以下是创建项目操作***********************/
     //创建新建project
-    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version,mo_version,resource_size,parent) " +
-            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{pc_version},#{mo_version},#{resource_size},#{parent})")
+    @Insert("insert into project(user_id,project_name,last_modify_time,pc_version,mo_version,resource_size,parent) " +
+            "values(#{user_id},#{project_name},#{last_modify_time},#{pc_version},#{mo_version},#{resource_size},#{parent})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createEmptyProject(Project project);
 
     //创建新建PSD的project
     //不需insert psd_file_name这条记录，因为psd文件只在内存中解析，如果解析出错保存psd文件到OSS中的error_psd_file中
-    @Insert("insert into project(user_id,project_name,timestamp,pc_version,mo_version,last_modify_time,resource_size,parent) " +
-            "values(#{user_id},#{project_name},#{timestamp},#{pc_version},#{mo_version},#{last_modify_time},#{resource_size},#{parent})")
+    @Insert("insert into project(user_id,project_name,pc_version,mo_version,last_modify_time,resource_size,parent) " +
+            "values(#{user_id},#{project_name},#{pc_version},#{mo_version},#{last_modify_time},#{resource_size},#{parent})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createPSDProject(Project project);
 
     //拷贝后，创建新的project项目
-    @Insert("insert into project(user_id,project_name,timestamp,last_modify_time,pc_version,mo_version,ref_id,parent,child) " +
-            "values(#{user_id},#{project_name},#{timestamp},#{last_modify_time},#{pc_version},#{mo_version},#{ref_id},#{parent},#{child})")
+    @Insert("insert into project(user_id,project_name,last_modify_time,pc_version,mo_version,ref_id,parent,child) " +
+            "values(#{user_id},#{project_name},#{last_modify_time},#{pc_version},#{mo_version},#{ref_id},#{parent},#{child})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createCopyProject(Project project);
 
     //通过URL，创建一个和source URL类似的Simulate project
-    @Insert("insert into project(user_id,parent,project_name,timestamp,last_modify_time,pc_version,mo_version) " +
-            "values(#{user_id},#{parent},#{project_name},#{timestamp},#{last_modify_time},#{pc_version},#{mo_version})")
+    @Insert("insert into project(user_id,parent,project_name,last_modify_time,pc_version,mo_version) " +
+            "values(#{user_id},#{parent},#{project_name},#{last_modify_time},#{pc_version},#{mo_version})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createSimulateProject(Project project);
 
@@ -70,10 +70,6 @@ public interface ProjectMapper {
     //根据project_id删除project表对应条目的数据
     @Delete("delete from project where id=#{id}")
     public int deleteProjectById(int id);
-
-    //测试在数据库中根据项目文件名删除项目
-//    @Delete("delete from project where timestamp=#{timestamp}")
-//    public int deleteProjectByFileName(String timestamp);
 
 
     /********************以下是更新项目名操作***********************/
@@ -106,10 +102,6 @@ public interface ProjectMapper {
     //更新child页面的数目-1
     @Update("update project set child=child-1 where id=#{projectId}")
     public int updateChildNumMinus(int projectId);
-
-    //更新项目的版本：手机版|电脑版
-    @Update("update project set timestamp=#{timestamp} where id=#{id}")
-    public int updateProjectVersion(@Param("id") String id, @Param("timestamp") String timestamp);
 
 }
 

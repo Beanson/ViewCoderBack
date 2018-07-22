@@ -1,6 +1,5 @@
 package viewcoder.operation.impl.render;
 
-import org.omg.CORBA.CODESET_INCOMPATIBLE;
 import viewcoder.exception.render.RenderException;
 import viewcoder.tool.common.Assemble;
 import viewcoder.tool.common.Common;
@@ -53,14 +52,10 @@ public class Render {
             //从数据库中根据项目Id获取项目渲染数据
             Project project = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, Integer.parseInt(projectId));
             if (project != null && project.getUser_id() == Integer.parseInt(userId)) {
-                //获取的结果数据记录返回
+                //获取的结果数据记录初始化
                 Map<String, Object> map = new HashMap<>(2);
-                map.put(Common.VERSION, Common.COMPUTER_V);
+                map.put(Common.VERSION, Common.PC_V);
                 String projectData = getProjectRenderDataHandler(map, project, ossClient, version);
-
-                //监测是否为切换系统，否则更新数据库操作
-
-
 
                 //检测OSS中读取的数据是否有效
                 if (CommonService.checkNotNull(projectData)) {
@@ -110,7 +105,6 @@ public class Render {
         String projectMODataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
                 project.getMo_version() + Common.PROJECT_DATA_SUFFIX;
 
-        System.out.println(projectPCDataFile + "  " + projectMODataFile);
         //根据version值对应获取电脑版或手机版
         if (Objects.equals(version, Common.MOBILE_V)) {
             projectData = OssOpt.getOssFile(ossClient, projectMODataFile);
@@ -515,8 +509,14 @@ public class Render {
             Project project = (Project) FormData.getParam(msg, Project.class);
             int num = sqlSession.update(Mapper.SAVE_PROJECT_DATA, project);
             if (num > 0) {
+                String projectDataFile = null;
+                //根据version值对应同步不同oss文件
+                if(Objects.equals(project.getVersion(), Common.MOBILE_V)){
+                    projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getMo_version() + Common.PROJECT_DATA_SUFFIX;
+                }else{
+                    projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getPc_version() + Common.PROJECT_DATA_SUFFIX;
+                }
                 //创建新的project_data数据并同步到OSS中
-                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
                 OssOpt.uploadFileToOss(projectDataFile, project.getProject_data().getBytes(), ossClient);
                 Assemble.responseSuccessSetting(responseData, null);
             } else {
@@ -527,63 +527,6 @@ public class Render {
             Render.logger.error("RenderException saveProjectData error: ", e);
             Assemble.responseErrorSetting(responseData, 500,
                     "RenderException saveProjectData system error");
-        } finally {
-            //对数据库进行后续提交和关闭操作等
-            CommonService.databaseCommitClose(sqlSession, responseData, true);
-            OssOpt.shutDownOssClient(ossClient);
-        }
-        return responseData;
-    }
-
-
-    /**
-     * 获取PC端或Mobile端的数据
-     *
-     * @param msg 传递的msg对象
-     * @return
-     */
-    public static ResponseData getVersionsData(Object msg) {
-        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
-        SqlSession sqlSession = MybatisUtils.getSession();
-        OSSClient ossClient = OssOpt.initOssClient();
-
-        try {
-            //参数获取
-            HashMap<String, Object> map = FormData.getParam(msg);
-            String timestamp = map.get(Common.TIME_STAMP).toString();
-            int id = Integer.parseInt(map.get(Common.ID).toString());
-
-            //查询项目的project_data数据并更新数据库
-            if (CommonService.checkNotNull(timestamp) && id > 0) {
-                //更新数据库版本号操作
-                int num = sqlSession.update(Mapper.UPDATE_PROJECT_VERSION, map);
-                //只有操作数据库成功后才继续进行其他操作
-                if (num > 0) {
-                    String versionFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + timestamp + Common.PROJECT_DATA_SUFFIX;
-                    if (OssOpt.getObjectExist(ossClient, versionFile)) {
-                        //可以查到pc 或 mobile version文件数据，从oss中读取文件数据
-                        String versionData = OssOpt.getOssFile(ossClient, versionFile);
-                        Map<String, Object> result = new HashMap<>(1);
-                        result.put("project_data", versionData);
-                        Assemble.responseSuccessSetting(responseData, result);
-
-                    } else {
-                        //数据库有该mobile version数据，但OSS中无该文件，返回400错误
-                        Assemble.responseErrorSetting(responseData, 400, versionFile + "not found");
-                    }
-                } else {
-                    //更新数据库操作失败
-                    Assemble.responseErrorSetting(responseData, 401, "update database error");
-                }
-            } else {
-                //暂无mobile version数据，返回null
-                Assemble.responseErrorSetting(responseData, 402, "No timestamp or id params error");
-            }
-
-        } catch (Exception e) {
-            Render.logger.error("RenderException getMobileVersion error: ", e);
-            Assemble.responseErrorSetting(responseData, 500,
-                    "RenderException getMobileVersion system error");
         } finally {
             //对数据库进行后续提交和关闭操作等
             CommonService.databaseCommitClose(sqlSession, responseData, true);

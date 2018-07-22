@@ -259,8 +259,8 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     httpResponse(ctx, msg, responseData); //成功接收到请求，正常返回
                 }
                 //通过timestamp获取project数据，用在PSD和URL项目中
-                else if (uri.equals("/getProjectByTimeStamp")) {
-                    ResponseData responseData = CreateProject.getProjectByTimeStamp(msg);
+                else if (uri.equals("/getProjectByPCVersion")) {
+                    ResponseData responseData = CreateProject.getProjectByPCVersion(msg);
                     httpResponse(ctx, msg, responseData); //成功接收到请求，正常返回
                 }
 
@@ -306,11 +306,6 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                 //保存项目数据
                 else if (uri.equals("/saveProjectData")) {
                     ResponseData response = Render.saveProjectData(msg);
-                    httpResponse(ctx, msg, response);
-                }
-                //获取手机版或PC版project_data数据
-                else if (uri.equals("/getVersionsData")) {
-                    ResponseData response = Render.getVersionsData(msg);
                     httpResponse(ctx, msg, response);
                 }
                 //网页前端默认的导出设置

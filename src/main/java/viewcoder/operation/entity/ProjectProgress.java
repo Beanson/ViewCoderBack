@@ -11,17 +11,17 @@ public class ProjectProgress implements Serializable{
     private int userId;
     private String type;
     private String name;
-    private String timeStamp;
+    private String pc_version;
     private int progress;
 
     public ProjectProgress() {
     }
 
-    public ProjectProgress(int userId, String type, String name, String timeStamp, int progress) {
+    public ProjectProgress(int userId, String type, String name, String pc_version, int progress) {
         this.userId = userId;
         this.type = type;
         this.name = name;
-        this.timeStamp = timeStamp;
+        this.pc_version = pc_version;
         this.progress = progress;
     }
 
@@ -41,12 +41,12 @@ public class ProjectProgress implements Serializable{
         this.type = type;
     }
 
-    public String getTimeStamp() {
-        return timeStamp;
+    public String getPc_version() {
+        return pc_version;
     }
 
-    public void setTimeStamp(String timeStamp) {
-        this.timeStamp = timeStamp;
+    public void setPc_version(String pc_version) {
+        this.pc_version = pc_version;
     }
 
     public int getProgress() {
@@ -71,7 +71,7 @@ public class ProjectProgress implements Serializable{
                 "userId=" + userId +
                 ", type='" + type + '\'' +
                 ", name='" + name + '\'' +
-                ", timeStamp='" + timeStamp + '\'' +
+                ", pc_version='" + pc_version + '\'' +
                 ", progress=" + progress +
                 '}';
     }

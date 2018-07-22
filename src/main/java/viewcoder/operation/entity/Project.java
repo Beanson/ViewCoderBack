@@ -10,9 +10,9 @@ public class Project {
     private int id;
     private int user_id;
     private int parent;
+    private String version; //记录创建时候的版本，pc版还是mobile版
     private String project_name;
     private String last_modify_time;
-    private String timestamp; //标识最终选择的版本
     private String pc_version; //电脑版在oss中的文件名
     private String mo_version; //手机版在oss中的文件名
     private String project_data; //项目数据， 用于接收项目数据，进行OSS操作，不进行数据库操作
@@ -37,20 +37,18 @@ public class Project {
     }
 
     //拷贝非psd项目时用到此构造函数
-    public Project(int user_id, String project_name, String timestamp, String last_modify_time, String project_data, String resource_size) {
+    public Project(int user_id, String project_name, String last_modify_time, String project_data, String resource_size) {
         this.user_id = user_id;
         this.project_name = project_name;
-        this.timestamp = timestamp;
         this.last_modify_time = last_modify_time;
         this.project_data = project_data;
         this.resource_size = resource_size;
     }
 
-    public Project(int id, int user_id, String project_name, String timestamp, String last_modify_time, String project_data, FileUpload psd_file) {
+    public Project(int id, int user_id, String project_name, String last_modify_time, String project_data, FileUpload psd_file) {
         this.id = id;
         this.user_id = user_id;
         this.project_name = project_name;
-        this.timestamp = timestamp;
         this.last_modify_time = last_modify_time;
         this.project_data = project_data;
         this.psd_file = psd_file;
@@ -70,6 +68,14 @@ public class Project {
 
     public void setUser_id(int user_id) {
         this.user_id = user_id;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public int getParent() {
@@ -94,14 +100,6 @@ public class Project {
 
     public void setLast_modify_time(String last_modify_time) {
         this.last_modify_time = last_modify_time;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
     }
 
     public String getPc_version() {
@@ -206,9 +204,9 @@ public class Project {
                 "id=" + id +
                 ", user_id=" + user_id +
                 ", parent=" + parent +
+                ", version=" + version +
                 ", project_name='" + project_name + '\'' +
                 ", last_modify_time='" + last_modify_time + '\'' +
-                ", timestamp='" + timestamp + '\'' +
                 ", pc_version='" + pc_version + '\'' +
                 ", mo_version='" + mo_version + '\'' +
                 ", project_data='" + project_data + '\'' +

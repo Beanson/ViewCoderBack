@@ -17,7 +17,7 @@ public class CommonTest {
 
     @Test
     public void testIntegerParse(){
-        System.out.println(Integer.parseInt(null));
+        System.out.println(Long.parseLong("11532265451135000")+1);
     }
 
     @Test

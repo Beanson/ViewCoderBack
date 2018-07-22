@@ -242,7 +242,7 @@ public class RenderTest {
         map.put("id", 151); //project_id
         map.put("last_modify_time", CommonService.getDateTime());
         map.put("project_data", project.getProject_data());
-        map.put("project_file_name", project.getTimestamp());
+        //map.put("project_file_name", project.getTimestamp());
         CommonService.junitReqRespVerify(map, "saveProjectData", 200);
     }
 
