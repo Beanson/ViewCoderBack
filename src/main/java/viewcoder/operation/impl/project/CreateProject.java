@@ -51,15 +51,13 @@ public class CreateProject {
             //插入数据库结果分析，如果插入条目大于0则成功，否则失败
             if (num > 0) {
                 //OSS创建空项目的project的数据文件
-                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
-                OssOpt.uploadFileToOss(projectDataFile, project.getProject_data().getBytes(), ossClient);
+                insertNewProjectToOss(project, ossClient);
+
                 //如果该页面为子页面，则增加子页面后，父页面的子页面数目更改
                 ProjectList.addParentChildPageNum(project.getParent(), sqlSession);
 
-                //返回新建项目的project_id数据
-                Map<String, Integer> map = new HashMap<>();
-                map.put("id", project.getId());
-                Assemble.responseSuccessSetting(responseData, map);
+                //返回新建项目的project数据
+                Assemble.responseSuccessSetting(responseData, project);
 
             } else {
                 CreateProject.logger.error("Insert Empty Project Data To Database Error");
@@ -124,8 +122,7 @@ public class CreateProject {
                 //如果插入数据库成功则进行解析PSD文件
                 if (insert_num > 0) {
                     //解析file文件数据并保存到指定位置，如果解析成功将删除该psd文件，如果解析失败将保留作为后续程序调优参考文件
-                    parsePSDFileLogic(responseData, project.getPsd_file().getFile(), project, sqlSession, ossClient,
-                            preRemainSize);
+                    parsePSDFileLogic(responseData, project.getPsd_file().getFile(), project, sqlSession, ossClient, preRemainSize);
                     //如果该页面为子页面，则增加子页面后，父页面的子页面数目更改
                     ProjectList.addParentChildPageNum(project.getParent(), sqlSession);
 
@@ -178,18 +175,16 @@ public class CreateProject {
 
                 //设置psdInfo的project_data数据到OSS中
                 project.setProject_data(JSON.toJSONString(psdInfo));
-                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getTimestamp() +
-                        Common.PROJECT_DATA_SUFFIX;
-                OssOpt.uploadFileToOss(projectDataFile, project.getProject_data().getBytes(), ossClient);
+                insertNewProjectToOss(project, ossClient);
+
+                //更新用户新的可用空间，减去resource size后的大小
+                sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(project.getUser_id(), String.valueOf(preRemainSize)));
 
                 //插入成功，返回新生成的project_id和project_data数据
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("id", project.getId());
                 map.put("project_data", project.getProject_data());
                 Assemble.responseSuccessSetting(responseData, map);
-                //更新用户新的可用空间，减去resource size后的大小
-                sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(project.getUser_id(),
-                        String.valueOf(preRemainSize)));
 
             } else {
                 //解析PSD文件失败
@@ -282,7 +277,7 @@ public class CreateProject {
             ProjectProgress projectProgress = new ProjectProgress(userId, Common.PROJECT_SIMULATE, projectName, timestamp, 0);
             CommonObject.getProgressList().add(projectProgress);
             //异步解析URL网站元素操作
-            createSimulateOpt(webUrl, projectProgress, browserWidth, browserHeight, userId, projectName, pcVersion,moVersion, parent);
+            createSimulateOpt(webUrl, projectProgress, browserWidth, browserHeight, userId, projectName, pcVersion, moVersion, parent);
             //正确解析传递的参数及其类型，并成功调用URL解析网站元素操作，返回正确数据
             Assemble.responseSuccessSetting(responseData, null);
 
@@ -322,6 +317,7 @@ public class CreateProject {
                         project.setTimestamp(projectProgress.getTimeStamp());
                         project.setPc_version(pcVersion);
                         project.setMo_version(moVersion);
+                        project.setProject_data(projectData);
                         project.setLast_modify_time(CommonService.getDateTime());
 
                         //把新创建的simulate的project插入数据库, 在这里启动数据库操作，不然可能会报超时错
@@ -331,10 +327,7 @@ public class CreateProject {
                         ProjectList.addParentChildPageNum(parent, sqlSession);
                         if (num > 0) {
                             //project_data数据同步到OSS中
-                            String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
-                                    project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
-                            OssOpt.uploadFileToOss(projectDataFile, projectData.getBytes(), ossClient);
-
+                            insertNewProjectToOss(project, ossClient);
                             Assemble.responseSuccessSetting(responseData, null);
                             CreateProject.logger.debug("createSimulateOpt success, project id is: " + project.getId());
                             projectProgress.setProgress(100);
@@ -463,6 +456,26 @@ public class CreateProject {
             OssOpt.shutDownOssClient(ossClient);
         }
         return responseData;
+    }
+
+
+    /**
+     * 新建项目数据插入到OSS中，有pc版和mobile版
+     * @param project 项目数据
+     */
+    private static void insertNewProjectToOss(Project project, OSSClient ossClient){
+        //OSS创建空项目的project的数据文件
+        String pcVersionData = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getPc_version() + Common.PROJECT_DATA_SUFFIX;
+        String moVersionData = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getMo_version() + Common.PROJECT_DATA_SUFFIX;
+
+        //如果选择版本是创建手机版则电脑版的project data为空，否则手机版的project data为空
+        if (Objects.equals(project.getTimestamp(), project.getMo_version())) {
+            OssOpt.uploadFileToOss(pcVersionData, new byte[0], ossClient);
+            OssOpt.uploadFileToOss(moVersionData, project.getProject_data().getBytes(), ossClient);
+        } else {
+            OssOpt.uploadFileToOss(pcVersionData, project.getProject_data().getBytes(), ossClient);
+            OssOpt.uploadFileToOss(moVersionData, new byte[0], ossClient);
+        }
     }
 
 }

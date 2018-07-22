@@ -150,12 +150,13 @@ public class Common {
 
     //一些数据库定义的字段
     public static final String ID = "id";
+    public static final String PROJECT = "project";
     public static final String PROJECT_ID = "project_id";
     public static final String USER_ID = "user_id";
     public static final String FILE_TYPE = "file_type";
     public static final String NEW_FILE_NAME = "new_file_name";
     public static final String TIME_STAMP = "timestamp";
-    public static final String VERSIONS = "versions";
+    public static final String VERSION = "version";
     public static final String PC_VERSION = "pc_version";
     public static final String MO_VERSION = "mo_version";
     public static final String PROJECT_NAME = "project_name";
@@ -209,7 +210,8 @@ public class Common {
     public static final String IMG_PSG = ".psd";
     public static final String TIME_FORMAT_1 = "yyyy-MM-dd HH:mm:ss";
     public static final String RELATIVE_PATH_SUFFIX = "/";
-    public static final String COMPUTER_V = "电脑版";
+    public static final String COMPUTER_V = "pc";
+    public static final String MOBILE_V = "mo";
     public static final String STORE_TYPE = "store";
 
     //mail的其他配置

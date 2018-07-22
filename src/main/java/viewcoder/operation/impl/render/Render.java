@@ -1,5 +1,6 @@
 package viewcoder.operation.impl.render;
 
+import org.omg.CORBA.CODESET_INCOMPATIBLE;
 import viewcoder.exception.render.RenderException;
 import viewcoder.tool.common.Assemble;
 import viewcoder.tool.common.Common;
@@ -22,6 +23,7 @@ import org.apache.log4j.Logger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Administrator on 2018/2/16.
@@ -44,18 +46,28 @@ public class Render {
         OSSClient ossClient = OssOpt.initOssClient();
         try {
             //从http中获取项目id数据
-            String projectId = FormData.getParam(msg, Common.ID);
+            Map<String, Object> data = FormData.getParam(msg);
+            String projectId = (String) data.get(Common.ID);
+            String userId = (String) data.get(Common.USER_ID);
+            String version = (String) data.get(Common.VERSION);
             //从数据库中根据项目Id获取项目渲染数据
             Project project = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, Integer.parseInt(projectId));
-            if (project != null) {
-                //从OSS中获取timestamp版本的project data
-                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
-                        project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
-                String projectData = OssOpt.getOssFile(ossClient, projectDataFile);
+            if (project != null && project.getUser_id() == Integer.parseInt(userId)) {
+                //获取的结果数据记录返回
+                Map<String, Object> map = new HashMap<>(2);
+                map.put(Common.VERSION, Common.COMPUTER_V);
+                String projectData = getProjectRenderDataHandler(map, project, ossClient, version);
+
+                //监测是否为切换系统，否则更新数据库操作
+
+
+
                 //检测OSS中读取的数据是否有效
                 if (CommonService.checkNotNull(projectData)) {
                     project.setProject_data(projectData);
-                    Assemble.responseSuccessSetting(responseData, project);
+                    map.put(Common.PROJECT, project);
+                    Assemble.responseSuccessSetting(responseData, map);
+
                 } else {
                     Assemble.responseErrorSetting(responseData, 400,
                             "RenderException getProjectRenderData: project data from oss null");
@@ -65,16 +77,53 @@ public class Render {
                         "RenderException getProjectRenderData: project null");
             }
         } catch (Exception e) {
-            Render.logger.debug("===RenderException getProjectRenderData with error: " + e);
+            Render.logger.error("===RenderException getProjectRenderData with error: ", e);
             Assemble.responseErrorSetting(responseData, 500,
                     "RenderException getProjectRenderData: system error");
 
         } finally {
             //对数据库进行后续提交和关闭操作等
-            CommonService.databaseCommitClose(sqlSession, responseData, false);
+            CommonService.databaseCommitClose(sqlSession, responseData, true);
             OssOpt.shutDownOssClient(ossClient);
         }
         return responseData;
+    }
+
+
+    /**
+     * 根据传入的手机版或电脑版，获取该project的渲染数据
+     *
+     * @param map       返回数据map
+     * @param project   获取该页面的项目数据
+     * @param ossClient oss句柄
+     * @param version   记录手机版还是电脑版
+     * @return
+     */
+    private static String getProjectRenderDataHandler(Map<String, Object> map, Project project, OSSClient ossClient,
+                                                      String version) {
+        //项目数据信息获取
+        String projectData = null;
+
+        //分别电脑版和手机版的OSS中文件路径信息
+        String projectPCDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
+                project.getPc_version() + Common.PROJECT_DATA_SUFFIX;
+        String projectMODataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
+                project.getMo_version() + Common.PROJECT_DATA_SUFFIX;
+
+        System.out.println(projectPCDataFile + "  " + projectMODataFile);
+        //根据version值对应获取电脑版或手机版
+        if (Objects.equals(version, Common.MOBILE_V)) {
+            projectData = OssOpt.getOssFile(ossClient, projectMODataFile);
+            //如果手机版为空则从新获取电脑版数据
+            if (!CommonService.checkNotNull(projectData)) {
+                projectData = OssOpt.getOssFile(ossClient, projectPCDataFile);
+            } else {
+                map.put(Common.VERSION, Common.MOBILE_V);
+            }
+        } else {
+            projectData = OssOpt.getOssFile(ossClient, projectPCDataFile);
+        }
+        return projectData;
     }
 
 
@@ -467,8 +516,7 @@ public class Render {
             int num = sqlSession.update(Mapper.SAVE_PROJECT_DATA, project);
             if (num > 0) {
                 //创建新的project_data数据并同步到OSS中
-                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
-                        project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
+                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getTimestamp() + Common.PROJECT_DATA_SUFFIX;
                 OssOpt.uploadFileToOss(projectDataFile, project.getProject_data().getBytes(), ossClient);
                 Assemble.responseSuccessSetting(responseData, null);
             } else {
@@ -529,7 +577,7 @@ public class Render {
                 }
             } else {
                 //暂无mobile version数据，返回null
-                Assemble.responseErrorSetting(responseData, 402,"No timestamp or id params error");
+                Assemble.responseErrorSetting(responseData, 402, "No timestamp or id params error");
             }
 
         } catch (Exception e) {
