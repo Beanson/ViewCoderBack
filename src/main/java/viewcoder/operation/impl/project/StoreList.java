@@ -104,7 +104,6 @@ public class StoreList {
             //接收前台传过来关于获取指定行业的project model数据
             //传递三个数据：user_id, industry_code, industry_sub_code
             Map<String, Object> data = FormData.getParam(msg);
-            sqlSession = MybatisUtils.getSession();
 
             //更新openness状态并返回影响条目数量
             int num = sqlSession.update(Mapper.UPDATE_USER_LAST_SELECTED_INDUSTRY, data);

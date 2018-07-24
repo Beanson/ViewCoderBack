@@ -1,4 +1,5 @@
 import org.apache.commons.codec.binary.Hex;
+import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.common.OssOpt;
 import viewcoder.tool.config.GlobalConfig;
@@ -16,8 +17,10 @@ import java.io.File;
 public class CommonTest {
 
     @Test
-    public void testIntegerParse(){
-        System.out.println(Long.parseLong("11532265451135000")+1);
+    public void testIntegerParse() throws Exception{
+        System.out.println(1+CommonService.getTimeStamp());
+        Thread.sleep(1000);
+        System.out.println(CommonService.getTimeStamp());
     }
 
     @Test

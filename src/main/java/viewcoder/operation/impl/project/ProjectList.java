@@ -131,16 +131,19 @@ public class ProjectList {
                 int userId = Integer.parseInt(String.valueOf(data.get(Common.USER_ID)));
                 int refId = Integer.parseInt(String.valueOf(data.get(Common.REF_ID)));
                 int parent = Integer.parseInt(String.valueOf(data.get(Common.PARENT)));
+                int newParent = Integer.parseInt(String.valueOf(data.get(Common.NEW_PARENT)));
+                String projectName = String.valueOf(data.get(Common.PROJECT_NAME));
                 String optType = String.valueOf(data.get(Common.OPT_TYPE));
+                Long timestamp = Long.parseLong(userId + CommonService.getTimeStamp());
 
                 //2、 获取原项目信息
                 List<Project> projectsOrigin = sqlSession.selectList(Mapper.GET_ALL_RELATED_PROJECT, userId);
 
                 //3、把list数据打包成map数据
-                Map<Integer, List<Project>> projects = packProjectListToMap(projectsOrigin, projectId, parent);
+                Map<Integer, List<Project>> projects = packProjectListToMap(projectsOrigin, projectId, parent, projectName);
 
                 //4、 更新新项目的project表格、OSS中single_export和project_data文件拷贝
-                insertCopyRecord(userId, parent, parent, refId, projects, sqlSession, ossClient);
+                insertCopyRecord(userId, parent, newParent, refId, projects, sqlSession, ossClient, timestamp);
 
                 //5、如果不是在root最外层，则其父的子页面个数加1
                 if (parent != 0) addParentChildPageNum(parent, sqlSession);
@@ -148,8 +151,8 @@ public class ProjectList {
                 //6、根据不同操作类型执行相应其他操作
                 optType(sqlSession, optType, projectId);
 
-                //7、返回200成功信息
-                Assemble.responseSuccessSetting(responseData, null);
+                //7、返回生成的根项目元素，200成功信息
+                Assemble.responseSuccessSetting(responseData, projects.get(parent).get(0));
 
             } else {
                 Assemble.responseErrorSetting(responseData, 402,
@@ -177,7 +180,7 @@ public class ProjectList {
      * @throws Exception
      */
     private static Map<Integer, List<Project>> packProjectListToMap(List<Project> projectsOrigin, int projectId,
-                                                                    int parent) throws Exception {
+                                                                    int parent, String projectName) throws Exception {
 
         //获取原项目project表数据监测
         if (!CommonService.checkNotNull(projectsOrigin)) {
@@ -189,9 +192,12 @@ public class ProjectList {
         Map<Integer, List<Project>> projects = new HashMap<>();
         for (Project project : projectsOrigin) {
 
-            //保证parent为0的project只能是传入的projectId；若该projectId不是根目录则parent为0的无记录
+            //保证parent为根的project只能是传入的projectId；（第二个条件比较若不相等continue不添加）
             if (project.getParent() == parent && project.getId() != projectId) {
                 continue;
+            } else {
+                //赋值该project根路径下的名称
+                project.setProject_name(projectName);
             }
 
             //获取map中该parent key的value
@@ -226,7 +232,7 @@ public class ProjectList {
      * @throws Exception
      */
     private static void insertCopyRecord(int userId, int parent, int newParent, int refId, Map<Integer, List<Project>> projects,
-                                         SqlSession sqlSession, OSSClient ossClient) throws Exception {
+                                         SqlSession sqlSession, OSSClient ossClient, long timestamp) throws Exception {
 
         //获取该父id下的所有子页面元素
         List<Project> children = projects.get(parent);
@@ -241,8 +247,8 @@ public class ProjectList {
                 String moVersion = project.getMo_version();
 
                 //原来pc和mobile的version分别+1
-                project.setPc_version(String.valueOf(Long.parseLong(pcVersion) + 1));
-                project.setMo_version(String.valueOf(Long.parseLong(moVersion) + 1));
+                project.setPc_version(String.valueOf(++timestamp));
+                project.setMo_version(String.valueOf(++timestamp));
 
                 //设置userId, 对于拷贝商城项目是必要的
                 project.setUser_id(userId);
@@ -253,7 +259,7 @@ public class ProjectList {
                 //新的修改时间
                 project.setLast_modify_time(CommonService.getDateTime());
                 //新的项目名称
-                project.setProject_name(project.getProject_name() + "_copy");
+                project.setProject_name(project.getProject_name());
 
                 //获取父元素的旧id
                 int oldId = project.getId();
@@ -277,7 +283,7 @@ public class ProjectList {
 
                     //每个子元素递归调用
                     int newId = project.getId();
-                    insertCopyRecord(userId, oldId, newId, refId, projects, sqlSession, ossClient);
+                    insertCopyRecord(userId, oldId, newId, refId, projects, sqlSession, ossClient, ++timestamp);
                 }
             }
         } else {
@@ -366,7 +372,7 @@ public class ProjectList {
                 List<Project> projectsOrigin = sqlSession.selectList(Mapper.GET_ALL_RELATED_PROJECT, userId);
 
                 //3、把list数据打包成map数据
-                Map<Integer, List<Project>> projects = packProjectListToMap(projectsOrigin, projectId, project.getParent());
+                Map<Integer, List<Project>> projects = packProjectListToMap(projectsOrigin, projectId, project.getParent(), null);
 
                 //4、删除该project的所有数据
                 deleteProjectRecordAndFile(project.getParent(), sqlSession, ossClient, projects);
