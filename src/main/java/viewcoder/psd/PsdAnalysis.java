@@ -1,7 +1,10 @@
 package viewcoder.psd;
 
 import viewcoder.exception.project.PSDAnalysisException;
+import viewcoder.operation.entity.Project;
+import viewcoder.operation.entity.UserUploadFile;
 import viewcoder.tool.common.Common;
+import viewcoder.tool.common.Mapper;
 import viewcoder.tool.common.OssOpt;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.operation.impl.common.CommonService;
@@ -20,34 +23,35 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 import org.apache.log4j.Logger;
 
 import static viewcoder.tool.common.Common.COMMON_BACKGROUND;
+import static viewcoder.tool.common.Common.MAIL_AUTH;
 
 public class PsdAnalysis {
     private static Logger logger = Logger.getLogger(PsdAnalysis.class.getName());
 
-    private int projectId, userId, totalWidth, totalHeight, maxId = 0, maxRate = 0;
+    private int totalWidth, totalHeight, maxId = 0, maxRate = 0;
+    private List<UserUploadFile> list = new ArrayList<>();
     private static final String IMAGE_PNG_TYPE = "png";
     private PsdInfo psdInfo = new PsdInfo();
     private SqlSession sqlSession;
     private OSSClient ossClient;
-    private String projectName;
-    public File file;
+    private Project project;
 
 
     /**
      * 构造函数收录关键数据
      */
-    public PsdAnalysis(int projectId, int userId, String projectName, SqlSession sqlSession, OSSClient ossClient) {
-        this.projectId = projectId;
-        this.userId = userId;
-        this.projectName = projectName;
-        this.sqlSession = sqlSession;
+    public PsdAnalysis(Project project, OSSClient ossClient, SqlSession sqlSession) {
+        this.project = project;
         this.ossClient = ossClient;
+        this.sqlSession = sqlSession;
     }
 
 
@@ -65,6 +69,14 @@ public class PsdAnalysis {
         }
     }
 
+    /**
+     * 返回需要插入数据库的file记录list
+     *
+     * @return
+     */
+    public List<UserUploadFile> getUploadFileList() {
+        return list;
+    }
 
     /**
      * PSD 文件解析进度追踪
@@ -89,11 +101,18 @@ public class PsdAnalysis {
                 //图层的number从1开始算起，所以需要i+1
                 PsdAnalysis.logger.debug("=== Parse PSD layer: " + layer.getName() + " - " + ((i + 1) * 100 / maxRate) + "%");
             }
-            //插入该psd项目的文件夹资源
-            //由于查找资源时根据user_id和file_type查找。如file_type为1查不到音频文件。因此，是创建项目-->file_type下的文件夹，不是项目下的文件夹
-            CreateProject.insertWidgetToDB(projectId, userId, null, Common.FILE_TYPE_IMAGE, Common.FOLDER_FILE,
-                    CommonService.getTimeStamp(), null, projectName, "", String.valueOf(0),
-                    null, CommonService.getDateTime(), sqlSession);
+
+
+            //psd项目的文件夹资源
+            UserUploadFile userUploadFile = new UserUploadFile(project.getId(), project.getUser_id(), null,
+                    Common.FILE_TYPE_IMAGE, Common.FOLDER_FILE, CommonService.getTimeStamp(), null, project.getProject_name(),
+                    "", String.valueOf(0), null, CommonService.getDateTime());
+
+            //查看是否已经插入，若是则不添加插入列表，否则添加到插入列表
+            int num = sqlSession.selectOne(Mapper.GET_ROOT_FOLDER_COUNT, userUploadFile);
+            if (num > 0) {
+                list.add(userUploadFile);
+            }
 
         } catch (Exception e) {
             PsdAnalysis.logger.error("===Parse PSD file occurs error: ", e);
@@ -207,9 +226,10 @@ public class PsdAnalysis {
             OssOpt.uploadFileToOss(ossFileName, byteArrayOutputStream.toByteArray(), ossClient);
 
             //保存文件信息到数据库,relative_path设置为"该项目名称/"，即默认每个项目都会以项目名称为起始位置的图片资源列表
-            CreateProject.insertWidgetToDB(projectId, userId, Common.COMMON_IMAGE, Common.FILE_TYPE_IMAGE, Common.NOT_FOLDER_FILE,
-                    timeStampName, IMAGE_PNG_TYPE, layer.getName(), projectName + Common.RELATIVE_PATH_SUFFIX,
-                    String.valueOf(byteArrayOutputStream.size()), null, CommonService.getDateTime(), sqlSession);
+            list.add(new UserUploadFile(project.getId(), project.getUser_id(), Common.COMMON_IMAGE, Common.FILE_TYPE_IMAGE,
+                    Common.NOT_FOLDER_FILE, timeStampName, IMAGE_PNG_TYPE, layer.getName(),
+                    project.getProject_name() + Common.RELATIVE_PATH_SUFFIX,
+                    String.valueOf(byteArrayOutputStream.size()), null, CommonService.getDateTime()));
         } else {
             logger.warn("===PSD Analizer-->saveAsImage null error: " + layer.getName());
         }

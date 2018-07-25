@@ -185,10 +185,11 @@ public class Common {
     public static final String PARENT = "parent"; //parent数据
     public static final String NEW_PARENT = "new_parent"; //设置更元素新的parent
     public static final String WEB_URL = "web_url"; //通过URL生成网页的操作
-    public static final String BROWSER_WIDTH = "browser_width"; //浏览器的宽度
-    public static final String BROWSER_HEIGHT = "browser_height"; //浏览器的高度
+    public static final String TARGET_WIDTH = "target_width"; //浏览器的宽度
     public static final String PROJECT_SIMULATE = "simulate"; //项目类型是simulate类型
     public static final String PAGE_PARENT = "parent"; //页面的父页面
+    public static final String OPT = "opt"; //具体操作类型
+
 
     //数字证书
     public static final String SIGN_FILE = "sign_file"; //数字签名文件

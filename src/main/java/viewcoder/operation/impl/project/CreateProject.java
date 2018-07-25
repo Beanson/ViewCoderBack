@@ -20,6 +20,8 @@ import viewcoder.url.Simulate;
 import java.io.File;
 import java.util.*;
 
+import static org.apache.ibatis.javassist.CtClass.version;
+
 /**
  * Created by Administrator on 2018/2/4.
  */
@@ -45,15 +47,12 @@ public class CreateProject {
             Project project = (Project) FormData.getParam(msg, Project.class);
 
             /*新创建空项目数据插入数据库*/
-            int num = sqlSession.insert(Mapper.CREATE_EMPTY_PROJECT, project);
+            int num = optHandler(sqlSession, project, Mapper.CREATE_EMPTY_PROJECT);
 
             //插入数据库结果分析，如果插入条目大于0则成功，否则失败
             if (num > 0) {
                 //OSS创建空项目的project的数据文件
                 insertNewProjectToOss(project, ossClient);
-
-                //如果该页面为子页面，则增加子页面后，父页面的子页面数目更改
-                ProjectList.addParentChildPageNum(project.getParent(), sqlSession);
 
                 //返回新建项目的project数据
                 Assemble.responseSuccessSetting(responseData, project);
@@ -113,26 +112,17 @@ public class CreateProject {
             long preRemainSize = Integer.parseInt(resourceRemain) - project.getPsd_file().length();
             //如果该用户有足够空间进行PSD文件解析，则创建该项目，否则不创建
             if (preRemainSize > 0) {
-                //a.设置项目占用空间，b.新建psd的project项目数据并插入数据库，从而获取project_id
+                //设置项目占用空间，
                 project.setResource_size(String.valueOf(project.getPsd_file().length()));
-                int insert_num = sqlSession.insert(Mapper.CREATE_PSD_PROJECT, project);
+                //根据opt值进行不同操作，若为新建psd的project项目，则数据插入数据库，从而获取project_id
+                optHandler(sqlSession, project, Mapper.CREATE_PSD_PROJECT);
+                //解析file文件数据并保存到指定位置，如果解析成功将删除该psd文件，如果解析失败将保留作为后续程序调优参考文件
+                parsePSDFileLogic(responseData, project.getPsd_file().getFile(), project, sqlSession, ossClient, preRemainSize);
 
-                //如果插入数据库成功则进行解析PSD文件
-                if (insert_num > 0) {
-                    //解析file文件数据并保存到指定位置，如果解析成功将删除该psd文件，如果解析失败将保留作为后续程序调优参考文件
-                    parsePSDFileLogic(responseData, project.getPsd_file().getFile(), project, sqlSession, ossClient, preRemainSize);
-                    //如果该页面为子页面，则增加子页面后，父页面的子页面数目更改
-                    ProjectList.addParentChildPageNum(project.getParent(), sqlSession);
-
-                } else {
-                    //数据库插入失败
-                    Assemble.responseErrorSetting(responseData, 401,
-                            "Insert new PSD project to database error");
-                }
             } else {
-                Assemble.responseErrorSetting(responseData, 402, "User resource space not enough");
+                Assemble.responseErrorSetting(responseData, 402,
+                        "User resource space not enough");
             }
-
         } catch (Exception e) {
             CreateProject.logger.error("createPSDProject Server Error", e);
             Assemble.responseErrorSetting(responseData, 500,
@@ -140,11 +130,11 @@ public class CreateProject {
 
         } finally {
             //如果该PSD文件无法解析则上传到OSS云端
-            uploadErrorPsdFile(responseData, project, sqlSession, ossClient);
+            uploadErrorPsdFile(responseData, project, ossClient);
+
             //资源关闭和释放
             CommonService.databaseCommitClose(sqlSession, responseData, true);
             OssOpt.shutDownOssClient(ossClient);
-            CreateProject.logger.debug("createPSDProject responseData" + responseData);
         }
         return responseData;
     }
@@ -163,8 +153,7 @@ public class CreateProject {
                                           OSSClient ossClient, long preRemainSize) throws PSDAnalysisException {
         try {
             //如果保存成功则进行解析PSD文件数据信息并返回内容数据
-            PsdAnalysis psdAnalysis = new PsdAnalysis(project.getId(), project.getUser_id(), project.getProject_name(),
-                    sqlSession, ossClient);
+            PsdAnalysis psdAnalysis = new PsdAnalysis(project, ossClient, sqlSession);
             psdAnalysis.parse(file);
             PsdInfo psdInfo = psdAnalysis.exportData();
 
@@ -173,12 +162,16 @@ public class CreateProject {
 
                 //设置psdInfo的project_data数据到OSS中
                 project.setProject_data(JSON.toJSONString(psdInfo));
+                //project data文件跟新插入oss中
                 insertNewProjectToOss(project, ossClient);
+
+                //图片信息batch插入userUploadFile表中
+                sqlSession.insert(Mapper.INSERT_BATCH_NEW_RESOURCE, psdAnalysis.getUploadFileList());
 
                 //更新用户新的可用空间，减去resource size后的大小
                 sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(project.getUser_id(), String.valueOf(preRemainSize)));
 
-                //插入成功，返回新生成的project_id和project_data数据
+                //插入成功，返回新生成的project_id和project_data数据，或原来的project_id新project_data
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("id", project.getId());
                 map.put("project_data", project.getProject_data());
@@ -200,10 +193,9 @@ public class CreateProject {
      *
      * @param responseData 返回数据包
      * @param project      项目数据
-     * @param sqlSession   sql句柄
      */
-    private static void uploadErrorPsdFile(ResponseData responseData, Project project, SqlSession sqlSession, OSSClient ossClient) {
-        //对status code进行判断处理
+    private static void uploadErrorPsdFile(ResponseData responseData, Project project, OSSClient ossClient) {
+        //若操作过程出错并且不是由于空间不足引起的，则把问题psd插入保存，后续研发
         if (responseData.getStatus_code() != 200 && responseData.getException_code() != 402) {
             ProjectList.deleteProjectOpt(project.getId(), project.getUser_id());
             try {
@@ -215,38 +207,9 @@ public class CreateProject {
             } catch (Exception e) {
                 CreateProject.logger.debug("Upload special psd file to common error");
             }
-
-        } else {
-            sqlSession.commit();
         }
     }
 
-
-    /**
-     * 把resource数据插入到数据库user_upload_file表中，对外开发调用
-     *
-     * @param projectId    项目id，用来标识项目的唯一性
-     * @param userId       用户id，用来标识注册了的用户的唯一性
-     * @param widgetType   组件类型，如Common_Image等
-     * @param fileType     资源类型，分别是 1:图片资源, 2:视频资源, 3:音频资源, 4:下载文件资源
-     * @param isFolder     1：表示文件夹，0：表示非文件夹文件
-     * @param timeStamp    时间戳，用来唯一性标识非文件夹文件的文件名
-     * @param suffix       非文件夹文件的文件后缀
-     * @param fileName     文件夹 或 非文件夹文件 的 文件名
-     * @param relativePath 文件夹 或 非文件夹文件 相对于文件存储基路径下的 相对路径
-     * @param fileSize     非文件夹文件的大小
-     * @param videoImage   视频文件的帧图片文件全名，包含后缀名，用来展示给用户视频未播放前的一帧图片
-     * @param createTime   该资源的创建时间/插入数据库时间
-     * @param sqlSession   mybatis数据库操作session句柄
-     */
-    public static int insertWidgetToDB(int projectId, int userId, String widgetType, int fileType, int isFolder,
-                                       String timeStamp, String suffix, String fileName, String relativePath,
-                                       String fileSize, String videoImage, String createTime, SqlSession sqlSession) {
-
-        return sqlSession.insert(Mapper.INSERT_NEW_RESOURCE, new UserUploadFile(projectId, userId, widgetType, fileType, isFolder, timeStamp,
-                suffix, fileName, relativePath, fileSize, videoImage, createTime));
-
-    }
 
 
     /**
@@ -260,22 +223,14 @@ public class CreateProject {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         try {
             //获取从前端传递过来的数据
-            Map<String, Object> map = FormData.getParam(msg);
-            String projectName = (String) map.get(Common.PROJECT_NAME);
-            String webUrl = (String) map.get(Common.WEB_URL);
-            String version = (String) map.get(Common.VERSION);
-            String pcVersion = (String) map.get(Common.PC_VERSION);
-            String moVersion = (String) map.get(Common.MO_VERSION);
-            Integer userId = Integer.parseInt((String) map.get(Common.USER_ID));
-            Integer browserWidth = Integer.parseInt((String) map.get(Common.BROWSER_WIDTH));
-            Integer browserHeight = Integer.parseInt((String) map.get(Common.BROWSER_HEIGHT));
-            Integer parent = Integer.parseInt((String) map.get(Common.PAGE_PARENT));
+            Project project = (Project) FormData.getParam(msg, Project.class);
 
             //初始化项目创建的进度
-            ProjectProgress projectProgress = new ProjectProgress(userId, Common.PROJECT_SIMULATE, projectName, pcVersion, 0);
+            ProjectProgress projectProgress = new ProjectProgress(project.getUser_id(), Common.PROJECT_SIMULATE,
+                    project.getProject_name(), project.getPc_version(), 0);
             CommonObject.getProgressList().add(projectProgress);
             //异步解析URL网站元素操作
-            createSimulateOpt(webUrl, projectProgress, browserWidth, browserHeight, userId, projectName, version, pcVersion, moVersion, parent);
+            createSimulateOpt(project, projectProgress);
             //正确解析传递的参数及其类型，并成功调用URL解析网站元素操作，返回正确数据
             Assemble.responseSuccessSetting(responseData, null);
 
@@ -290,8 +245,7 @@ public class CreateProject {
      * 异步解析URL网站元素操作
      * TODO 后面采用云主机进行请求响应，而慢操作放在物理主机中运行
      */
-    public static void createSimulateOpt(String webUrl, ProjectProgress projectProgress, int browserWidth, int browserHeight, int userId,
-                                         String projectName, String version, String pcVersion, String moVersion, int parent) throws Exception {
+    public static void createSimulateOpt(Project project, ProjectProgress projectProgress) throws Exception {
         //创建解析URL网站元素的线程
         Thread simulateParseThread = new Thread(new Runnable() {
             @Override
@@ -301,26 +255,17 @@ public class CreateProject {
                 OSSClient ossClient = OssOpt.initOssClient();
                 try {
                     //获取URL资源项目元数据
-                    String projectData = Simulate.createProject(webUrl, projectProgress, browserWidth, browserHeight);
+                    String projectData = Simulate.createProject(project.getWeb_url(), projectProgress, project.getTarget_width());
 
                     //如果获取解析后项目数据不为空则进行插入数据库等操作，否则全局变量中记录错误消息
                     if (projectData != null) {
                         //准备project实体类数据
-                        Project project = new Project();
-                        project.setUser_id(userId);
-                        project.setParent(parent);
-                        project.setProject_name(projectName);
-                        project.setVersion(version);
-                        project.setPc_version(pcVersion);
-                        project.setMo_version(moVersion);
                         project.setProject_data(projectData);
                         project.setLast_modify_time(CommonService.getDateTime());
 
                         //把新创建的simulate的project插入数据库, 在这里启动数据库操作，不然可能会报超时错
                         sqlSession = MybatisUtils.getSession();
-                        int num = sqlSession.insert(Mapper.CREATE_SIMULATE_PROJECT, project);
-                        //如果该页面为子页面，则增加子页面后，父页面的子页面数目更改
-                        ProjectList.addParentChildPageNum(parent, sqlSession);
+                        int num = optHandler(sqlSession, project, Mapper.CREATE_SIMULATE_PROJECT);
                         if (num > 0) {
                             //project_data数据同步到OSS中
                             insertNewProjectToOss(project, ossClient);
@@ -439,6 +384,7 @@ public class CreateProject {
                 if (CommonService.checkNotNull(projectData)) {
                     project.setProject_data(projectData);
                     Assemble.responseSuccessSetting(responseData, project);
+
                 } else {
                     Assemble.responseErrorSetting(responseData, 400,
                             "getProjectByPCVersion: project data from oss null");
@@ -457,9 +403,10 @@ public class CreateProject {
 
     /**
      * 新建项目数据插入到OSS中，有pc版和mobile版
+     *
      * @param project 项目数据
      */
-    private static void insertNewProjectToOss(Project project, OSSClient ossClient){
+    private static void insertNewProjectToOss(Project project, OSSClient ossClient) {
         //OSS创建空项目的project的数据文件
         String pcVersionData = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getPc_version() + Common.PROJECT_DATA_SUFFIX;
         String moVersionData = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getMo_version() + Common.PROJECT_DATA_SUFFIX;
@@ -472,6 +419,40 @@ public class CreateProject {
             OssOpt.uploadFileToOss(pcVersionData, project.getProject_data().getBytes(), ossClient);
             OssOpt.uploadFileToOss(moVersionData, new byte[0], ossClient);
         }
+    }
+
+
+    /**
+     * 根据传入的操作类型执行特定的不同
+     *
+     * @param sqlSession sql句柄
+     * @param sql        sql操作引用
+     */
+    private static int optHandler(SqlSession sqlSession, Project project, String sql) {
+        int num = 0;
+        switch (project.getOpt()) {
+            case 1: {
+                //新项目创建，由于是根目录，无需跟新父项目child个数
+                num = sqlSession.insert(sql, project);
+                break;
+            }
+            case 2: {
+                //子项目创建，更新父项目的child个数
+                num = sqlSession.insert(sql, project);
+                //如果该页面为子页面，则增加子页面后，父页面的子页面数目更改
+                ProjectList.addParentChildPageNum(project.getParent(), sqlSession);
+                break;
+            }
+            case 3: {
+                //重构当前页面，无需更新任何数据库条目，只需更新OSS即可
+                num = 1;
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+        return num;
     }
 
 }

@@ -16,10 +16,11 @@ import java.net.URL;
  */
 public class Simulate {
     private static Logger logger = Logger.getLogger(Simulate.class);
+    private static final String TEST_URL = "http://www.hao365.org.cn/";
+    private static final int TOTAL_HEIGHT = 700;
 
     public static void main(String[] args) throws Exception {
-        createProject("http://www.hao365.org.cn/",
-                new ProjectProgress(), 1300, 700);
+        createProject(Simulate.TEST_URL, new ProjectProgress(), 1300);
     }
 
     /**
@@ -28,11 +29,10 @@ public class Simulate {
      * @param webUrl          目标网站网站
      * @param projectProgress 项目进度记录
      * @param totalWidth      网站整体宽度
-     * @param totalHeight     网站整体高度
      * @return
      * @throws Exception
      */
-    public static String createProject(String webUrl, ProjectProgress projectProgress, int totalWidth, int totalHeight)
+    public static String createProject(String webUrl, ProjectProgress projectProgress, int totalWidth)
             throws Exception {
 
         WebDriver driver = null;
@@ -46,7 +46,7 @@ public class Simulate {
             projectProgress.setProgress(20);
 
             //打开网页
-            connectToUrl(driver, webUrl, totalWidth, totalHeight);
+            connectToUrl(driver, webUrl, totalWidth);
             projectProgress.setProgress(80);
 
             //加载提取网站元素的js文件
@@ -56,10 +56,10 @@ public class Simulate {
             String jqueryText = Resources.toString(jqueryUrl, Charsets.UTF_8);
             js.executeScript(jqueryText);
             int contentHeight = ((Number) js.executeScript("return $(document).height()")).intValue();
-            Simulate.logger.debug("get page height: "+contentHeight);
+            Simulate.logger.debug("get page height: " + contentHeight);
 
             //慢加载操作，后期前端设置允许用户调节每次滚动的等待时间
-            for (int i = totalHeight; i < contentHeight; i += totalHeight) {
+            for (int i = Simulate.TOTAL_HEIGHT; i < contentHeight; i += Simulate.TOTAL_HEIGHT) {
                 js.executeScript("window.scrollBy(0, " + i + ")");
                 Thread.sleep(500);
             }
@@ -113,9 +113,9 @@ public class Simulate {
      *
      * @param webUrl 目标网站的url
      */
-    private static void connectToUrl(WebDriver driver, String webUrl, int totalWidth, int totalHeight) {
+    private static void connectToUrl(WebDriver driver, String webUrl, int totalWidth) {
         try {
-            Dimension dimension = new Dimension(totalWidth, totalHeight);
+            Dimension dimension = new Dimension(totalWidth, Simulate.TOTAL_HEIGHT);
             //设置屏幕宽高
             driver.manage().window().setSize(dimension);
             //打开指定网址

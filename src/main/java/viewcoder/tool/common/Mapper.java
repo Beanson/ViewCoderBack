@@ -41,6 +41,7 @@ public class Mapper {
     public static final String GET_RESOURCE_BY_USERID_AND_FILETYPE = "getResourceByUserIdAndFileType";
     public static final String GET_RESOURCE_REF_COUNT = "getResourceRefCount";
     public static final String GET_FOLDER_SUB_RESOURCE = "getFolderSubResource";
+    public static final String GET_ROOT_FOLDER_COUNT = "getRootFolderCount";
 
     //delete
     public static final String DELETE_RESOURCE_BY_ID = "deleteResourceById";

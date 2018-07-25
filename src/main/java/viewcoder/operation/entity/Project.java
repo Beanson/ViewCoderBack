@@ -10,7 +10,6 @@ public class Project {
     private int id;
     private int user_id;
     private int parent;
-    private String version; //记录创建时候的版本，pc版还是mobile版
     private String project_name;
     private String last_modify_time;
     private String pc_version; //电脑版在oss中的文件名
@@ -24,6 +23,16 @@ public class Project {
     private int points;
     private int ref_id;
     private int child;
+
+    /*以下是帮助数据，在数据库中无该字段*/
+    private String version; //记录创建时候的版本，pc版还是mobile版
+    private int opt; //操作类型，1为根目录下创建项目，2为创建子项目，3为更新本项目
+
+    //simulate项目特有的字段
+    private String web_url;
+    private int target_width; //页面目标宽度
+
+    //photoshop项目特有字段
     private FileUpload psd_file;
 
 
@@ -198,13 +207,36 @@ public class Project {
         this.child = child;
     }
 
+    public int getOpt() {
+        return opt;
+    }
+
+    public void setOpt(int opt) {
+        this.opt = opt;
+    }
+
+    public int getTarget_width() {
+        return target_width;
+    }
+
+    public void setTarget_width(int target_width) {
+        this.target_width = target_width;
+    }
+
+    public String getWeb_url() {
+        return web_url;
+    }
+
+    public void setWeb_url(String web_url) {
+        this.web_url = web_url;
+    }
+
     @Override
     public String toString() {
         return "Project{" +
                 "id=" + id +
                 ", user_id=" + user_id +
                 ", parent=" + parent +
-                ", version=" + version +
                 ", project_name='" + project_name + '\'' +
                 ", last_modify_time='" + last_modify_time + '\'' +
                 ", pc_version='" + pc_version + '\'' +
@@ -218,6 +250,10 @@ public class Project {
                 ", points=" + points +
                 ", ref_id=" + ref_id +
                 ", child=" + child +
+                ", version='" + version + '\'' +
+                ", opt=" + opt +
+                ", web_url='" + web_url + '\'' +
+                ", target_width=" + target_width +
                 ", psd_file=" + psd_file +
                 '}';
     }

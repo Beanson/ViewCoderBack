@@ -40,8 +40,8 @@ public interface ProjectMapper {
 
     /********************以下是创建项目操作***********************/
     //创建新建project
-    @Insert("insert into project(user_id,project_name,last_modify_time,pc_version,mo_version,resource_size,parent) " +
-            "values(#{user_id},#{project_name},#{last_modify_time},#{pc_version},#{mo_version},#{resource_size},#{parent})")
+    @Insert("insert into project(user_id,project_name,last_modify_time,pc_version,mo_version,parent) " +
+            "values(#{user_id},#{project_name},#{last_modify_time},#{pc_version},#{mo_version},#{parent})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createEmptyProject(Project project);
 
@@ -87,7 +87,7 @@ public interface ProjectMapper {
     public int updateProjectResourceSize(Project Project);
 
     //根据项目传递过来参数进行更新项目公开程度状态
-    @SelectProvider(type = SqlProvider.class, method = "updateProjectOpenness")
+    @UpdateProvider(type = SqlProvider.class, method = "updateProjectOpenness")
     public int updateProjectOpenness(Map<String, Object> map);
 
     //更新project的引用次数+1

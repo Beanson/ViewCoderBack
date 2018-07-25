@@ -1,20 +1,39 @@
 import org.apache.commons.codec.binary.Hex;
+import org.apache.ibatis.session.SqlSession;
+import viewcoder.operation.entity.UserUploadFile;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.common.Common;
+import viewcoder.tool.common.Mapper;
 import viewcoder.tool.common.OssOpt;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.encrypt.AESEncryptor;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.PutObjectResult;
 import org.junit.Test;
+import viewcoder.tool.util.MybatisUtils;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Administrator on 2018/2/17.
  */
 
 public class CommonTest {
+
+    @Test
+    public void insertBatch()throws Exception{
+        SqlSession sqlSession = MybatisUtils.getSession();
+        List<UserUploadFile> list = new ArrayList<>();
+        UserUploadFile userUploadFile = new UserUploadFile(1, 1, null,
+                Common.FILE_TYPE_IMAGE, Common.FOLDER_FILE, CommonService.getTimeStamp(), null, "folder",
+                "", String.valueOf(0), null, CommonService.getDateTime());
+        list.add(userUploadFile);
+
+        sqlSession.insert(Mapper.INSERT_BATCH_NEW_RESOURCE, list);
+        sqlSession.close();
+    }
 
     @Test
     public void testIntegerParse() throws Exception{

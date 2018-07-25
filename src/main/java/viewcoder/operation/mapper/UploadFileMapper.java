@@ -32,6 +32,11 @@ public interface UploadFileMapper {
             "and file_type=#{file_type} and relative_path like concat(#{relative_path},'%') ")
     public List<UserUploadFile> getFolderSubResource(UserUploadFile userUploadFile);
 
+    //查找是否存在该记录在数据库中
+    @Select("select count(*) from user_upload_file where project_id=#{project_id} and is_folder=#{is_folder} " +
+            "and file_name=#{file_name} and relative_path=#{relative_path}")
+    public int getRootFolderCount(UserUploadFile userUploadFile);
+
 
 
     /********************以下是删除文件操作***********************/
@@ -54,8 +59,8 @@ public interface UploadFileMapper {
     public int insertNewResource(UserUploadFile userUploadFile);
 
 
-    @SelectProvider(type = SqlProvider.class, method = "insertBatchNewResource")
-    public int insertBatchNewResource(List<UserUploadFile> files);
+    @InsertProvider(type = SqlProvider.class, method = "insertBatchNewResource")
+    public int insertBatchNewResource(@Param("list") List<UserUploadFile> files);
 
 
     /********************以下是更新文件信息操作***********************/
