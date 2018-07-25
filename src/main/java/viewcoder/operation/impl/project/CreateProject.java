@@ -406,7 +406,7 @@ public class CreateProject {
      *
      * @param project 项目数据
      */
-    private static void insertNewProjectToOss(Project project, OSSClient ossClient) {
+    public static void insertNewProjectToOss(Project project, OSSClient ossClient) {
         //OSS创建空项目的project的数据文件
         String pcVersionData = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getPc_version() + Common.PROJECT_DATA_SUFFIX;
         String moVersionData = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getMo_version() + Common.PROJECT_DATA_SUFFIX;

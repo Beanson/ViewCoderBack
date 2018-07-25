@@ -121,43 +121,40 @@ public class ProjectList {
         OSSClient ossClient = OssOpt.initOssClient();
 
         try {
-            //解析请求数据
-            HashMap<String, Object> data = FormData.getParam(msg);
-            if (data != null && data.get(Common.PROJECT_ID) != null && data.get(Common.PROJECT_ID) != "" &&
-                    data.get(Common.USER_ID) != null && data.get(Common.USER_ID) != "") {
+            //1、获取前端传递过来的数据
+            Project project = (Project) FormData.getParam(msg, Project.class);
+            Long timestamp = Long.parseLong(project.getUser_id() + CommonService.getTimeStamp());
 
-                //1、获取前端传递过来的数据
-                int projectId = Integer.parseInt(String.valueOf(data.get(Common.PROJECT_ID)));
-                int userId = Integer.parseInt(String.valueOf(data.get(Common.USER_ID)));
-                int refId = Integer.parseInt(String.valueOf(data.get(Common.REF_ID)));
-                int parent = Integer.parseInt(String.valueOf(data.get(Common.PARENT)));
-                int newParent = Integer.parseInt(String.valueOf(data.get(Common.NEW_PARENT)));
-                String projectName = String.valueOf(data.get(Common.PROJECT_NAME));
-                String optType = String.valueOf(data.get(Common.OPT_TYPE));
-                Long timestamp = Long.parseLong(userId + CommonService.getTimeStamp());
+            //2、 获取原项目信息
+            Project projectRef = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, project.getId());
+            List<Project> projectsOrigin = sqlSession.selectList(Mapper.GET_ALL_RELATED_PROJECT, projectRef.getUser_id());
 
-                //2、 获取原项目信息
-                List<Project> projectsOrigin = sqlSession.selectList(Mapper.GET_ALL_RELATED_PROJECT, userId);
+            //3、把list数据打包成map数据
+            Map<Integer, List<Project>> projects = packProjectListToMap(projectsOrigin, project.getId(),
+                    project.getParent(), project.getProject_name());
 
-                //3、把list数据打包成map数据
-                Map<Integer, List<Project>> projects = packProjectListToMap(projectsOrigin, projectId, parent, projectName);
+            //4、 更新新项目的project表格、OSS中single_export和project_data文件拷贝
+            //若是3操作，重构当前页面，否则插入新页面
+            if(project.getOpt()==3){
+                //重构当前页面
+                reCreateOpt(project, ossClient, projects, sqlSession, project.getParent(), timestamp);
 
-                //4、 更新新项目的project表格、OSS中single_export和project_data文件拷贝
-                insertCopyRecord(userId, parent, newParent, refId, projects, sqlSession, ossClient, timestamp);
-
-                //5、如果不是在root最外层，则其父的子页面个数加1
-                if (parent != 0) addParentChildPageNum(parent, sqlSession);
-
-                //6、根据不同操作类型执行相应其他操作
-                optType(sqlSession, optType, projectId);
-
-                //7、返回生成的根项目元素，200成功信息
-                Assemble.responseSuccessSetting(responseData, projects.get(parent).get(0));
-
-            } else {
-                Assemble.responseErrorSetting(responseData, 402,
-                        "project_id or user_id null error");
+            }else{
+                insertCopyRecord(project.getUser_id(), project.getParent(), project.getNew_parent(), project.getRef_id(),
+                        projects, sqlSession, ossClient, timestamp);
             }
+
+
+            //5、如果不是在root最外层，则其父的子页面个数加1
+            if (project.getParent() != 0) addParentChildPageNum(project.getParent(), sqlSession);
+
+            //6、根据不同操作类型执行相应其他操作
+            optType(sqlSession, project.getOpt_type(), project.getId());
+
+            //7、返回生成的根项目元素，200成功信息
+            Assemble.responseSuccessSetting(responseData, projects.get(project.getParent()).get(0));
+
+
         } catch (Exception e) {
             ProjectList.logger.debug("copyProject occurs error", e);
             Assemble.responseErrorSetting(responseData, 500, e.toString());
@@ -221,6 +218,29 @@ public class ProjectList {
 
 
     /**
+     * 重构当前页面
+     * @param project 前端传递的项目信息
+     * @param ossClient oss句柄
+     * @param projects 排版好的projects数据
+     * @param sqlSession sql句柄
+     * @param parent project的父元素
+     * @param timestamp 时间戳用来新生成项目使用
+     * @throws Exception
+     */
+    private static void reCreateOpt(Project project, OSSClient ossClient, Map<Integer, List<Project>> projects,
+                                    SqlSession sqlSession, int parent, long timestamp) throws Exception{
+        //商城首页project
+        Project project1 = projects.get(parent).get(0);
+
+        //用商城首页数据覆盖原来页面的数据和文件
+        copyOssDataAndFile(ossClient, project1.getPc_version(), project1.getMo_version(), project);
+
+        insertCopyRecord(project.getUser_id(), project.getId(), project.getCurrent_id(), project.getCurrent_id(),
+                projects, sqlSession, ossClient, ++timestamp);
+    }
+
+
+    /**
      * 新项目页面插入数据库 + 生成oss文件数据
      *
      * @param userId     用户id，商城项目拷贝使用时必须的
@@ -267,19 +287,8 @@ public class ProjectList {
                 int num = sqlSession.insert(Mapper.CREATE_COPY_PROJECT, project);
 
                 if (num > 0) {
-                    /*拷贝pc版本项目project data数据*/
-                    ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.PROJECT_DATA),
-                            Common.PROJECT_DATA_SUFFIX, pcVersion, project.getPc_version());
-                    /*拷贝项目导出project file单文件数据*/
-                    ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT),
-                            Common.PROJECT_FILE_SUFFIX, pcVersion, project.getPc_version());
-
-                    /*拷贝mobile版本项目project data数据*/
-                    ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.PROJECT_DATA),
-                            Common.PROJECT_DATA_SUFFIX, moVersion, project.getMo_version());
-                     /*拷贝项目导出project file单文件数据*/
-                    ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT),
-                            Common.PROJECT_FILE_SUFFIX, moVersion, project.getMo_version());
+                    //拷贝生成新的项目OSS的数据和文件
+                    copyOssDataAndFile(ossClient, pcVersion, moVersion, project);
 
                     //每个子元素递归调用
                     int newId = project.getId();
@@ -290,6 +299,32 @@ public class ProjectList {
             //如果无child元素则返回
             return;
         }
+    }
+
+
+    /**
+     * 拷贝生成新的PC版和MO版的OSS数据和文件
+     *
+     * @param ossClient oss句柄
+     * @param pcVersion PC版
+     * @param moVersion MO版
+     * @param project   项目
+     */
+    private static void copyOssDataAndFile(OSSClient ossClient, String pcVersion, String moVersion, Project project) {
+
+        /*拷贝pc版本项目project data数据*/
+        ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.PROJECT_DATA),
+                Common.PROJECT_DATA_SUFFIX, pcVersion, project.getPc_version());
+                    /*拷贝项目导出project file单文件数据*/
+        ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT),
+                Common.PROJECT_FILE_SUFFIX, pcVersion, project.getPc_version());
+
+                    /*拷贝mobile版本项目project data数据*/
+        ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.PROJECT_DATA),
+                Common.PROJECT_DATA_SUFFIX, moVersion, project.getMo_version());
+                     /*拷贝项目导出project file单文件数据*/
+        ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT),
+                Common.PROJECT_FILE_SUFFIX, moVersion, project.getMo_version());
     }
 
 

@@ -104,13 +104,13 @@ public class PsdAnalysis {
 
 
             //psd项目的文件夹资源
-            UserUploadFile userUploadFile = new UserUploadFile(project.getId(), project.getUser_id(), null,
-                    Common.FILE_TYPE_IMAGE, Common.FOLDER_FILE, CommonService.getTimeStamp(), null, project.getProject_name(),
-                    "", String.valueOf(0), null, CommonService.getDateTime());
+            UserUploadFile userUploadFile = new UserUploadFile(project.getId(), project.getUser_id(), Common.EMPTY,
+                    Common.FILE_TYPE_IMAGE, Common.FOLDER_FILE, CommonService.getTimeStamp(), Common.EMPTY, project.getProject_name(),
+                    "", String.valueOf(0), Common.EMPTY, CommonService.getDateTime());
 
             //查看是否已经插入，若是则不添加插入列表，否则添加到插入列表
             int num = sqlSession.selectOne(Mapper.GET_ROOT_FOLDER_COUNT, userUploadFile);
-            if (num > 0) {
+            if (num <= 0) {
                 list.add(userUploadFile);
             }
 
@@ -229,7 +229,7 @@ public class PsdAnalysis {
             list.add(new UserUploadFile(project.getId(), project.getUser_id(), Common.COMMON_IMAGE, Common.FILE_TYPE_IMAGE,
                     Common.NOT_FOLDER_FILE, timeStampName, IMAGE_PNG_TYPE, layer.getName(),
                     project.getProject_name() + Common.RELATIVE_PATH_SUFFIX,
-                    String.valueOf(byteArrayOutputStream.size()), null, CommonService.getDateTime()));
+                    String.valueOf(byteArrayOutputStream.size()), Common.EMPTY, CommonService.getDateTime()));
         } else {
             logger.warn("===PSD Analizer-->saveAsImage null error: " + layer.getName());
         }

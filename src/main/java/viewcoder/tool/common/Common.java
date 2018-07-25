@@ -11,6 +11,9 @@ public class Common {
 
     private static Logger logger = Logger.getLogger(Common.class.getName());
 
+    //Genreal信息
+    public static String EMPTY = "";
+
     //不同环境共享的配置
     public static String TARGET_ENVIRONMENT = "com.viewcoder.target.environement"; //设定目标环境
 

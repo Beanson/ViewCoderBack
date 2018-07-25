@@ -35,6 +35,11 @@ public class Project {
     //photoshop项目特有字段
     private FileUpload psd_file;
 
+    //store项目特有字段
+    private int new_parent; //拷贝到某个project下
+    private String opt_type; //标注拷贝还是商城使用操作
+    private int current_id; //标注当前项目id
+
 
     public Project() {
     }
@@ -231,6 +236,30 @@ public class Project {
         this.web_url = web_url;
     }
 
+    public int getNew_parent() {
+        return new_parent;
+    }
+
+    public void setNew_parent(int new_parent) {
+        this.new_parent = new_parent;
+    }
+
+    public String getOpt_type() {
+        return opt_type;
+    }
+
+    public void setOpt_type(String opt_type) {
+        this.opt_type = opt_type;
+    }
+
+    public int getCurrent_id() {
+        return current_id;
+    }
+
+    public void setCurrent_id(int current_id) {
+        this.current_id = current_id;
+    }
+
     @Override
     public String toString() {
         return "Project{" +
@@ -255,6 +284,9 @@ public class Project {
                 ", web_url='" + web_url + '\'' +
                 ", target_width=" + target_width +
                 ", psd_file=" + psd_file +
+                ", new_parent=" + new_parent +
+                ", opt_type='" + opt_type + '\'' +
+                ", current_id='" + current_id + '\'' +
                 '}';
     }
 }
