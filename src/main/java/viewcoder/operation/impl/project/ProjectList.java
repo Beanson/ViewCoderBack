@@ -126,33 +126,33 @@ public class ProjectList {
             Long timestamp = Long.parseLong(project.getUser_id() + CommonService.getTimeStamp());
 
             //2、 获取原项目信息
-            Project projectRef = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, project.getId());
+            Project projectRef = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, project.getRef_id());
             List<Project> projectsOrigin = sqlSession.selectList(Mapper.GET_ALL_RELATED_PROJECT, projectRef.getUser_id());
 
             //3、把list数据打包成map数据
-            Map<Integer, List<Project>> projects = packProjectListToMap(projectsOrigin, project.getId(),
-                    project.getParent(), project.getProject_name());
+            Map<Integer, List<Project>> projects = packProjectListToMap(projectsOrigin, projectRef.getId(),
+                    projectRef.getParent(), project.getProject_name());
 
             //4、 更新新项目的project表格、OSS中single_export和project_data文件拷贝
             //若是3操作，重构当前页面，否则插入新页面
             if(project.getOpt()==3){
                 //重构当前页面，并插入子页面
-                reCreateOpt(project, ossClient, projects, sqlSession, project.getParent(), timestamp);
+                reCreateOpt(project, ossClient, projects, sqlSession, projectRef.getParent(), timestamp);
 
             }else{
                 //插入新project和子project页面记录
-                insertCopyRecord(project.getUser_id(), project.getParent(), project.getNew_parent(), project.getRef_id(),
+                insertCopyRecord(project.getUser_id(), projectRef.getParent(), project.getNew_parent(), project.getRef_id(),
                         projects, sqlSession, ossClient, timestamp);
+
+                //5、如果不是在root最外层，则其父的子页面个数加1
+                if (project.getNew_parent() != 0) addParentChildPageNum(project.getNew_parent(), sqlSession);
             }
 
-            //5、如果不是在root最外层，则其父的子页面个数加1
-            if (project.getParent() != 0) addParentChildPageNum(project.getParent(), sqlSession);
-
             //6、根据不同操作类型执行相应其他操作
-            optType(sqlSession, project.getOpt_type(), project.getId());
+            optType(sqlSession, project.getOpt_type(), projectRef.getId());
 
             //7、返回生成的根项目元素，200成功信息
-            Assemble.responseSuccessSetting(responseData, projects.get(project.getParent()).get(0));
+            Assemble.responseSuccessSetting(responseData, projects.get(projectRef.getParent()).get(0));
 
 
         } catch (Exception e) {
@@ -235,7 +235,7 @@ public class ProjectList {
         //用商城首页数据覆盖原来页面的数据和文件
         copyOssDataAndFile(ossClient, project1.getPc_version(), project1.getMo_version(), project);
 
-        insertCopyRecord(project.getUser_id(), project.getId(), project.getCurrent_id(), project.getCurrent_id(),
+        insertCopyRecord(project.getUser_id(), project.getRef_id(), project.getId(), project.getRef_id(),
                 projects, sqlSession, ossClient, ++timestamp);
     }
 

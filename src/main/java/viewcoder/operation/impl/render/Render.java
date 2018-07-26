@@ -49,6 +49,7 @@ public class Render {
             String projectId = (String) data.get(Common.ID);
             String userId = (String) data.get(Common.USER_ID);
             String version = (String) data.get(Common.VERSION);
+
             //从数据库中根据项目Id获取项目渲染数据
             Project project = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, Integer.parseInt(projectId));
             if (project != null && project.getUser_id() == Integer.parseInt(userId)) {

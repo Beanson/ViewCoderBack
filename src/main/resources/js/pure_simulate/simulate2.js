@@ -375,7 +375,7 @@ function getTextProperty(ele, obj, text) {
     obj['font-weight'] = css(ele, 'font-weight');
     obj['line-height'] = 150;
     obj['text-align'] = css(ele, 'text-align');
-    obj['font-family'] = css(ele, 'font-family').replace(/"/g, '');
+    obj['font-family'] = css(ele, 'font-family').replace(/"/g, '').toLowerCase();
     obj['font-style'] = css(ele, 'font-style');
     obj['font-color'] = css(ele, 'color');
     obj['text-decoration'] = css(ele, 'text-decoration');
