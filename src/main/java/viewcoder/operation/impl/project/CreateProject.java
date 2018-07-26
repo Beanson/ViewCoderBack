@@ -162,7 +162,7 @@ public class CreateProject {
 
                 //设置psdInfo的project_data数据到OSS中
                 project.setProject_data(JSON.toJSONString(psdInfo));
-                //project data文件跟新插入oss中
+                //project data文件更新插入oss中
                 insertNewProjectToOss(project, ossClient);
 
                 //图片信息batch插入userUploadFile表中

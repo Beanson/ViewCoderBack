@@ -136,14 +136,14 @@ public class ProjectList {
             //4、 更新新项目的project表格、OSS中single_export和project_data文件拷贝
             //若是3操作，重构当前页面，否则插入新页面
             if(project.getOpt()==3){
-                //重构当前页面
+                //重构当前页面，并插入子页面
                 reCreateOpt(project, ossClient, projects, sqlSession, project.getParent(), timestamp);
 
             }else{
+                //插入新project和子project页面记录
                 insertCopyRecord(project.getUser_id(), project.getParent(), project.getNew_parent(), project.getRef_id(),
                         projects, sqlSession, ossClient, timestamp);
             }
-
 
             //5、如果不是在root最外层，则其父的子页面个数加1
             if (project.getParent() != 0) addParentChildPageNum(project.getParent(), sqlSession);
