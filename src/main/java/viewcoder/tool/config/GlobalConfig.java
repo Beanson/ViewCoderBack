@@ -1,6 +1,7 @@
 package viewcoder.tool.config;
 
 import org.apache.commons.io.IOUtils;
+import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.common.Common;
 import org.apache.log4j.Logger;
 
@@ -27,6 +28,10 @@ public class GlobalConfig {
         try {
             //从Jenkins中获取设置的目标environment
             String targetEnvironment = System.getenv(TARGET_ENV);
+            if (!CommonService.checkNotNull(targetEnvironment)) {
+                targetEnvironment = Common.DEV_ENVIRONMENT;
+            }
+            GlobalConfig.logger.debug("Target Environment is " + targetEnvironment);
 
             /*加载主配置文件，获取全局辅助配置信息*/
             inputStream = GlobalConfig.class.getResourceAsStream(GENERAL_CONFIG);
