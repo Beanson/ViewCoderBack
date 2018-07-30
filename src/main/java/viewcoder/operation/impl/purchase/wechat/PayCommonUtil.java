@@ -11,32 +11,20 @@ import java.util.*;
 public class PayCommonUtil {
 
     private static Logger logger = Logger.getLogger(PayCommonUtil.class.getName());
+
     /**
      * 是否签名正确,规则是:按参数名称a-z排序,遇到空值的参数不参加签名。
      *
      * @return boolean
      */
-    public static boolean isTenpaySign(String characterEncoding, Map<String, String> packageParams, String API_KEY) {
-        StringBuffer sb = new StringBuffer();
-        Set es = packageParams.entrySet();
-        Iterator it = es.iterator();
-        while (it.hasNext()) {
-            Map.Entry entry = (Map.Entry) it.next();
-            String k = (String) entry.getKey();
-            String v = (String) entry.getValue();
-            if (!"sign".equals(k) && null != v && !"".equals(v)) {
-                sb.append(k + "=" + v + "&");
-            }
-        }
-
-        sb.append("key=" + API_KEY);
-
+    public static boolean isTenpaySign(String characterEncoding, Map<String, String> packageParams, String API_KEY)
+            throws Exception {
         //算出摘要
-        String mySign = MD5WechatPayUtil.MD5Encode(sb.toString(), characterEncoding).toLowerCase();
-        String wechatPaySign = ((String) packageParams.get("sign")).toLowerCase();
-
-        PayCommonUtil.logger.debug("wechatPaySign: "+wechatPaySign + "    mySign: " + mySign);
+        String mySign = createSign(characterEncoding, packageParams, API_KEY);
+        String wechatPaySign = ((String) packageParams.get("sign"));
+        System.out.println("mySign: " + mySign + " , originSign:" + wechatPaySign);
         return wechatPaySign.equals(mySign);
+
     }
 
     /**
@@ -46,22 +34,23 @@ public class PayCommonUtil {
      * @date 2016-4-22
      * @Description：sign签名
      */
-    public static String createSign(String characterEncoding, SortedMap<Object, Object> packageParams, String API_KEY) {
-        StringBuffer sb = new StringBuffer();
-        Set es = packageParams.entrySet();
-        Iterator it = es.iterator();
-        while (it.hasNext()) {
-            Map.Entry entry = (Map.Entry) it.next();
-            String k = (String) entry.getKey();
-            String v = (String) entry.getValue();
-            if (null != v && !"".equals(v) && !"sign".equals(k) && !"key".equals(k)) {
-                sb.append(k + "=" + v + "&");
+    public static String createSign(String characterEncoding, Map<String, String> packageParams, String API_KEY) throws Exception {
+
+        Set<String> keySet = packageParams.keySet();
+        String[] keyArray = keySet.toArray(new String[keySet.size()]);
+        Arrays.sort(keyArray);
+        StringBuilder sb = new StringBuilder();
+        for (String k : keyArray) {
+            if (k.equals("sign")) {
+                continue;
             }
+            if (packageParams.get(k).trim().length() > 0) // 参数值为空，则不参与签名
+                sb.append(k).append("=").append(packageParams.get(k).trim()).append("&");
         }
-        sb.append("key=" + API_KEY);
-        String sign = MD5WechatPayUtil.MD5Encode(sb.toString(), characterEncoding).toUpperCase();
-        return sign;
+        sb.append("key=").append(API_KEY);
+        return MD5WechatPayUtil.MD5Encode(sb.toString(), characterEncoding).toUpperCase();
     }
+
 
     /**
      * @param parameters 请求参数

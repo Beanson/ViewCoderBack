@@ -34,8 +34,8 @@ public interface OrderMapper {
 
     /**************************以下是insert操作**********************************/
     //插入新的order数据
-    @Insert("insert into orders(out_trade_no,trade_no,user_id,service_id,service_num,order_date,pay_date,expire_date,pay_status,pay_way,price)" +
-            " values(#{out_trade_no},#{trade_no},#{user_id},#{service_id},#{service_num},#{order_date},#{pay_date},#{expire_date},#{pay_status},#{pay_way},#{price})")
+    @Insert("insert into orders(user_id,service_id,service_num,order_date,pay_way,price)" +
+            " values(#{user_id},#{service_id},#{service_num},#{order_date},#{pay_way},#{price})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     int insertNewOrderItem(Orders orders);
 
@@ -48,8 +48,9 @@ public interface OrderMapper {
 
     /**************************以下是update操作**********************************/
     //更新order支付状态的数据
-//    @Update("update orders set pay_date=#{pay_date}, expire_date=#{expire_date}, pay_way=#{pay_way} where id=#{id}")
-//    int updateOrderPayment(Orders orders);
+    @Update("update orders set out_trade_no=#{out_trade_no}, trade_no=#{trade_no}, pay_date=#{pay_date}, " +
+            "expire_date=#{expire_date}, pay_status=1 where id=#{id}")
+    int updateOrderPayment(Orders orders);
 }
 
 

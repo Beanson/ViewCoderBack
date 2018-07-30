@@ -2,6 +2,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.ibatis.session.SqlSession;
 import viewcoder.operation.entity.UserUploadFile;
 import viewcoder.operation.impl.common.CommonService;
+import viewcoder.operation.impl.purchase.wechat.PayCommonUtil;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.common.Mapper;
 import viewcoder.tool.common.OssOpt;
@@ -13,14 +14,57 @@ import org.junit.Test;
 import viewcoder.tool.util.MybatisUtils;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Administrator on 2018/2/17.
  */
 
 public class CommonTest {
+
+    @Test
+    public void weChatVerify() throws Exception{
+        Map packageParams = new HashMap<String, String>();
+        packageParams.put("appid","wx16c7efa55a7f976b");
+        packageParams.put("bank_type","BOC_DEBIT");
+        packageParams.put("cash_fee","10");
+        packageParams.put("fee_type","CNY");
+        packageParams.put("is_subscribe","Y");
+        packageParams.put("mch_id","1503031011");
+        packageParams.put("nonce_str","2324373739");
+        packageParams.put("openid","oaCnbs6EiIYbXgc8aYlRRSlJvqGk");
+        packageParams.put("out_trade_no","1532791477865");
+        packageParams.put("result_code","SUCCESS");
+        packageParams.put("return_code","SUCCESS");
+        packageParams.put("sign","94C42B64245D52032A18CBC2C31FF9AB");
+        packageParams.put("time_end","20180728232451");
+        packageParams.put("total_fee","10");
+        packageParams.put("trade_type","NATIVE");
+        packageParams.put("transaction_id","4200000150201807289324621765");
+        PayCommonUtil.isTenpaySign(Common.UTF8, packageParams, GlobalConfig.getProperties(Common.PAY_WECHAT_API_KEY));
+
+        Map packageParams2 = new HashMap<String, String>();
+        packageParams2.put("appid","wx16c7efa55a7f976b");
+        packageParams2.put("bank_type","BOC_DEBIT");
+        packageParams2.put("cash_fee","10");
+        packageParams2.put("fee_type","CNY");
+        packageParams2.put("is_subscribe","Y");
+        packageParams2.put("mch_id","1503031011");
+
+        packageParams2.put("openid","oaCnbs6EiIYbXgc8aYlRRSlJvqGk");
+        packageParams2.put("nonce_str","2324373739");
+
+        packageParams2.put("out_trade_no","1532791477865");
+        packageParams2.put("result_code","SUCCESS");
+        packageParams2.put("return_code","SUCCESS");
+        //packageParams.put("sign","94C42B64245D52032A18CBC2C31FF9AB");
+        packageParams2.put("time_end","20180728232451");
+        packageParams2.put("total_fee","10");
+        packageParams2.put("trade_type","NATIVE");
+        packageParams2.put("transaction_id","4200000150201807289324621765");
+//
+        System.out.println("create sign:"+PayCommonUtil.createSign(Common.UTF8, packageParams2, GlobalConfig.getProperties(Common.PAY_WECHAT_API_KEY)));
+    }
 
     @Test
     public void insertBatch()throws Exception{

@@ -93,7 +93,7 @@ public class Mapper {
     public static final String INSERT_NEW_ORDER_ITEM = "insertNewOrderItem";
 
     //update
-    //public static final String UPDATE_ORDER_PAYMENT="updateOrderPayment";
+    public static final String UPDATE_ORDER_PAYMENT="updateOrderPayment";
 
     //delete
     public static final String DELETE_ORDER_ITEM = "deleteOrderItem";

@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Administrator on 2018/2/17.
@@ -23,8 +24,8 @@ public class OssOpt {
 
     // endpoint以杭州为例，其它region请按实际情况填写
     //TODO 上ECS后把 END_POINT 设置为ECS处的连接
-    private static final String END_POINT = "com.viewcoder.oss.endpoint.outer";
-    //private static final String END_POINT = "com.viewcoder.oss.endpoint.inner";
+    private static final String END_POINT_DEV = "com.viewcoder.oss.endpoint.outer";
+    private static final String END_POINT_PROD = "com.viewcoder.oss.endpoint.inner";
     // 云账号AccessKey有所有API访问权限，建议遵循阿里云安全最佳实践，创建并使用RAM子账号进行API访问或日常运维，请登录 https://ram.console.aliyun.com 创建
     private static final String VIEWCODER_BUCKET = "viewcoder-bucket";
 
@@ -35,8 +36,13 @@ public class OssOpt {
      * @return 返回OSSClient的实例
      */
     public static OSSClient initOssClient() {
+        if(Objects.equals(GlobalConfig.getProperties(Common.TARGET_ENVIRONMENT), Common.PROD_ENVIRONMENT)){
+            return new OSSClient(GlobalConfig.getProperties(END_POINT_PROD), "q4pjxqabACHK2WE5","yF3L6IbHTma6QbgfopLcJ4JF2cvSbJ");
+
+        }else{
+            return new OSSClient(GlobalConfig.getProperties(END_POINT_DEV), "q4pjxqabACHK2WE5","yF3L6IbHTma6QbgfopLcJ4JF2cvSbJ");
+        }
         //OssOpt.logger.debug("access key:" + Common.ALI_ACCESSKEY_ID + " access secret:" + Common.ALI_ACCESSKEY_SECRET);
-        return new OSSClient(GlobalConfig.getProperties(END_POINT), "q4pjxqabACHK2WE5","yF3L6IbHTma6QbgfopLcJ4JF2cvSbJ");
         //return new OSSClient(GlobalConfig.getProperties(END_POINT), Common.ALI_ACCESSKEY_ID, Common.ALI_ACCESSKEY_SECRET);
     }
 

@@ -1,5 +1,6 @@
 package viewcoder.operation.impl.purchase;
 
+import com.sun.org.apache.xpath.internal.operations.Or;
 import org.apache.ibatis.session.SqlSession;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.common.Common;
@@ -59,10 +60,13 @@ public class AliPay {
             json.put(Common.PAY_ALI_KEY_TRADE_NO, CommonService.getTimeStamp());
             json.put(Common.PAY_ALI_KEY_PRODUCT_CODE, GlobalConfig.getProperties(Common.PAY_ALI_PRODUCT_CODE));
             json.put(Common.PAY_ALI_KEY_TOTAL_AMOUNT, orders.getPrice());
-            //商品描述标题
-            json.put(Common.PAY_ALI_KEY_SUBJECT, orders.getSubject());
+            json.put(Common.PAY_ALI_KEY_SUBJECT, orders.getSubject());//商品描述标题
             //notify_url中回传接收数据
-            json.put(Common.PAY_ALI_KEY_PASSBACK_PARAMS, URLEncoder.encode(JSON.toJSONString(orders), Common.UTF8));
+            Map<String, Object> map = new HashMap<>(2);
+            map.put(Common.ID, orders.getId());
+            map.put(Common.SERVICE_ID, orders.getService_id());
+            map.put(Common.SERVICE_NUM, orders.getService_num());
+            json.put(Common.PAY_ALI_KEY_PASSBACK_PARAMS, URLEncoder.encode(JSON.toJSONString(map), Common.UTF8));
             //设置支付信息参数
             alipayRequest.setBizContent(json.toString());
             //调用SDK生成表单
@@ -81,14 +85,13 @@ public class AliPay {
     public static String aliPayNotify(Object msg) {
 
         //初始化返回支付宝的response
-        String notifyResponse = "failure";
+        String notifyResponse = Common.FAIL;
         try {
             //获取支付宝POST过来反馈信息
             Map<String, String> params = new HashMap<String, String>();
             Map<String, Object> requestParams = FormData.getParam(msg);
             for (Iterator<String> iter = requestParams.keySet().iterator(); iter.hasNext(); ) {
                 String name = (String) iter.next();
-                //String[] values = (String[]) requestParams.get(name);
                 String valueStr = String.valueOf(requestParams.get(name));
                 AliPay.logger.debug("name:" + name + " , value:" + valueStr);
                 params.put(name, valueStr);
@@ -99,7 +102,7 @@ public class AliPay {
                     GlobalConfig.getProperties(Common.PAY_ALI_CHARSET), GlobalConfig.getProperties(Common.PAY_ALI_SIGN_TYPE));
 
             if (signVerified) {
-                notifyResponse = "success";
+                notifyResponse = Common.SUCCESS;
                 AliPay.logger.debug("aliPayNotify signVerified success");
                 //签名成功，进行业务逻辑处理
                 verifyOrderLogic(params);
@@ -124,9 +127,9 @@ public class AliPay {
     private static void verifyOrderLogic(Map<String, String> params) throws Exception {
         // 验签成功后，按照支付结果异步通知中的描述，对支付结果中的业务内容进行二次校验，
         // 校验成功后在response中返回success并继续商户自身业务处理，校验失败返回failure
-        //商户订单号
+        //商户订单号，查询交易订单详情记录，相当于查看订单详情
         String out_trade_no = new String(params.get("out_trade_no").getBytes("ISO-8859-1"), "UTF-8");
-        //支付宝交易号
+        //支付宝交易号，查询交易流水记录，客户可以自己登陆根据交易号查找
         String trade_no = new String(params.get("trade_no").getBytes("ISO-8859-1"), "UTF-8");
         //交易状态
         String trade_status = new String(params.get("trade_status").getBytes("ISO-8859-1"), "UTF-8");
@@ -146,25 +149,14 @@ public class AliPay {
 
             //判断该订单号是否已在数据库中，若是则不进行操作，否则进行插入操作并下载数字证书文件
             //从交易记录解析出该订单信息
-            Orders orders = JSON.parseObject(
-                    URLDecoder.decode(params.get(Common.PAY_ALI_KEY_PASSBACK_PARAMS), Common.UTF8), Orders.class);
+            Orders orders = JSON.parseObject(URLDecoder.decode(
+                    params.get(Common.PAY_ALI_KEY_PASSBACK_PARAMS), Common.UTF8), Orders.class);
+            //设置订单的购买时间和到期时间
+            Purchase.updateOrderTime(orders);
             //设置外部订单号和支付宝交易号
             orders.setOut_trade_no(out_trade_no);
             orders.setTrade_no(trade_no);
-
-            //查询该订单号在数据库中是否存在，如果不存在则插入数据
-            SqlSession sqlSession = MybatisUtils.getSession();
-            int num = sqlSession.selectOne(Mapper.GET_ORDER_NUM_BY_TRADE_NO, out_trade_no);
-            if (num <= 0) {
-                //插入新订单信息到数据库操作
-                Purchase.insertNewPaidOrderItem(orders);
-                AliPay.logger.debug("verifyOrderLogic Trade success, and insert new order item");
-            }else{
-                AliPay.logger.debug("verifyOrderLogic Trade success, not insert because has existed");
-            }
-            //提交数据并关闭连接池
-            sqlSession.commit();
-            sqlSession.close();
+            Purchase.updateOrderStatus(orders);
         }
     }
 }

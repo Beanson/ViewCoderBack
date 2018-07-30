@@ -13,6 +13,8 @@
     </properties>
 
     <build>
+        <defaultGoal>package</defaultGoal>
+
         <plugins>
             <!--由于用到bouncycastle，会在meta-inf中引入.sf/.dsa/.rsa等文件，导致运行报错，因此需在打包时exclude这些文件-->
             <plugin>
@@ -45,6 +47,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.2</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -57,6 +60,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
                 <executions>
                     <execution>
                         <id>compile</id>
@@ -105,11 +109,11 @@
         <!--  CommonTest dependencies -->
         <!-- https://mvnrepository.com/artifact/junit/junit -->
         <!--for test module use 用在test模块中-->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.1</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>junit</groupId>-->
+            <!--<artifactId>junit</artifactId>-->
+            <!--<version>4.8.1</version>-->
+        <!--</dependency>-->
 
         <!--http请求及包装时使用，微信支付等-->
         <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->

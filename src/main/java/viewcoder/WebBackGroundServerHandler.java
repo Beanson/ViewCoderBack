@@ -84,8 +84,7 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                 if (uri.equals("/getUserInfoById")) {
                     ResponseData response = Overall.getUserInfoById(msg);
                     httpResponse(ctx, msg, response);
-                }
-                else if(uri.equals("/sendSuggestion")) {
+                } else if (uri.equals("/sendSuggestion")) {
                     ResponseData response = Overall.sendSuggestion(msg);
                     httpResponse(ctx, msg, response);
                 }
@@ -163,11 +162,12 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                 //更新order信息到数据库
                 else if (uri.equals("/aliPayNotify")) {
                     String response = AliPay.aliPayNotify(msg);
-                    httpResponse(ctx, msg, response);
+                    httpResponsePureHtml(ctx, msg, response);
                 }
                 //更新order信息到数据库
                 else if (uri.equals("/wechatPayNotify")) {
-                    WechatPay.weChatPayNotify(msg);
+                    String response = WechatPay.weChatPayNotify(msg);
+                    httpResponsePureHtml(ctx, msg, response);
                 }
                 //下载支付哈希凭证信息
                 else if (uri.equals("/getPayInfo")) {
@@ -237,8 +237,7 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                 else if (uri.equals("/createEmptyProject")) {
                     ResponseData response = CreateProject.createEmptyProject(msg);
                     httpResponse(ctx, msg, response);
-                }
-                else if (uri.equals("/createStoreProject")) {
+                } else if (uri.equals("/createStoreProject")) {
                     ResponseData response = CreateProject.createStoreProject(msg);
                     httpResponse(ctx, msg, response);
                 }
@@ -266,13 +265,6 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
 
                 /***************************************************************/
                 /*Render专区 *************************/
-                /*Table/List 获取数据*/
-//                else if (uri.equals("/getTableData")) {
-//                    httpResponse(ctx, msg, JSON.toJSONString(getTableData(request)));
-//                } else if (uri.equals("/getListData")) {
-//                    httpResponse(ctx, msg, JSON.toJSONString(getListData(request)));
-//                }
-
                 //根据project的id获取该project的渲染信息
                 else if (uri.equals("/getProjectRenderData")) {
                     ResponseData response = Render.getProjectRenderData(msg);
@@ -315,13 +307,7 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                 }
 
                 /*以下是测试请求链接*/
-                else if (uri.equals("/testWechatPay")) {
-                    Purchase.testWechatPay(msg);
-
-                } else if (uri.equals("/testAliPay")) {
-                    httpResponsePureHtml(ctx, msg, Purchase.testAliPay(msg));
-
-                } else if (uri.equals("/getAllOss")) {
+                else if (uri.equals("/getAllOss")) {
                     ResponseData responseData = TestUtil.getAllOss();
                     httpResponse(ctx, msg, responseData);
 
@@ -333,8 +319,7 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     logger.debug(GlobalConfig.getProperties("com.viewcoder.file.system.base.url"));
                     httpResponse(ctx, msg, JSON.toJSONString("hello world"));
 
-                }
-                else {
+                } else {
                     httpResponse(ctx, msg, "server do not serve such request");
                     System.out.println("----------------------------come to invalid request-----------------------");
                 }

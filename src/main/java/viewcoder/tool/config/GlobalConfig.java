@@ -16,9 +16,8 @@ import java.util.Properties;
 public class GlobalConfig {
 
     private static Logger logger = Logger.getLogger(GlobalConfig.class);
-
     private final static String GENERAL_CONFIG = "/config/general.properties";
-    private final static String SLASH = "/";
+    private final static String TARGET_ENV = "TARGET_ENV";
     private static Properties props = new Properties();
     private static int cores = Runtime.getRuntime().availableProcessors();
 
@@ -26,19 +25,18 @@ public class GlobalConfig {
     static {
         InputStream inputStream = null;
         try {
-            /*加载主配置文件，获取目标environment*/
+            //从Jenkins中获取设置的目标environment
+            String targetEnvironment = System.getenv(TARGET_ENV);
+
+            /*加载主配置文件，获取全局辅助配置信息*/
             inputStream = GlobalConfig.class.getResourceAsStream(GENERAL_CONFIG);
             props.load(new InputStreamReader(inputStream, Common.UTF8));
-            String targetEnvironment = GlobalConfig.getProperties(Common.TARGET_ENVIRONMENT);
+            String[] settingFiles = GlobalConfig.getProperties(Common.SETTING_FILES).split(",");
 
             /*读取具体环境下所有config文件*/
-            String targetConfigUrl = "config/" + targetEnvironment + SLASH;
-            List<String> files = IOUtils.readLines(GlobalConfig.class.getClassLoader()
-                    .getResourceAsStream(targetConfigUrl), StandardCharsets.UTF_8);
-
-            /*加载所有该配置环境下的文件*/
-            for (String file : files) {
-                inputStream = GlobalConfig.class.getResourceAsStream(SLASH + targetConfigUrl + file);
+            for (String file : settingFiles) {
+                String targetConfigUrl = "/config/" + targetEnvironment + "/" + file + "_" + targetEnvironment + ".properties";
+                inputStream = GlobalConfig.class.getResourceAsStream(targetConfigUrl);
                 props.load(new InputStreamReader(inputStream, Common.UTF8));
             }
 
@@ -119,9 +117,10 @@ public class GlobalConfig {
 
     /**
      * 获取所有环境properties的引用
+     *
      * @return
      */
-    public static Properties getPropertiesRef(){
+    public static Properties getPropertiesRef() {
         return props;
     }
 

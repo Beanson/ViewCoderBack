@@ -179,9 +179,13 @@ public class Purchase {
      * 根据不同支付方式进入不同支付页面
      */
     public static void doPayment(ResponseData responseData, Orders orders) throws Exception {
+
         //设置支付日期等
         orders.setOrder_date(CommonService.getDateTime());
+        //插入订单条目到数据库操作
+        insertNewPaidOrderItem(orders);
 
+        //先插入数据库支付，后调用payment方法，这样可以获取新插入的id值作为附加数据添加上
         //根据不同支付方式进行不同逻辑处理
         switch (orders.getPay_way()) {
             case 1: {
@@ -200,7 +204,8 @@ public class Purchase {
             }
             case 3: {
                 //进行积分兑换交易操作
-                insertNewPaidOrderItem(orders);
+                //设置pay_status为1，表示已支付
+                orders.setPay_status(1);
                 responseData.setMark(2);
                 updateTotalPointsAfterExchange(orders, responseData);
                 break;
@@ -223,11 +228,6 @@ public class Purchase {
     public static void insertNewPaidOrderItem(Orders orders) {
         SqlSession sqlSession = MybatisUtils.getSession();
         try {
-            //设置订单的购买时间和到期时间
-            updateOrderTime(orders);
-            //设置pay_status为1，表示已支付
-            orders.setPay_status(1);
-
             //更新orders数据库条目，并返回影响条数
             int num = sqlSession.insert(Mapper.INSERT_NEW_ORDER_ITEM, orders);
             Purchase.logger.debug("Purchase update database num is:" + num);
@@ -284,29 +284,24 @@ public class Purchase {
     }
 
 
-    //测试AliPay的方法
-    public static String testAliPay(Object msg) {
-        Orders orders = new Orders();
-        orders.setUser_id(1);
-        orders.setService_id(2);
-        orders.setService_num(2);
-        orders.setOrder_date(CommonService.getDateTime());
-        orders.setPay_way(1);
-        orders.setPrice("0.1");
-        orders.setSubject("套餐日销版 * 2");
-        String backData = "";
+    /**
+     * 更新订单交易情况，针对支付宝和微信支付方式
+     *
+     * @param orders 更新的订单信息
+     */
+    public static void updateOrderStatus(Orders orders) {
+        SqlSession sqlSession = MybatisUtils.getSession();
         try {
-            backData = AliPay.invokePayment(orders);
-        } catch (Exception e) {
-            Purchase.logger.error("testAliPay exception", e);
-        }
-        return backData;
-    }
+            sqlSession.update(Mapper.UPDATE_ORDER_PAYMENT, orders);
 
-    //测试WechatPay的方法
-    public static void testWechatPay(Object msg) {
-        String str = TextData.getText(msg);
-        logger.debug("get response: " + str);
+        } catch (Exception e) {
+            Purchase.logger.error("updateOrderStatus error: ", e);
+
+        } finally {
+            //跟新数据库并关闭连接
+            sqlSession.commit();
+            sqlSession.close();
+        }
     }
 
 
@@ -353,7 +348,7 @@ public class Purchase {
 
         } catch (Exception e) {
             Assemble.responseErrorSetting(responseData, 500,
-                    "updateOrderPayment error: " + e);
+                    "getPayInfo error: " + e);
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
@@ -400,11 +395,11 @@ public class Purchase {
                 Assemble.responseSuccessSetting(responseData, null);
             } else {
                 Assemble.responseErrorSetting(responseData, 401,
-                        "updateOrderPayment update error, num is:" + num);
+                        "deleteOrderItem update error, num is:" + num);
             }
         } catch (Exception e) {
             Assemble.responseErrorSetting(responseData, 500,
-                    "updateOrderPayment error: " + e);
+                    "deleteOrderItem error: " + e);
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
         }

@@ -16,10 +16,15 @@ public class Common {
 
     //不同环境共享的配置
     public static String TARGET_ENVIRONMENT = "com.viewcoder.target.environement"; //设定目标环境
+    public static String SETTING_FILES = "com.viewcoder.setting.files"; //设定目标环境下的文件
+    public static String DEV_ENVIRONMENT = "dev"; //开发环境
+    public static String PROD_ENVIRONMENT = "prod"; //生产环境
 
     //后台返回status_code
     public final static int STATUS_CODE_OK = 200;
     public final static String STATUS_OK = "OK";
+    public final static String SUCCESS = "SUCCESS";
+    public final static String FAIL = "FAIL";
 
     //PSD文件解析出来后的组件类型
     public final static String COMMON_IMAGE = "Common_Image";
@@ -139,6 +144,8 @@ public class Common {
     public static final String PAY_WECHAT_NOTIFY_RESULT_CODE_SUCCESS = "SUCCESS"; //支付结果变量--SUCCESS
     public static final String PAY_WECHAT_NOTIFY_ERROR_CODE = "err_code"; //支付错误代码
     public static final String PAY_WECHAT_NOTIFY_ERROR_DEPICT = "err_code_des"; //支付错误描述
+    public static final String PAY_WECHAT_TRANSACTION_ID = "transaction_id"; //相当于支付宝的trade_no
+    public static final String PAY_WECHAT_PRODUCT_ID = "product_id"; //trade_type为native时要传
 
 
     //Web driver pool消息获取
