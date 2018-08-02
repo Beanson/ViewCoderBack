@@ -36,11 +36,11 @@ public class OssOpt {
      * @return 返回OSSClient的实例
      */
     public static OSSClient initOssClient() {
-        if(Objects.equals(GlobalConfig.getProperties(Common.TARGET_ENVIRONMENT), Common.PROD_ENVIRONMENT)){
-            return new OSSClient(GlobalConfig.getProperties(END_POINT_PROD), "q4pjxqabACHK2WE5","yF3L6IbHTma6QbgfopLcJ4JF2cvSbJ");
+        if (Objects.equals(GlobalConfig.getProperties(Common.TARGET_ENVIRONMENT), Common.PROD_ENVIRONMENT)) {
+            return new OSSClient(GlobalConfig.getProperties(END_POINT_PROD), "q4pjxqabACHK2WE5", "yF3L6IbHTma6QbgfopLcJ4JF2cvSbJ");
 
-        }else{
-            return new OSSClient(GlobalConfig.getProperties(END_POINT_DEV), "q4pjxqabACHK2WE5","yF3L6IbHTma6QbgfopLcJ4JF2cvSbJ");
+        } else {
+            return new OSSClient(GlobalConfig.getProperties(END_POINT_DEV), "q4pjxqabACHK2WE5", "yF3L6IbHTma6QbgfopLcJ4JF2cvSbJ");
         }
         //OssOpt.logger.debug("access key:" + Common.ALI_ACCESSKEY_ID + " access secret:" + Common.ALI_ACCESSKEY_SECRET);
         //return new OSSClient(GlobalConfig.getProperties(END_POINT), Common.ALI_ACCESSKEY_ID, Common.ALI_ACCESSKEY_SECRET);
@@ -259,27 +259,31 @@ public class OssOpt {
      * @return
      */
     public static String getOssFile(OSSClient ossClient, String fileName) {
-        OSSObject ossObject = ossClient.getObject(VIEWCODER_BUCKET, fileName);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(ossObject.getObjectContent()));
-        StringBuilder builder = new StringBuilder();
-        try {
-            //从数据流中读取字符流并用builder装载
-            String line = null;
-            line = reader.readLine();
-            while (CommonService.checkNotNull(line)) {
-                builder.append(line);
+        //如果存在该媒体对象则获取，否则返回Null，若不check直接获取不存在的oss文件会报错
+        if (getObjectExist(ossClient, fileName)) {
+            OSSObject ossObject = ossClient.getObject(VIEWCODER_BUCKET, fileName);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(ossObject.getObjectContent()));
+            StringBuilder builder = new StringBuilder();
+            try {
+                //从数据流中读取字符流并用builder装载
+                String line = null;
                 line = reader.readLine();
+                while (CommonService.checkNotNull(line)) {
+                    builder.append(line);
+                    line = reader.readLine();
+                }
+
+                //数据读取完成后，获取的流一定要显示Close，否则会造成资源泄露。
+                reader.close();
+
+            } catch (IOException e) {
+                OssOpt.logger.error("getOssFile error: ", e);
             }
-
-            //数据读取完成后，获取的流一定要显示Close，否则会造成资源泄露。
-            reader.close();
-
-        } catch (IOException e) {
-            OssOpt.logger.error("getOssFile error: ", e);
+            return builder.toString();
+        } else {
+            return null;
         }
-        return builder.toString();
     }
-
 }
 
 

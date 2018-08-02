@@ -80,6 +80,13 @@ public class CommonTest {
     }
 
     @Test
+    public void testFile(){
+        OSSClient ossClient = OssOpt.initOssClient();
+        String data = OssOpt.getOssFile(ossClient, "hello world");
+        System.out.println(data);
+    }
+
+    @Test
     public void testIntegerParse() throws Exception{
         System.out.println(1+CommonService.getTimeStamp());
         Thread.sleep(1000);
