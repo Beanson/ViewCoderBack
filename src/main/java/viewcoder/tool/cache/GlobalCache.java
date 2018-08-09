@@ -15,6 +15,7 @@ public class GlobalCache {
 
     private static CacheManager cacheManager;
     private static Cache<Integer, ProjectProgress> projectProgressCache;
+    private static Cache<String, Integer> registerVerifyCache;
 
     static {
         //初始化cache manager信息
@@ -24,6 +25,7 @@ public class GlobalCache {
 
         //初始化各个cache到对象
         projectProgressCache = cacheManager.getCache("projectProgress", Integer.class, ProjectProgress.class);
+        registerVerifyCache = cacheManager.getCache("registerVerifyCache", String.class, Integer.class);
     }
 
     /**
@@ -33,6 +35,14 @@ public class GlobalCache {
      */
     public static Cache<Integer, ProjectProgress> getProjectProgressCache() {
         return projectProgressCache;
+    }
+
+    /**
+     * 返回registerVerifyCache的cache信息
+     * @return
+     */
+    public static Cache<String, Integer> getRegisterVerifyCache() {
+        return registerVerifyCache;
     }
 
     //测试方法

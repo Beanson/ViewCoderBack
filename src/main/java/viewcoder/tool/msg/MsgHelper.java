@@ -11,8 +11,10 @@ import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import org.apache.log4j.Logger;
+import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.config.GlobalConfig;
+import viewcoder.tool.encrypt.AESEncryptor;
 
 
 import java.util.Map;
@@ -20,6 +22,7 @@ import java.util.Map;
 
 /**
  * Created by Administrator on 2018/4/28.
+ * 调用阿里云短信云服务发送短信
  */
 public class MsgHelper {
 
@@ -28,32 +31,40 @@ public class MsgHelper {
     private static final String domain = GlobalConfig.getProperties(Common.MSG_DOMAIN);//短信API产品域名（接口地址固定，无需修改）
     private static final String endPointName = GlobalConfig.getProperties(Common.MSG_ENDPOINT);
     private static final String regionId = GlobalConfig.getProperties(Common.MSG_REGIONID);
-    private static final String defaultConnectTimeout="sun.net.client.defaultConnectTimeout";
-    private static final String defaultReadTimeout="sun.net.client.defaultReadTimeout";
+    private static final String defaultConnectTimeout = "sun.net.client.defaultConnectTimeout";
+    private static final String defaultReadTimeout = "sun.net.client.defaultReadTimeout";
+    private static DefaultAcsClient defaultAcsClient; //发送短信的单例client
 
     /**
      * 初始化调用阿里云发送短信业务的句柄
+     *
      * @return 返回调用类的句柄
      * @throws Exception
      */
-    public static IAcsClient initMsg() throws Exception{
-        //可自助调整超时时间
-        System.setProperty(defaultConnectTimeout, Common.TIMEOUT_10000);
-        System.setProperty(defaultReadTimeout, Common.TIMEOUT_10000);
+    public static IAcsClient initMsg() throws Exception {
+        if (!CommonService.checkNotNull(defaultAcsClient)) {
+            //可自助调整超时时间
+            System.setProperty(defaultConnectTimeout, Common.TIMEOUT_10000);
+            System.setProperty(defaultReadTimeout, Common.TIMEOUT_10000);
 
-        //初始化ascClient,暂时不支持多region（请勿修改）
-        IClientProfile profile = DefaultProfile.getProfile(regionId, Common.ALI_ACCESSKEY_ID, Common.ALI_ACCESSKEY_SECRET);
-        DefaultProfile.addEndpoint(endPointName, regionId, product, domain);
-        return new DefaultAcsClient(profile);
+            //初始化ascClient,暂时不支持多region（请勿修改）
+            String accessId = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_ID));
+            String accessKey = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_SECRET));
+            IClientProfile profile = DefaultProfile.getProfile(regionId, accessId, accessKey);
+            DefaultProfile.addEndpoint(endPointName, regionId, product, domain);
+            defaultAcsClient = new DefaultAcsClient(profile);
+        }
+        return defaultAcsClient;
     }
 
 
     /**
      * 请求阿里云短息业务进行发送短信
-     * @param msgTemplate   消息模板id
-     * @param replaceData   需更换模板消息的占位符数据
-     * @param msgTo         短信发送达的手机
-     * @param signName      消息签名
+     *
+     * @param msgTemplate 消息模板id
+     * @param replaceData 需更换模板消息的占位符数据
+     * @param msgTo       短信发送达的手机
+     * @param signName    消息签名
      */
     public static void sendSingleMsg(String msgTemplate, Map<String, String> replaceData, String msgTo, String signName) {
 
@@ -75,10 +86,14 @@ public class MsgHelper {
             SendSmsResponse sendSmsResponse = acsClient.getAcsResponse(request);
             if (sendSmsResponse.getCode() != null && sendSmsResponse.getCode().equals(Common.STATUS_OK)) {
                 //请求成功
-                MsgHelper.logger.debug("sendSingleMsg with success: msgTo:"+ msgTo+", signName:"+signName+", msgTemplate:"+msgTemplate);
+                MsgHelper.logger.debug("sendSingleMsg with success: msgTo:" + msgTo + ", signName:" + signName + ", msgTemplate:" + msgTemplate);
+
+            }else {
+                //请求失败
+                System.out.println(sendSmsResponse.getCode());
             }
-        }catch (Exception e){
-            MsgHelper.logger.error("sendSingleMsg with error: ",e);
+        } catch (Exception e) {
+            MsgHelper.logger.error("sendSingleMsg with error: ", e);
         }
 
     }
@@ -86,14 +101,15 @@ public class MsgHelper {
 
     /**
      * 请求阿里云短息业务进行发送短信
-     * @param msgTemplate   消息模板id
-     * @param replaceData   需更换模板消息的占位符数据
-     * @param msgTos        短信发送达的手机号
-     * @param signName      消息签名
+     *
+     * @param msgTemplate 消息模板id
+     * @param replaceData 需更换模板消息的占位符数据
+     * @param msgTos      短信发送达的手机号
+     * @param signName    消息签名
      */
     public static void sendBatchMsg(String msgTemplate, Map<String, String> replaceData, String msgTos, String signName) {
 
-        try{
+        try {
             IAcsClient acsClient = initMsg();
             //组装请求对象
             SendBatchSmsRequest request = new SendBatchSmsRequest();
@@ -113,10 +129,10 @@ public class MsgHelper {
             SendBatchSmsResponse sendSmsResponse = acsClient.getAcsResponse(request);
             if (sendSmsResponse.getCode() != null && sendSmsResponse.getCode().equals(Common.STATUS_OK)) {
                 //请求成功
-                MsgHelper.logger.debug("sendSingleMsg with success: msgTo:"+ msgTos+", signName:"+signName+", msgTemplate:"+msgTemplate);
+                MsgHelper.logger.debug("sendSingleMsg with success: msgTo:" + msgTos + ", signName:" + signName + ", msgTemplate:" + msgTemplate);
             }
-        }catch (Exception e){
-            MsgHelper.logger.error("sendSingleMsg with error: ",e);
+        } catch (Exception e) {
+            MsgHelper.logger.error("sendSingleMsg with error: ", e);
         }
     }
 

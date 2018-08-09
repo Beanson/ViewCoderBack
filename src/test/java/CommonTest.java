@@ -11,6 +11,7 @@ import viewcoder.tool.encrypt.AESEncryptor;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.PutObjectResult;
 import org.junit.Test;
+import viewcoder.tool.msg.MsgHelper;
 import viewcoder.tool.util.MybatisUtils;
 
 import java.io.File;
@@ -22,52 +23,77 @@ import java.util.*;
 
 public class CommonTest {
 
+    //测试发送阿里云短信
     @Test
-    public void weChatVerify() throws Exception{
-        Map packageParams = new HashMap<String, String>();
-        packageParams.put("appid","wx16c7efa55a7f976b");
-        packageParams.put("bank_type","BOC_DEBIT");
-        packageParams.put("cash_fee","10");
-        packageParams.put("fee_type","CNY");
-        packageParams.put("is_subscribe","Y");
-        packageParams.put("mch_id","1503031011");
-        packageParams.put("nonce_str","2324373739");
-        packageParams.put("openid","oaCnbs6EiIYbXgc8aYlRRSlJvqGk");
-        packageParams.put("out_trade_no","1532791477865");
-        packageParams.put("result_code","SUCCESS");
-        packageParams.put("return_code","SUCCESS");
-        packageParams.put("sign","94C42B64245D52032A18CBC2C31FF9AB");
-        packageParams.put("time_end","20180728232451");
-        packageParams.put("total_fee","10");
-        packageParams.put("trade_type","NATIVE");
-        packageParams.put("transaction_id","4200000150201807289324621765");
-        PayCommonUtil.isTenpaySign(Common.UTF8, packageParams, GlobalConfig.getProperties(Common.PAY_WECHAT_API_KEY));
+    public void sendMsgTest() {
+        //校验码验证
+//        Map<String, String> map = new HashMap<>();
+//        map.put("code","12345");
+//        MsgHelper.sendSingleMsg("SMS_142010203", map, "18316433415", Common.MSG_SIGNNAME_LIPHIN);
 
-        Map packageParams2 = new HashMap<String, String>();
-        packageParams2.put("appid","wx16c7efa55a7f976b");
-        packageParams2.put("bank_type","BOC_DEBIT");
-        packageParams2.put("cash_fee","10");
-        packageParams2.put("fee_type","CNY");
-        packageParams2.put("is_subscribe","Y");
-        packageParams2.put("mch_id","1503031011");
+        //到期预警提醒
+//        Map<String, String> map = new HashMap<>();
+//        map.put("name", "beanson");
+//        map.put("service", " \"ViewCoder建站月套餐\" ");
+//        map.put("time", "2018-8-12 00:00");
+//        map.put("day", "7");
+//        MsgHelper.sendSingleMsg("SMS_142000294", map, "18316433415", Common.MSG_SIGNNAME_LIPHIN);
 
-        packageParams2.put("openid","oaCnbs6EiIYbXgc8aYlRRSlJvqGk");
-        packageParams2.put("nonce_str","2324373739");
+        //购买成功提醒
+        Map<String, String> map = new HashMap<>();
+        map.put("name", "beanson");
+        map.put("service", " \"ViewCoder建站月套餐\" ");
+        MsgHelper.sendSingleMsg("SMS_142020247", map, "18316433415", Common.MSG_SIGNNAME_LIPHIN);
 
-        packageParams2.put("out_trade_no","1532791477865");
-        packageParams2.put("result_code","SUCCESS");
-        packageParams2.put("return_code","SUCCESS");
-        //packageParams.put("sign","94C42B64245D52032A18CBC2C31FF9AB");
-        packageParams2.put("time_end","20180728232451");
-        packageParams2.put("total_fee","10");
-        packageParams2.put("trade_type","NATIVE");
-        packageParams2.put("transaction_id","4200000150201807289324621765");
-//
-        System.out.println("create sign:"+PayCommonUtil.createSign(Common.UTF8, packageParams2, GlobalConfig.getProperties(Common.PAY_WECHAT_API_KEY)));
+
     }
 
     @Test
-    public void insertBatch()throws Exception{
+    public void weChatVerify() throws Exception {
+        Map packageParams = new HashMap<String, String>();
+        packageParams.put("appid", "wx16c7efa55a7f976b");
+        packageParams.put("bank_type", "BOC_DEBIT");
+        packageParams.put("cash_fee", "10");
+        packageParams.put("fee_type", "CNY");
+        packageParams.put("is_subscribe", "Y");
+        packageParams.put("mch_id", "1503031011");
+        packageParams.put("nonce_str", "2324373739");
+        packageParams.put("openid", "oaCnbs6EiIYbXgc8aYlRRSlJvqGk");
+        packageParams.put("out_trade_no", "1532791477865");
+        packageParams.put("result_code", "SUCCESS");
+        packageParams.put("return_code", "SUCCESS");
+        packageParams.put("sign", "94C42B64245D52032A18CBC2C31FF9AB");
+        packageParams.put("time_end", "20180728232451");
+        packageParams.put("total_fee", "10");
+        packageParams.put("trade_type", "NATIVE");
+        packageParams.put("transaction_id", "4200000150201807289324621765");
+        PayCommonUtil.isTenpaySign(Common.UTF8, packageParams, GlobalConfig.getProperties(Common.PAY_WECHAT_API_KEY));
+
+        Map packageParams2 = new HashMap<String, String>();
+        packageParams2.put("appid", "wx16c7efa55a7f976b");
+        packageParams2.put("bank_type", "BOC_DEBIT");
+        packageParams2.put("cash_fee", "10");
+        packageParams2.put("fee_type", "CNY");
+        packageParams2.put("is_subscribe", "Y");
+        packageParams2.put("mch_id", "1503031011");
+
+        packageParams2.put("openid", "oaCnbs6EiIYbXgc8aYlRRSlJvqGk");
+        packageParams2.put("nonce_str", "2324373739");
+
+        packageParams2.put("out_trade_no", "1532791477865");
+        packageParams2.put("result_code", "SUCCESS");
+        packageParams2.put("return_code", "SUCCESS");
+        //packageParams.put("sign","94C42B64245D52032A18CBC2C31FF9AB");
+        packageParams2.put("time_end", "20180728232451");
+        packageParams2.put("total_fee", "10");
+        packageParams2.put("trade_type", "NATIVE");
+        packageParams2.put("transaction_id", "4200000150201807289324621765");
+//
+        System.out.println("create sign:" + PayCommonUtil.createSign(Common.UTF8, packageParams2, GlobalConfig.getProperties(Common.PAY_WECHAT_API_KEY)));
+    }
+
+    @Test
+    public void insertBatch() throws Exception {
         SqlSession sqlSession = MybatisUtils.getSession();
         List<UserUploadFile> list = new ArrayList<>();
         UserUploadFile userUploadFile = new UserUploadFile(1, 1, null,
@@ -80,15 +106,15 @@ public class CommonTest {
     }
 
     @Test
-    public void testFile(){
+    public void testFile() {
         OSSClient ossClient = OssOpt.initOssClient();
         String data = OssOpt.getOssFile(ossClient, "hello world");
         System.out.println(data);
     }
 
     @Test
-    public void testIntegerParse() throws Exception{
-        System.out.println(1+CommonService.getTimeStamp());
+    public void testIntegerParse() throws Exception {
+        System.out.println(1 + CommonService.getTimeStamp());
         Thread.sleep(1000);
         System.out.println(CommonService.getTimeStamp());
     }
@@ -118,7 +144,7 @@ public class CommonTest {
             ClassLoader classLoader = getClass().getClassLoader();
             File file = new File(classLoader.getResource("files/simple.psd").getFile());
             //OssOpt.uploadFileToOss("upload_files/simple.psd", file, ossClient);
-            PutObjectResult putObjectResult = ossClient.putObject("viewcoder-bucket","upload_files/simple.psd",file);
+            PutObjectResult putObjectResult = ossClient.putObject("viewcoder-bucket", "upload_files/simple.psd", file);
             System.out.println(putObjectResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -161,20 +187,20 @@ public class CommonTest {
 
 
     @Test
-    public void parseData(){
+    public void parseData() {
         String a[] = new String[2];
-        a[0]="123";
-        a[1]="456";
+        a[0] = "123";
+        a[1] = "456";
         Object b = a;
-        String c [] = (String[]) b;
-        System.out.println(c[0]+","+c[1]);
+        String c[] = (String[]) b;
+        System.out.println(c[0] + "," + c[1]);
     }
 
     @Test
-    public void testHex() throws Exception{
+    public void testHex() throws Exception {
         String str = "31353330343935343239353234323031383037303232313030313030343335303538323333393332333331323031382d30372d30322030393a33373a343731302e3130316e756c6c";
         byte[] decode = Hex.decodeHex(str.toCharArray());
-        System.out.println(new String(decode,"UTF-8"));
+        System.out.println(new String(decode, "UTF-8"));
     }
 }
 

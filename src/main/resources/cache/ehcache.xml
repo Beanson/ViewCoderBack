@@ -27,6 +27,19 @@
         </resources>
     </cache>
 
+    <!--记录注册验证码的cache-->
+    <cache alias="registerVerifyCache">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.lang.Integer</value-type>
+        <expiry>
+            <ttl unit="minutes">5</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">2000</heap>
+            <offheap unit="MB">500</offheap>
+        </resources>
+    </cache>
+
 
     <cache alias="test1" uses-template="default">
         <key-type>java.lang.Number</key-type>

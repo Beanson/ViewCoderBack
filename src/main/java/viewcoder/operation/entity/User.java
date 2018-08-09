@@ -10,6 +10,7 @@ import java.io.Serializable;
 public class User implements Serializable{
 
     private int id;
+    private String account;
     private String timestamp;
     private String portrait;
     private String user_name;
@@ -56,6 +57,14 @@ public class User implements Serializable{
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     public String getTimestamp() {
@@ -206,6 +215,7 @@ public class User implements Serializable{
     public String toString() {
         return "User{" +
                 "id=" + id +
+                ", account='" + account + '\'' +
                 ", timestamp='" + timestamp + '\'' +
                 ", portrait='" + portrait + '\'' +
                 ", user_name='" + user_name + '\'' +

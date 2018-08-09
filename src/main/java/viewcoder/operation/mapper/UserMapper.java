@@ -19,11 +19,11 @@ public interface UserMapper {
     public User getUserData(int user_id);
 
     //登录验证
-    @Select("select * from user where email=#{email} and password=#{password}")
+    @Select("select * from user where email=#{account} or phone=#{account} and password=#{password}")
     public List<User> loginValidation(User user);
 
     //注册验证
-    @Select("select * from user where email=#{email}")
+    @Select("select * from user where email=#{account} or phone=#{account}")
     public List<User> registerAccountCheck(User user);
 
     //获取用户原portrait数据信息
