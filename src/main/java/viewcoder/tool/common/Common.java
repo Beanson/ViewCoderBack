@@ -47,6 +47,16 @@ public class Common {
     //XML的配置文件类型
     public final static String XML_MSG_TYPE = "msg";
 
+    //用户数据
+    public final static String PHONE = "phone";
+    public final static String CODE = "code";
+
+    //短信数据
+    public final static String MESG_REGISTER_VERIFY_CODE = "SMS_142010203";
+    public final static String MESG_ALERT_EXPIRY = "SMS_142000294";
+    public final static String MESG_PURCHASE_SUCCESS = "SMS_142020247";
+
+
     //各种配置文件的key值
     //阿里云key
     public static final String ACCESS_KEY_ID = "com.viewcoder.aliyun.access.key";

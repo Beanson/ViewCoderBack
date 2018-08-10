@@ -101,6 +101,11 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     ResponseData response = Logon.ViewCoderLogin(msg);
                     httpResponse(ctx, msg, response);
                 }
+                //获取注册验证码
+                else if (uri.equals("/getRegisterVerifyCode")) {
+                    ResponseData response = Logon.getRegisterVerifyCode(msg);
+                    httpResponse(ctx, msg, response);
+                }
 
                 /***************************************************************/
                 /*Personal专区**************************/

@@ -18,6 +18,7 @@ public class User implements Serializable{
     private String password;
     private String open_id;
     private String phone;
+    private String verifyCode; //用于注册时使用
     private String role;
     private String nation;
     private FileUpload portrait_file;
@@ -105,6 +106,14 @@ public class User implements Serializable{
 
     public void setPortrait(String portrait) {
         this.portrait = portrait;
+    }
+
+    public String getVerifyCode() {
+        return verifyCode;
+    }
+
+    public void setVerifyCode(String verifyCode) {
+        this.verifyCode = verifyCode;
     }
 
     public String getRole() {
@@ -223,6 +232,7 @@ public class User implements Serializable{
                 ", password='" + password + '\'' +
                 ", open_id='" + open_id + '\'' +
                 ", phone='" + phone + '\'' +
+                ", verifyCode='" + verifyCode + '\'' +
                 ", role='" + role + '\'' +
                 ", nation='" + nation + '\'' +
                 ", portrait_file=" + portrait_file +

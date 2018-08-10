@@ -16,10 +16,7 @@ import org.apache.log4j.Logger;
 import org.junit.Assert;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Administrator on 2018/2/20.
@@ -147,6 +144,20 @@ public class CommonService {
         }
         testResponseOpt.doResponseOpt(responseData);
         CommonService.logger.debug(functionUri + " get result: " + result);
+    }
+
+
+    /**
+     * 生成6位数验证码
+     * @return
+     */
+    public static String generateSixDigits(){
+        Random random = new Random();
+        String result="";
+        for (int i=0;i<6;i++) {
+            result+=random.nextInt(10);
+        }
+        return result;
     }
 }
 

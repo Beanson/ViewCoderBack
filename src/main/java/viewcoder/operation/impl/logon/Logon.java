@@ -1,7 +1,10 @@
 package viewcoder.operation.impl.logon;
 
+import viewcoder.tool.cache.GlobalCache;
 import viewcoder.tool.common.Assemble;
+import viewcoder.tool.common.Common;
 import viewcoder.tool.common.Mapper;
+import viewcoder.tool.msg.MsgHelper;
 import viewcoder.tool.parser.form.FormData;
 import viewcoder.tool.util.MybatisUtils;
 import viewcoder.operation.entity.User;
@@ -10,7 +13,10 @@ import viewcoder.operation.impl.common.CommonService;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Administrator on 2018/2/2.
@@ -22,123 +28,191 @@ public class Logon {
     /**
      * *********************************************************************************
      * 注册新用户方法
+     *
      * @param msg
      * @return
      */
     public static ResponseData ViewCoderRegister(Object msg) {
 
-        ResponseData responseData=new ResponseData();
+        ResponseData responseData = new ResponseData();
         SqlSession sqlSession = MybatisUtils.getSession();
 
-        try{
+        try {
             User user = (User) FormData.getParam(msg, User.class);
 
             //检查该邮件地址是否已被注册过
             User userDB = sqlSession.selectOne(Mapper.REGISTER_ACCOUNT_CHECK, user);
             //进行新用户注册逻辑并对responseData进行相应赋值
-            Logon.signUpLogic(responseData,userDB,user,sqlSession);
+            Logon.signUpLogic(responseData, userDB, user, sqlSession);
 
-        }catch (Exception e){
-            Logon.logger.debug("Sign up catch exception: ",e);
-            Assemble.responseErrorSetting(responseData,500,
+        } catch (Exception e) {
+            Logon.logger.debug("Sign up catch exception: ", e);
+            Assemble.responseErrorSetting(responseData, 500,
                     "Server error");
 
-        }finally {
-            CommonService.databaseCommitClose(sqlSession,responseData,true);
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, true);
         }
         return responseData;
     }
 
     /**
      * 进行新用户注册逻辑并对responseData进行相应赋值
+     *
      * @param responseData 包装返回数据
-     * @param userDB 查询数据库中user结果信息
-     * @param user http请求发送过来的user查询信息
-     * @param sqlSession sql句柄
+     * @param userDB       查询数据库中user结果信息
+     * @param user         http请求发送过来的user查询信息
+     * @param sqlSession   sql句柄
      */
-    private static void signUpLogic(ResponseData responseData, User userDB, User user,SqlSession sqlSession){
+    private static void signUpLogic(ResponseData responseData, User userDB, User user, SqlSession sqlSession) {
 
         if (userDB != null) {
-            //Email之前已注册过
-            Assemble.responseErrorSetting(responseData,401,
-                    "Email signed before");
+            //查看数据库相关数据并和原数据作比对
+            if (Objects.equals(userDB.getPhone(), user.getPhone())) {
+                //Phone之前已注册过
+                Logon.logger.warn("Phone signed before");
+                Assemble.responseErrorSetting(responseData, 401,
+                        "Phone signed before");
 
-        } else {
-            //如果Email之前尚未注册过则进行注册操作
-            user.setPortrait("default_portrait.png");//设置默认portrait
-            int num = sqlSession.insert(Mapper.REGISTER_NEW_ACCOUNT, user);
-            Logon.logger.debug("注册添加数：" + num + " ；用户id为：" + user.getId());
-
-            if (num > 0) {
-                //如果添加记录后影响记录数大于0，则添加成功
-                //返回数据时不传递密码
-                user.setPassword(null);
-                Assemble.responseSuccessSetting(responseData,user);
+            } else if (Objects.equals(userDB.getEmail(), user.getEmail())) {
+                //Email之前已注册过
+                Logon.logger.warn("Email signed before");
+                Assemble.responseErrorSetting(responseData, 402,
+                        "Email signed before");
 
             } else {
-                //添加记录数目等于0，则添加失败
-                Logon.logger.error("Insert info to db error");
-                Assemble.responseErrorSetting(responseData,402,
-                        "Insert info to db error");
+                //不明觉厉的case
+                Logon.logger.warn("Unknown case：" + userDB.toString());
+                Assemble.responseErrorSetting(responseData, 403,
+                        "Unknown case：" + userDB.toString());
+            }
+
+        } else {
+            //验证手机验证码操作
+            if (Objects.equals(user.getVerifyCode(), GlobalCache.getRegisterVerifyCache().get(user.getPhone()))) {
+                //插入数据库进行注册操作
+                user.setPortrait("default_portrait.png");//设置默认portrait
+                int num = sqlSession.insert(Mapper.REGISTER_NEW_ACCOUNT, user);
+                Logon.logger.debug("注册添加数：" + num + " ；用户id为：" + user.getId());
+
+                if (num > 0) {
+                    //如果添加记录后影响记录数大于0，则添加成功
+                    //返回数据时不传递密码
+                    user.setPassword(null);
+                    Assemble.responseSuccessSetting(responseData, user);
+
+                } else {
+                    //添加记录数目等于0，则添加失败
+                    Logon.logger.error("Insert info to db error");
+                    Assemble.responseErrorSetting(responseData, 404,
+                            "Insert info to db error");
+                }
+            } else {
+                Logon.logger.warn("verify code incorrect");
+                Assemble.responseErrorSetting(responseData, 405,
+                        "verify code incorrect");
             }
         }
     }
 
 
     /**
-     * ******************************************************************************************
-     * 老用户登录方法
+     * 获取手机验证码操作
+     *
+     * @param msg 前端传递过来的数据
+     * @return
+     */
+    public static ResponseData getRegisterVerifyCode(Object msg) {
+        ResponseData responseData = new ResponseData();
+        SqlSession sqlSession = MybatisUtils.getSession();
+        try {
+            //获取从前端传递过来的phone
+            String phone = FormData.getParam(msg, Common.PHONE);
+            //查看数据库中该phone是否已经注册过了
+            int num = sqlSession.selectOne(Mapper.GET_PHONE_ACCOUNT, phone);
+            if (num > 0) {
+                //告知用户该手机已被注册
+                Assemble.responseErrorSetting(responseData, 401, "phone has registered");
+
+            } else {
+                String sixDigits = CommonService.generateSixDigits();
+                //发送验证码到用户手机
+                Map<String, String> map = new HashMap<>();
+                map.put(Common.CODE, sixDigits);
+                MsgHelper.sendSingleMsg(Common.MESG_REGISTER_VERIFY_CODE, map, phone, Common.MSG_SIGNNAME_LIPHIN);
+                //验证码存储到cache中
+                GlobalCache.getRegisterVerifyCache().put(phone, sixDigits);
+                //返回成功数据
+                Assemble.responseSuccessSetting(responseData, null);
+            }
+
+        } catch (Exception e) {
+            Logon.logger.error("getRegisterVerifyCode error: ", e);
+            Assemble.responseErrorSetting(responseData, 500,
+                    "getRegisterVerifyCode error");
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
+        }
+        return responseData;
+    }
+
+
+    /**
+     * *******************************************************************************************************************
+     * 用户登录方法
+     *
      * @param msg
      * @return
      */
     public static ResponseData ViewCoderLogin(Object msg) {
-        ResponseData responseData=new ResponseData();
+        ResponseData responseData = new ResponseData();
         SqlSession sqlSession = MybatisUtils.getSession();
 
-        try{
+        try {
             User user = (User) FormData.getParam(msg, User.class);
             //检查是否已存在有该用户
             User userDB = sqlSession.selectOne(Mapper.LOGON_VALIDATION, user);
             //进行已注册过的用户登录逻辑，并对responseData相应赋值
-            Logon.signInLogic(responseData,userDB,user,sqlSession);
+            signInLogic(responseData, userDB, user, sqlSession);
 
-        }catch (Exception e){
-            Logon.logger.debug("Sign in catch exception: ",e);
-            Assemble.responseErrorSetting(responseData,500,
+        } catch (Exception e) {
+            Logon.logger.debug("Sign in catch exception: ", e);
+            Assemble.responseErrorSetting(responseData, 500,
                     "Server error");
 
-        }finally {
-            CommonService.databaseCommitClose(sqlSession,responseData,false);
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
         return responseData;
     }
 
     /**
      * 进行已注册过的用户登录逻辑，并对responseData相应赋值
+     *
      * @param responseData 返回数据包装
-     * @param userDB 从数据库查询的用户信息
-     * @param user 从http数据流接收的请求用户信息
-     * @param sqlSession sql句柄
+     * @param userDB       从数据库查询的用户信息
+     * @param user         从http数据流接收的请求用户信息
+     * @param sqlSession   sql句柄
      */
-    private static void signInLogic(ResponseData responseData, User userDB, User user,SqlSession sqlSession){
+    private static void signInLogic(ResponseData responseData, User userDB, User user, SqlSession sqlSession) {
         if (userDB != null) {
             //登录成功则返回用户的profile信息
             userDB.setPassword(null);//不会传密码
-            Assemble.responseSuccessSetting(responseData,userDB);
+            Assemble.responseSuccessSetting(responseData, userDB);
 
         } else {
             //登录不成功，数据库无该user信息，查看是否该账号存在
-            List<User> users = sqlSession.selectList(Mapper.REGISTER_ACCOUNT_CHECK, user);
+            List<User> users = sqlSession.selectList(Mapper.SIGN_ACCOUNT_CHECK, user);
 
             if (users.size() > 0) {
                 //账号存在但是密码错误
                 Logon.logger.error("Password error");
-                Assemble.responseErrorSetting(responseData,401,
+                Assemble.responseErrorSetting(responseData, 401,
                         "Correct account, wrong password");
             } else {
                 //账号尚未注册
                 Logon.logger.error("Account not exist");
-                Assemble.responseErrorSetting(responseData,402,
+                Assemble.responseErrorSetting(responseData, 402,
                         "Account not exist");
             }
         }

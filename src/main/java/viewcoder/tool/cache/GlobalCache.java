@@ -6,6 +6,7 @@ import org.ehcache.CacheManager;
 import org.ehcache.config.Configuration;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.xml.XmlConfiguration;
+import org.junit.Test;
 import viewcoder.operation.entity.ProjectProgress;
 
 /**
@@ -15,7 +16,7 @@ public class GlobalCache {
 
     private static CacheManager cacheManager;
     private static Cache<Integer, ProjectProgress> projectProgressCache;
-    private static Cache<String, Integer> registerVerifyCache;
+    private static Cache<String, String> registerVerifyCache;
 
     static {
         //初始化cache manager信息
@@ -25,7 +26,7 @@ public class GlobalCache {
 
         //初始化各个cache到对象
         projectProgressCache = cacheManager.getCache("projectProgress", Integer.class, ProjectProgress.class);
-        registerVerifyCache = cacheManager.getCache("registerVerifyCache", String.class, Integer.class);
+        registerVerifyCache = cacheManager.getCache("registerVerifyCache", String.class, String.class);
     }
 
     /**
@@ -41,7 +42,7 @@ public class GlobalCache {
      * 返回registerVerifyCache的cache信息
      * @return
      */
-    public static Cache<String, Integer> getRegisterVerifyCache() {
+    public static Cache<String, String> getRegisterVerifyCache() {
         return registerVerifyCache;
     }
 
@@ -59,5 +60,11 @@ public class GlobalCache {
 //        projectProgressCache.clear();
 //        cacheManager.removeCache("projectMark");
 //        cacheManager.close();
+//    }
+
+//    @Test
+//    public void tryRegister(){
+//        registerVerifyCache.put("123123123","213124");
+//        System.out.println(registerVerifyCache.get("123123123"));
 //    }
 }

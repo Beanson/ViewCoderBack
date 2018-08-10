@@ -61,11 +61,13 @@ public class Mapper {
     //select
     public static final String GET_USER_DATA = "getUserData";
     public static final String LOGON_VALIDATION = "loginValidation";
+    public static final String SIGN_ACCOUNT_CHECK = "signAccountCheck";
     public static final String REGISTER_ACCOUNT_CHECK = "registerAccountCheck";
     public static final String GET_ORIGIN_PORTRAIT_NAME = "getOriginPortraitName";
     public static final String GET_USER_RESOURCE_SPACE_REMAIN = "getUserResourceSpaceRemain";
     public static final String GET_TOTAL_POINTS = "getTotalPoints";
     public static final String GET_USER_SPACE_INFO = "getUserSpaceInfo";
+    public static final String GET_PHONE_ACCOUNT = "getPhoneAccount";
 
     //insert
     public static final String REGISTER_NEW_ACCOUNT = "registerNewAccount";

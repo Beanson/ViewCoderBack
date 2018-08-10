@@ -18,13 +18,23 @@ public interface UserMapper {
     @Select("select * from user where id=#{user_id}")
     public User getUserData(int user_id);
 
+    /** 登录 *************************************************************/
     //登录验证
-    @Select("select * from user where email=#{account} or phone=#{account} and password=#{password}")
+    @Select("select * from user where (email=#{account} or phone=#{account}) and password=#{password}")
     public List<User> loginValidation(User user);
 
-    //注册验证
+    //登录验证
     @Select("select * from user where email=#{account} or phone=#{account}")
-    public List<User> registerAccountCheck(User user);
+    public List<User> signAccountCheck(User user);
+
+    /** 注册 *************************************************************/
+    //手机号查重
+    @Select("select count(*) from user where phone=#{phone}")
+    public int getPhoneAccount(String phone);
+
+    //注册验证
+    @Select("select email, phone from user where email=#{email} or phone=#{phone}")
+    public User registerAccountCheck(User user);
 
     //获取用户原portrait数据信息
     @Select("select portrait from user where id=#{id}")
@@ -47,7 +57,7 @@ public interface UserMapper {
 
     /********************以下是插入user操作***********************/
     //注册操作
-    @Insert("insert into user(portrait,user_name,email,password) values(#{portrait},#{user_name},#{email},#{password})")
+    @Insert("insert into user(portrait,user_name,email,password,phone) values(#{portrait},#{user_name},#{email},#{password},#{phone})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int registerNewAccount(User user);
 
