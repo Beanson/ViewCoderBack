@@ -1,6 +1,6 @@
 package operation.job;
 
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.text.StrSubstitutor;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import viewcoder.tool.mail.MailEntity;

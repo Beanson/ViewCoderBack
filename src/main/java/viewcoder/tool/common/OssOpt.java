@@ -37,6 +37,7 @@ public class OssOpt {
      */
     public static OSSClient initOssClient() {
         if (Objects.equals(GlobalConfig.getProperties(Common.TARGET_ENVIRONMENT), Common.PROD_ENVIRONMENT)) {
+
             return new OSSClient(GlobalConfig.getProperties(END_POINT_PROD), "q4pjxqabACHK2WE5", "yF3L6IbHTma6QbgfopLcJ4JF2cvSbJ");
 
         } else {

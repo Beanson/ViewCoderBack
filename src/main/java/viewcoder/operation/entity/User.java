@@ -30,6 +30,7 @@ public class User implements Serializable{
     private int total_points;
     private int framework;
     private int package_way;
+    private String dis_serial_num; //企业优惠码序列号
 
     public User(){}
 
@@ -220,6 +221,14 @@ public class User implements Serializable{
         this.package_way = package_way;
     }
 
+    public String getDis_serial_num() {
+        return dis_serial_num;
+    }
+
+    public void setDis_serial_num(String dis_serial_num) {
+        this.dis_serial_num = dis_serial_num;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -244,6 +253,7 @@ public class User implements Serializable{
                 ", total_points=" + total_points +
                 ", framework=" + framework +
                 ", package_way=" + package_way +
+                ", dis_serial_num='" + dis_serial_num + '\'' +
                 '}';
     }
 }
