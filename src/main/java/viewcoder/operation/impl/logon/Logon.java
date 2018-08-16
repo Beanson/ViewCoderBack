@@ -1,5 +1,7 @@
 package viewcoder.operation.impl.logon;
 
+import viewcoder.operation.entity.Project;
+import viewcoder.operation.impl.project.ProjectList;
 import viewcoder.tool.cache.GlobalCache;
 import viewcoder.tool.common.Assemble;
 import viewcoder.tool.common.Common;
@@ -36,9 +38,10 @@ public class Logon {
 
         ResponseData responseData = new ResponseData();
         SqlSession sqlSession = MybatisUtils.getSession();
+        User user = null;
 
         try {
-            User user = (User) FormData.getParam(msg, User.class);
+            user = (User) FormData.getParam(msg, User.class);
 
             //检查该邮件地址是否已被注册过
             User userDB = sqlSession.selectOne(Mapper.REGISTER_ACCOUNT_CHECK, user);
@@ -52,6 +55,19 @@ public class Logon {
 
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
+
+            //给刚注册成功的用户提供example页面case
+            if (responseData.getStatus_code() == 200 && CommonService.checkNotNull(user)
+                    && user.getId() > 0) {
+                Project project = new Project();
+                project.setUser_id(user.getId());
+                project.setRef_id(Common.EXAMPLE_REF_ID);
+                project.setOpt_type(Common.STORE_TYPE);
+                project.setProject_name(Common.EXAMPLE_CASE_1);
+                project.setNew_parent(0);
+                project.setOpt(1);//1代表从project面板中创建，3是重新生成页面，会重构当前页面
+                ProjectList.copyProject(project);
+            }
         }
         return responseData;
     }

@@ -16,21 +16,9 @@ public class Company {
     private int feed_way;
     private int feed_amount;
     private String remark;
+    private String account;
 
     public Company() {
-    }
-
-    public Company(int id, String credit, String name, String address, String contact, int dis_way, int dis_amount, int feed_way, int feed_amount, String remark) {
-        this.id = id;
-        this.credit = credit;
-        this.name = name;
-        this.address = address;
-        this.contact = contact;
-        this.dis_way = dis_way;
-        this.dis_amount = dis_amount;
-        this.feed_way = feed_way;
-        this.feed_amount = feed_amount;
-        this.remark = remark;
     }
 
     public int getId() {
@@ -113,6 +101,14 @@ public class Company {
         this.remark = remark;
     }
 
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
     @Override
     public String toString() {
         return "Company{" +
@@ -126,6 +122,7 @@ public class Company {
                 ", feed_way=" + feed_way +
                 ", feed_amount=" + feed_amount +
                 ", remark='" + remark + '\'' +
+                ", account='" + account + '\'' +
                 '}';
     }
 }

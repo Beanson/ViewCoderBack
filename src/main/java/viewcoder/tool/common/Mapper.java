@@ -126,6 +126,17 @@ public class Mapper {
 
     //delete
 
+
+
+    //company数据库操作mapper************************************************************************
+    //select
+    public static final String GET_COMPANY_DISCOUNT_ORDER = "getCompanyDiscountOrder";
+
+    //insert
+
+    //update
+
+    //delete
 }
 
 

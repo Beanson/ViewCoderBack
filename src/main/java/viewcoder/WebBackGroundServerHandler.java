@@ -4,6 +4,7 @@ package viewcoder;
  * Created by Administrator on 2017/2/8.
  */
 
+import viewcoder.operation.impl.company.CompanyOpt;
 import viewcoder.operation.impl.test.TestUtil;
 import viewcoder.tool.common.Common;
 import viewcoder.operation.entity.response.ResponseData;
@@ -308,6 +309,13 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                 //网页前端默认的导出设置
                 else if (uri.equals("/updateExportDefaultSetting")) {
                     ResponseData response = Render.updateExportDefaultSetting(msg);
+                    httpResponse(ctx, msg, response);
+                }
+
+                /***************************************************************/
+                /*Company专区 *************************/
+                else if (uri.equals("/getCompanyDiscountOrder")) {
+                    ResponseData response = CompanyOpt.getCompanyDiscountOrder(msg);
                     httpResponse(ctx, msg, response);
                 }
 

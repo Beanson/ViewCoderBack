@@ -209,6 +209,7 @@ public class Common {
     public static final String PROJECT_SIMULATE = "simulate"; //项目类型是simulate类型
     public static final String PAGE_PARENT = "parent"; //页面的父页面
     public static final String OPT = "opt"; //具体操作类型
+    public static final String COMPANY_CREDIT = "company_credit"; //公司credit, company_credit
 
 
     //数字证书
@@ -235,6 +236,9 @@ public class Common {
     public static final String PC_V = "pc";
     public static final String MOBILE_V = "mo";
     public static final String STORE_TYPE = "store";
+    public static final Integer EXAMPLE_REF_ID = 140;
+    public static final String EXAMPLE_CASE_1 = "样例1";
+
 
     //mail的其他配置
     public static final String MAIL_HTML_TYPE = "html";

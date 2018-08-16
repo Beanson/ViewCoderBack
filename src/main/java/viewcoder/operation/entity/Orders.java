@@ -17,27 +17,12 @@ public class Orders {
     private int pay_status;
     private int pay_way;
     private String price;
+    private String company_credit;
     private String subject;
 
     public Orders() {
     }
 
-    public Orders(int id, String out_trade_no, String trade_no, int user_id, int service_id, int service_num,
-                  String order_date, String pay_date, String expire_date, int pay_status, int pay_way, String price, String subject) {
-        this.id = id;
-        this.out_trade_no = out_trade_no;
-        this.trade_no = trade_no;
-        this.user_id = user_id;
-        this.service_id = service_id;
-        this.service_num = service_num;
-        this.order_date = order_date;
-        this.pay_date = pay_date;
-        this.expire_date = expire_date;
-        this.pay_status = pay_status;
-        this.pay_way = pay_way;
-        this.price = price;
-        this.subject = subject;
-    }
 
     public int getId() {
         return id;
@@ -143,6 +128,14 @@ public class Orders {
         this.subject = subject;
     }
 
+    public String getCompany_credit() {
+        return company_credit;
+    }
+
+    public void setCompany_credit(String company_credit) {
+        this.company_credit = company_credit;
+    }
+
     @Override
     public String toString() {
         return "Orders{" +
@@ -158,6 +151,7 @@ public class Orders {
                 ", pay_status=" + pay_status +
                 ", pay_way=" + pay_way +
                 ", price='" + price + '\'' +
+                ", company_credit='" + company_credit + '\'' +
                 ", subject='" + subject + '\'' +
                 '}';
     }

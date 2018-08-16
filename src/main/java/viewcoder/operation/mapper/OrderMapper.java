@@ -29,6 +29,10 @@ public interface OrderMapper {
     @Select("select * from orders where out_trade_no=#{out_trade_no} and trade_no=#{trade_no}")
     Orders getOrderByTradeNo(@Param("out_trade_no") String out_trade_no, @Param("trade_no") String trade_no);
 
+    //根据company_credit查询对应的order信息
+    @Select("select * from orders where company_credit=#{companyCredit}")
+    List<Orders> getCompanyDiscountOrder(String companyCredit);
+
 
     /**************************以下是insert操作**********************************/
     //插入新的order数据

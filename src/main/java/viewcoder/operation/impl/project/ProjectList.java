@@ -1,6 +1,7 @@
 package viewcoder.operation.impl.project;
 
 import com.alibaba.fastjson.JSON;
+import io.netty.handler.codec.http.HttpRequest;
 import viewcoder.exception.project.ProjectListException;
 import viewcoder.operation.entity.*;
 import viewcoder.tool.common.*;
@@ -122,7 +123,16 @@ public class ProjectList {
 
         try {
             //1、获取前端传递过来的数据
-            Project project = (Project) FormData.getParam(msg, Project.class);
+            Project project = null;
+            if (msg instanceof HttpRequest) {
+                //普通http请求操作
+                ProjectList.logger.debug("msg http request");
+                project = (Project) FormData.getParam(msg, Project.class);
+            } else {
+                //注册时直接copy商城一个example案例操作
+                ProjectList.logger.debug("msg register example request");
+                project = (Project) msg;
+            }
             Long timestamp = Long.parseLong(project.getUser_id() + CommonService.getTimeStamp());
 
             //2、 获取原项目信息
@@ -135,11 +145,11 @@ public class ProjectList {
 
             //4、 更新新项目的project表格、OSS中single_export和project_data文件拷贝
             //若是3操作，重构当前页面，否则插入新页面
-            if(project.getOpt()==3){
+            if (project.getOpt() == 3) {
                 //重构当前页面，并插入子页面
                 reCreateOpt(project, ossClient, projects, sqlSession, projectRef.getParent(), timestamp);
 
-            }else{
+            } else {
                 //插入新project和子project页面记录
                 insertCopyRecord(project.getUser_id(), projectRef.getParent(), project.getNew_parent(), project.getRef_id(),
                         projects, sqlSession, ossClient, timestamp);
@@ -219,16 +229,17 @@ public class ProjectList {
 
     /**
      * 重构当前页面
-     * @param project 前端传递的项目信息
-     * @param ossClient oss句柄
-     * @param projects 排版好的projects数据
+     *
+     * @param project    前端传递的项目信息
+     * @param ossClient  oss句柄
+     * @param projects   排版好的projects数据
      * @param sqlSession sql句柄
-     * @param parent project的父元素
-     * @param timestamp 时间戳用来新生成项目使用
+     * @param parent     project的父元素
+     * @param timestamp  时间戳用来新生成项目使用
      * @throws Exception
      */
     private static void reCreateOpt(Project project, OSSClient ossClient, Map<Integer, List<Project>> projects,
-                                    SqlSession sqlSession, int parent, long timestamp) throws Exception{
+                                    SqlSession sqlSession, int parent, long timestamp) throws Exception {
         //商城首页project
         Project project1 = projects.get(parent).get(0);
 

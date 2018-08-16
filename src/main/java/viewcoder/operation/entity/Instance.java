@@ -7,8 +7,8 @@ package viewcoder.operation.entity;
 public class Instance {
 
     private int id;
-    private String timestamp;
     private int user_id;
+    private int order_id;
     private int service_id;
     private String space;  //单位是KByte
     private String from_date;
@@ -26,20 +26,20 @@ public class Instance {
         this.id = id;
     }
 
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
-
     public int getUser_id() {
         return user_id;
     }
 
     public void setUser_id(int user_id) {
         this.user_id = user_id;
+    }
+
+    public int getOrder_id() {
+        return order_id;
+    }
+
+    public void setOrder_id(int order_id) {
+        this.order_id = order_id;
     }
 
     public int getService_id() {
@@ -86,10 +86,10 @@ public class Instance {
     public String toString() {
         return "Instance{" +
                 "id=" + id +
-                ", timestamp=" + timestamp +
                 ", user_id=" + user_id +
+                ", order_id=" + order_id +
                 ", service_id=" + service_id +
-                ", space=" + space +
+                ", space='" + space + '\'' +
                 ", from_date='" + from_date + '\'' +
                 ", end_date='" + end_date + '\'' +
                 ", expire_days=" + expire_days +
