@@ -153,6 +153,39 @@ public class Render {
     }
 
 
+
+    /**
+     * ****************************************************************************
+     * 试探上传资源前是否有足够容纳空间
+     * @param msg
+     * @return
+     */
+    public static ResponseData uploadSpaceDetect(Object msg){
+        String message = "";
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        SqlSession sqlSession = MybatisUtils.getSession();
+
+        try {
+            UserUploadFile userUploadFile = (UserUploadFile) FormData.getParam(msg, UserUploadFile.class);
+            String resourceRemain = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, userUploadFile.getUser_id());
+            long newUserResSpace = Integer.parseInt(resourceRemain) - userUploadFile.getFile().length();
+            if(newUserResSpace>0){
+                Assemble.responseSuccessSetting(responseData,null);
+            }else {
+                Assemble.responseErrorSetting(responseData, 400, "No enough space");
+            }
+
+        }catch (Exception e){
+            message = "System error";
+            Render.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
+        }finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
+        }
+        return responseData;
+    }
+
     /**
      * ****************************************************************************
      * 上传文件资源
@@ -162,38 +195,38 @@ public class Render {
      */
     public static ResponseData uploadResource(Object msg) {
 
+        String message = "";
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
-        SqlSession sqlSession = MybatisUtils.getSession();
-        OSSClient ossClient = OssOpt.initOssClient();
-
         try {
             //获取用户上传资源文件信息
             UserUploadFile userUploadFile = (UserUploadFile) FormData.getParam(msg, UserUploadFile.class);
             long newUserResSpace = 0;
+
             if (userUploadFile.getIs_folder() != 1) {
-                //检查是否有足够空间接收该上传文件资源
+                //查看检查是否有足够空间接收该上传文件资源
+                SqlSession sqlSession = MybatisUtils.getSession();
                 String resourceRemain = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, userUploadFile.getUser_id());
                 newUserResSpace = Integer.parseInt(resourceRemain) - userUploadFile.getFile().length();
+                sqlSession.close();
+
                 //如果接收资源后用户可用空间大于0则接收资源文件
                 if (newUserResSpace > 0) {
-                    uploadResourceOpt(sqlSession, userUploadFile, ossClient, responseData, newUserResSpace);
+                    uploadResourceOpt(userUploadFile, responseData, newUserResSpace);
+
                 } else {
-                    Assemble.responseErrorSetting(responseData, 403,
-                            "User has not enough space");
+                    message = "No enough space: " + newUserResSpace;
+                    Render.logger.warn(message);
+                    Assemble.responseErrorSetting(responseData, 403, message);
                 }
             } else {
-                uploadResourceOpt(sqlSession, userUploadFile, ossClient, responseData, newUserResSpace);
+                uploadResourceOpt(userUploadFile, responseData, newUserResSpace);
             }
 
         } catch (Exception e) {
-            Render.logger.debug("===RenderException uploadResource with error: " + e);
-            Assemble.responseErrorSetting(responseData, 500,
-                    "RenderException uploadResource system error");
+            message = "System error";
+            Render.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
 
-        } finally {
-            //对数据库进行后续提交和关闭操作等
-            CommonService.databaseCommitClose(sqlSession, responseData, true);
-            OssOpt.shutDownOssClient(ossClient);
         }
         return responseData;
     }
@@ -201,52 +234,69 @@ public class Render {
     /**
      * 上传文件逻辑操作
      *
-     * @param sqlSession      sql句柄
      * @param userUploadFile  上传的文件对象信息
-     * @param ossClient       oss句柄
      * @param responseData    返回数据组装
      * @param newUserResSpace 预添加后的空间
      * @throws Exception
      */
-    private static void uploadResourceOpt(SqlSession sqlSession, UserUploadFile userUploadFile, OSSClient ossClient,
-                                          ResponseData responseData, long newUserResSpace) throws Exception {
-        //资源文件插入数据库操作
-        int influence_num = sqlSession.insert(Mapper.INSERT_NEW_RESOURCE, userUploadFile);
-        //如果上传文件插入数据库成功则将该文件存OSS
-        if (influence_num > 0) {
-            //后续操作成功后将返回backData
-            Map<String, Object> backData = new HashMap<>();
-            backData.put("id", userUploadFile.getId());
+    private static void uploadResourceOpt(UserUploadFile userUploadFile, ResponseData responseData, long newUserResSpace) throws Exception {
 
-            if (userUploadFile.getIs_folder() != 1) {
-                //文件保存文件到OSS
-                String fileName = GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES) + userUploadFile.getTime_stamp() +
-                        "." + userUploadFile.getSuffix();
-                OssOpt.uploadFileToOss(fileName, userUploadFile.getFile().get(), ossClient);
+        String message = "";
 
-                //更新用户resource_remain大小
-                int userUpdateNum = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN,
-                        new User(userUploadFile.getUser_id(), String.valueOf(newUserResSpace)));
-                //更新project的占用空间大小的数据
-                String projectResSpace = sqlSession.selectOne(Mapper.GET_PROJECT_RESOURCE_SIZE, userUploadFile.getProject_id());
-                long newProjectResSpace = Integer.parseInt(projectResSpace) + userUploadFile.getFile().length();
-                int projectUpdateNum = sqlSession.update(Mapper.UPDATE_PROJECT_RESOURCE_SIZE,
-                        new Project(userUploadFile.getProject_id(), String.valueOf(newProjectResSpace)));
+        //上传到oss中
+        if (userUploadFile.getIs_folder() != 1) {
+            //文件保存文件到OSS
+            OSSClient ossClient = OssOpt.initOssClient();
+            String fileName = GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES) + userUploadFile.getTime_stamp() + "." + userUploadFile.getSuffix();
+            OssOpt.uploadFileToOss(fileName, userUploadFile.getFile().get(), ossClient);
+            OssOpt.shutDownOssClient(ossClient);
+        }
 
-                //返回成功信息
-                if (userUpdateNum > 0 && projectUpdateNum > 0) {
-                    backData.put("user_resource_remain", newUserResSpace);
-                    backData.put("project_resource_space", newProjectResSpace);
+        //数据库更新操作，因为上传到oss步骤是耗时步骤，因此sql数据库直到该步骤才开启
+        SqlSession sqlSession = MybatisUtils.getSession();
+        try {
+            //插入数据库操作
+            int influence_num = sqlSession.insert(Mapper.INSERT_NEW_RESOURCE, userUploadFile);
+            //根据插入结果返回相应数据
+            if (influence_num > 0) {
+                //准备返回的结果数据
+                Map<String, Object> backData = new HashMap<>();
+                backData.put("id", userUploadFile.getId());
+
+                if (userUploadFile.getIs_folder() != 1) {
+                    //更新project的占用空间大小的数据
+                    String projectResSpace = sqlSession.selectOne(Mapper.GET_PROJECT_RESOURCE_SIZE, userUploadFile.getProject_id());
+                    long newProjectResSpace = Integer.parseInt(projectResSpace) + userUploadFile.getFile().length();
+
+                    //更新用户resource_remain大小
+                    int userUpdateNum = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(userUploadFile.getUser_id(), String.valueOf(newUserResSpace)));
+                    //跟新项目占用空间大小
+                    int projectUpdateNum = sqlSession.update(Mapper.UPDATE_PROJECT_RESOURCE_SIZE, new Project(userUploadFile.getProject_id(), String.valueOf(newProjectResSpace)));
+
+                    //返回成功信息
+                    if (userUpdateNum > 0 && projectUpdateNum > 0) {
+                        backData.put("user_resource_remain", newUserResSpace);
+                        backData.put("project_resource_space", newProjectResSpace);
+                        Assemble.responseSuccessSetting(responseData, backData);
+                    }
+
+                } else {
+                    //新建文件夹resource，返回成功code
                     Assemble.responseSuccessSetting(responseData, backData);
                 }
             } else {
-                //新建文件夹resource，返回成功code
-                Assemble.responseSuccessSetting(responseData, backData);
+                //新建resource插入数据库失败，返回402
+                message = "Insert resource to database error";
+                Render.logger.error(message);
+                Assemble.responseErrorSetting(responseData, 402, message);
             }
-        } else {
-            //新建resource插入数据库失败，返回402
-            Assemble.responseErrorSetting(responseData, 402,
-                    "Insert resource to database error");
+        } catch (Exception e) {
+            message = "System error";
+            Render.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 412, message);
+
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, true);
         }
     }
 
@@ -512,9 +562,9 @@ public class Render {
             if (num > 0) {
                 String projectDataFile = null;
                 //根据version值对应同步不同oss文件
-                if(Objects.equals(project.getVersion(), Common.MOBILE_V)){
+                if (Objects.equals(project.getVersion(), Common.MOBILE_V)) {
                     projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getMo_version() + Common.PROJECT_DATA_SUFFIX;
-                }else{
+                } else {
                     projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getPc_version() + Common.PROJECT_DATA_SUFFIX;
                 }
                 //创建新的project_data数据并同步到OSS中

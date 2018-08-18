@@ -281,6 +281,11 @@ public class WebBackGroundServerHandler extends SimpleChannelInboundHandler<Obje
                     ResponseData response = Render.getUploadResource(msg);
                     httpResponse(ctx, msg, response);
                 }
+                //查看客户账号是否有足够空间上传该文件信息
+                else if (uri.equals("/uploadSpaceDetect")) {
+                    ResponseData response = Render.uploadSpaceDetect(msg);
+                    httpResponse(ctx, msg, response);
+                }
                 //上传resource资源文件
                 else if (uri.equals("/uploadResource")) {
                     ResponseData response = Render.uploadResource(msg);

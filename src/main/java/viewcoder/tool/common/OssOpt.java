@@ -55,6 +55,7 @@ public class OssOpt {
     public static void shutDownOssClient(OSSClient ossClient) {
         if (ossClient != null) {
             ossClient.shutdown();
+            ossClient = null;
         }
 
     }
