@@ -18,6 +18,7 @@ public class CommonObject {
     private static final Map<String, String> xmlMap = new HashMap<>();
     private static final Map<Integer, String> serviceName = new HashMap<>();
     private static final List<ProjectProgress> progressList = new ArrayList<ProjectProgress>(); //装载后台渲染生成页面的进度
+    private static final Map<Integer, String> loginVerify = new HashMap<>();//用户登录时验证的userId:sessionId等信息；
 
     static {
         //初始化积分兑换套餐的数据
@@ -59,6 +60,10 @@ public class CommonObject {
 
     public static List<ProjectProgress> getProgressList() {
         return progressList;
+    }
+
+    public static Map<Integer, String> getLoginVerify() {
+        return loginVerify;
     }
 
 }

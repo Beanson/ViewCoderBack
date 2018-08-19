@@ -11,12 +11,12 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.ssl.SslContext;
 
-public class WebBackGroundServerInitializer extends ChannelInitializer<SocketChannel> {
+public class ViewCoderServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private final SslContext sslCtx;
     private static final String WEBSOCKET_PATH = "/websocket";
 
-    public WebBackGroundServerInitializer(SslContext sslCtx) {
+    public ViewCoderServerInitializer(SslContext sslCtx) {
         this.sslCtx = sslCtx;
     }
 
@@ -46,7 +46,7 @@ public class WebBackGroundServerInitializer extends ChannelInitializer<SocketCha
         *  当建立websocket后，下面channel进行数据发送
         */
         //System.out.println("b");
-        p.addLast(new WebBackGroundServerHandler());
+        p.addLast(new ViewCoderServerHandler());
 
     }
 }

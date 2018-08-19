@@ -1,10 +1,13 @@
 package viewcoder.operation.impl.logon;
 
+import sun.rmi.runtime.Log;
 import viewcoder.operation.entity.Project;
+import viewcoder.operation.entity.WeChatInfo;
 import viewcoder.operation.impl.project.ProjectList;
 import viewcoder.tool.cache.GlobalCache;
 import viewcoder.tool.common.Assemble;
 import viewcoder.tool.common.Common;
+import viewcoder.tool.common.CommonObject;
 import viewcoder.tool.common.Mapper;
 import viewcoder.tool.msg.MsgHelper;
 import viewcoder.tool.parser.form.FormData;
@@ -42,7 +45,6 @@ public class Logon {
 
         try {
             user = (User) FormData.getParam(msg, User.class);
-
             //检查该邮件地址是否已被注册过
             User userDB = sqlSession.selectOne(Mapper.REGISTER_ACCOUNT_CHECK, user);
             //进行新用户注册逻辑并对responseData进行相应赋值
@@ -57,8 +59,7 @@ public class Logon {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
 
             //给刚注册成功的用户提供example页面case
-            if (responseData.getStatus_code() == 200 && CommonService.checkNotNull(user)
-                    && user.getId() > 0) {
+            if (responseData.getStatus_code() == 200 && user != null && user.getId() > 0) {
                 Project project = new Project();
                 project.setUser_id(user.getId());
                 project.setRef_id(Common.EXAMPLE_REF_ID);
@@ -115,7 +116,12 @@ public class Logon {
                     //如果添加记录后影响记录数大于0，则添加成功
                     //返回数据时不传递密码
                     user.setPassword(null);
+                    //赋予该用户session_id
+                    user.setSession_id(CommonService.getTimeStamp());
+                    //正确返回操作
                     Assemble.responseSuccessSetting(responseData, user);
+                    //插入userId : sessionId 的map数据到object中
+                    CommonObject.getLoginVerify().put(user.getId(), user.getSession_id());
 
                 } else {
                     //添加记录数目等于0，则添加失败
@@ -151,13 +157,8 @@ public class Logon {
                 Assemble.responseErrorSetting(responseData, 401, "phone has registered");
 
             } else {
-                String sixDigits = CommonService.generateSixDigits();
-                //发送验证码到用户手机
-                Map<String, String> map = new HashMap<>();
-                map.put(Common.CODE, sixDigits);
-                MsgHelper.sendSingleMsg(Common.MESG_REGISTER_VERIFY_CODE, map, phone, Common.MSG_SIGNNAME_LIPHIN);
-                //验证码存储到cache中
-                GlobalCache.getRegisterVerifyCache().put(phone, sixDigits);
+                //生成验证码并发送到手机
+                generatePhoneVerifyCode(phone);
                 //返回成功数据
                 Assemble.responseSuccessSetting(responseData, null);
             }
@@ -171,6 +172,39 @@ public class Logon {
         }
         return responseData;
     }
+
+
+    /**
+     * 注册成功后扫码绑定二维码操作
+     * @param msg
+     */
+    public static ResponseData updateWeChatInfoToUser (Object msg){
+        ResponseData responseData = new ResponseData();
+        SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
+
+        try{
+            WeChatInfo weChatInfo = (WeChatInfo) FormData.getParam(msg, WeChatInfo.class);
+            int num = sqlSession.update(Mapper.UPDATE_WECHAT_INFO_TO_USER,weChatInfo);
+            if(num>0){
+                Assemble.responseSuccessSetting(responseData,null);
+            }else {
+                message = "Db Insert Error";
+                Logon.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
+            }
+
+        }catch (Exception e){
+            message = "System error";
+            Logon.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
+        }finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, true);
+        }
+        return responseData;
+    }
+
 
 
     /**
@@ -214,7 +248,21 @@ public class Logon {
         if (userDB != null) {
             //登录成功则返回用户的profile信息
             userDB.setPassword(null);//不会传密码
-            Assemble.responseSuccessSetting(responseData, userDB);
+
+            //查看该userId是否已经存在登录信息，若是则发消息回去告知要短信验证，否则走登录成功流程
+            if (CommonService.checkNotNull(CommonObject.getLoginVerify().get(user.getId()))) {
+                //若已经系统存在该user登录信息，则可能多用户同时登录状态，此时发送验证码进行验证
+                generatePhoneVerifyCode(user.getPhone());
+                Assemble.responseErrorSetting(responseData, 301, "Multi Login");
+
+            } else {
+                //赋予该用户session_id
+                userDB.setSession_id(CommonService.getTimeStamp());
+                //返回数据到前端
+                Assemble.responseSuccessSetting(responseData, userDB);
+                //插入userId : sessionId 的map数据到object中
+                CommonObject.getLoginVerify().put(userDB.getId(), userDB.getSession_id());
+            }
 
         } else {
             //登录不成功，数据库无该user信息，查看是否该账号存在
@@ -233,4 +281,73 @@ public class Logon {
             }
         }
     }
+
+
+    /**
+     * 验证登录验证码是否一致
+     *
+     * @param msg
+     * @return
+     */
+    public static ResponseData signInVerifyCodeCheck(Object msg) {
+        ResponseData responseData = new ResponseData();
+        SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
+
+        try {
+            User user = (User) FormData.getParam(msg, User.class);
+            //检查是否已存在有该用户
+            User userDB = sqlSession.selectOne(Mapper.LOGON_VALIDATION, user);
+            if (userDB != null) {
+                String targetVerifyCode = GlobalCache.getRegisterVerifyCache().get(userDB.getPhone());
+                //比较系统验证码和用户填写的验证码是否一致，是则返回成功，否则返回false
+                if (CommonService.checkNotNull(targetVerifyCode) && Objects.equals(user.getVerifyCode(), targetVerifyCode)) {
+                    //验证成功，更新该用户对应的sessionId
+                    userDB.setSession_id(CommonService.getTimeStamp());
+                    CommonObject.getLoginVerify().put(userDB.getId(), userDB.getSession_id());
+                    Assemble.responseSuccessSetting(responseData, userDB);
+
+                } else {
+                    message = "verify code error";
+                    Logon.logger.error(message);
+                    Assemble.responseErrorSetting(responseData, 405, message, userDB.getPhone());
+                }
+            } else {
+                message = "no such account";
+                Logon.logger.error(message);
+                Assemble.responseErrorSetting(responseData, 406, message);
+            }
+
+        } catch (Exception e) {
+            message = "system error";
+            Logon.logger.debug(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
+        }
+        return responseData;
+    }
+
+
+    /**
+     * 生成验证码并发送到手机
+     *
+     * @param phone 手机号
+     */
+    private static void generatePhoneVerifyCode(String phone) {
+        //获取6为数验证码
+        String sixDigits = CommonService.generateSixDigits();
+        //发送验证码到用户手机
+        Map<String, String> map = new HashMap<>();
+        map.put(Common.CODE, sixDigits);
+        //发送短信验证码
+        MsgHelper.sendSingleMsg(Common.MESG_REGISTER_VERIFY_CODE, map, phone, Common.MSG_SIGNNAME_LIPHIN);
+        //验证码存储到cache中
+        GlobalCache.getRegisterVerifyCache().put(phone, sixDigits);
+    }
+
+
+
+
 }

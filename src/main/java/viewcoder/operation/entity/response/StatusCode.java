@@ -5,7 +5,7 @@ package viewcoder.operation.entity.response;
  */
 public enum StatusCode {
 
-    OK(200), ERROR(400);
+    OK(200), ERROR(400), RELOGIN_ALERT(401);
 
     private int value;
 

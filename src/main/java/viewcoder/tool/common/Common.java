@@ -20,6 +20,11 @@ public class Common {
     public static String DEV_ENVIRONMENT = "dev"; //开发环境
     public static String PROD_ENVIRONMENT = "prod"; //生产环境
 
+    //异地重新登录设置
+    public static Integer RELOGIN_ALERT = -1;
+    public static String RETURN_TEXT_HTML = "text/html;charset=UTF-8";
+    public static String RETURN_JSON = "application/json";
+
     //后台返回status_code
     public final static int STATUS_CODE_OK = 200;
     public final static String STATUS_OK = "OK";

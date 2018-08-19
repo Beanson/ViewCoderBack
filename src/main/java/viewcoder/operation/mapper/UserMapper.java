@@ -7,6 +7,7 @@ package viewcoder.operation.mapper;
 import viewcoder.operation.entity.Instance;
 import viewcoder.operation.entity.User;
 import org.apache.ibatis.annotations.*;
+import viewcoder.operation.entity.WeChatInfo;
 
 import java.util.List;
 
@@ -96,5 +97,8 @@ public interface UserMapper {
     @Update("update user set framework=#{framework}, package_way=#{package_way} where id=#{id}")
     public int updateExportDefaultSetting(User user);
 
+    //更新用户微信昵称和微信的头像等信息
+    @Update("update user set user_name=#{nickname}, portrait=#{headimgurl} where id=#{user_id}")
+    public int updateWeChatInfoToUser(WeChatInfo weChatInfo);
 
 }

@@ -23,8 +23,8 @@ import viewcoder.tool.pool.WebDriverPool;
  * in a pretty plaintext form.
  */
 
-public class WebBackGroundServer {
-    static final Logger logger = Logger.getLogger(WebBackGroundServer.class);
+public class ViewCoderServer {
+    static final Logger logger = Logger.getLogger(ViewCoderServer.class);
     static final boolean SSL = System.getProperty("ssl") != null;
     static final int PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
 
@@ -47,10 +47,10 @@ public class WebBackGroundServer {
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new WebBackGroundServerInitializer(sslCtx));
+                    .childHandler(new ViewCoderServerInitializer(sslCtx));
 
             Channel ch = b.bind(PORT).sync().channel();
-            WebBackGroundServer.logger.debug("Service access through port on:" + PORT + '/');
+            ViewCoderServer.logger.debug("Service access through port on:" + PORT + '/');
             initFunc();
             ch.closeFuture().sync();
 
@@ -65,7 +65,7 @@ public class WebBackGroundServer {
      */
     private static void initFunc(){
         //初始化该静态方法中某些信息
-        WebBackGroundServer.logger.debug("idle: " + WebDriverPool.getPool().getNumIdle() +
+        ViewCoderServer.logger.debug("idle: " + WebDriverPool.getPool().getNumIdle() +
                         " num total:" + WebDriverPool.getPool().getNumActive() +
                         " waiter:" + WebDriverPool.getPool().getNumWaiters());
     }

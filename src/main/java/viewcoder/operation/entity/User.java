@@ -18,7 +18,7 @@ public class User implements Serializable{
     private String password;
     private String open_id;
     private String phone;
-    private String verifyCode; //用于注册时使用
+    private String verifyCode; //用于注册时使用和登录验证使用
     private String role;
     private String nation;
     private FileUpload portrait_file;
@@ -31,6 +31,10 @@ public class User implements Serializable{
     private int framework;
     private int package_way;
     private String dis_serial_num; //企业优惠码序列号
+    private String province;
+    private String city;
+    private String unionid; //各种微信平台唯一识别id
+    private String session_id; //该用户的session_id
 
     public User(){}
 
@@ -229,6 +233,38 @@ public class User implements Serializable{
         this.dis_serial_num = dis_serial_num;
     }
 
+    public String getProvince() {
+        return province;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getUnionid() {
+        return unionid;
+    }
+
+    public void setUnionid(String unionid) {
+        this.unionid = unionid;
+    }
+
+    public String getSession_id() {
+        return session_id;
+    }
+
+    public void setSession_id(String session_id) {
+        this.session_id = session_id;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -254,6 +290,10 @@ public class User implements Serializable{
                 ", framework=" + framework +
                 ", package_way=" + package_way +
                 ", dis_serial_num='" + dis_serial_num + '\'' +
+                ", province='" + province + '\'' +
+                ", city='" + city + '\'' +
+                ", unionid='" + unionid + '\'' +
+                ", session_id='" + session_id + '\'' +
                 '}';
     }
 }

@@ -10,6 +10,7 @@ public class ResponseData implements Serializable{
     private static final long serialVersionUID = 7526472295622776147L;
 
     private int status_code;
+    private int verify_code;
     private int exception_code;
     private String exception;
     private Object data;
@@ -27,6 +28,14 @@ public class ResponseData implements Serializable{
         this.exception_code = exception_code;
         this.exception = exception;
         this.data = data;
+    }
+
+    public int getVerify_code() {
+        return verify_code;
+    }
+
+    public void setVerify_code(int verify_code) {
+        this.verify_code = verify_code;
     }
 
     public int getStatus_code() {
@@ -73,6 +82,7 @@ public class ResponseData implements Serializable{
     public String toString() {
         return "ResponseData{" +
                 "status_code=" + status_code +
+                ", verify_code=" + verify_code +
                 ", exception_code=" + exception_code +
                 ", exception='" + exception + '\'' +
                 ", data=" + data +

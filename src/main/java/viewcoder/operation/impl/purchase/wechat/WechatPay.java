@@ -105,46 +105,49 @@ public class WechatPay {
      *
      * @param msg
      * @return
-     * @throws Exception
      */
-    public static String weChatPayNotify(Object msg) throws Exception {
-
-        //获取WeChatPay的notify数据
-        String text = TextData.getText(msg);
-        Map<String, String> packageParams = XMLWechatPayUtil.xmlToMap(text);
-        //打印查看微信回传的信息
-        for (Map.Entry<String, String> entry : packageParams.entrySet()) {
-            logger.info("key= " + entry.getKey() + " and value= " + entry.getValue());
-        }
+    public static String weChatPayNotify(Object msg) {
 
         String resXml = "";
-        //判断签名是否正确
-        if (PayCommonUtil.isTenpaySign(Common.UTF8, packageParams, GlobalConfig.getProperties(Common.PAY_WECHAT_API_KEY))) {
-            //通知微信.异步确认成功.必写.不然会一直通知后台.八次之后就认为交易失败了.
-            resXml = PayCommonUtil.packNotifyResXml(true);
-
-            //判断支付状态是否成功支付
-            if (Common.PAY_WECHAT_NOTIFY_RESULT_CODE_SUCCESS.equals(packageParams.get(Common.PAY_WECHAT_NOTIFY_RESULT_CODE))) {
-                WechatPay.logger.debug("Get WechatPay Notify Success");
-
-                //获取回传的附加数据，并更新数据库
-                Orders orders = JSON.parseObject(URLDecoder.decode(
-                        packageParams.get(Common.PAY_WECHAT_KEY_ATTACH), Common.UTF8), Orders.class);
-                //设置订单的购买时间和到期时间
-                Purchase.updateOrderTime(orders);
-                //设置外部订单号和支付宝交易号
-                orders.setOut_trade_no(packageParams.get(Common.PAY_WECHAT_KEY_OUT_TRADE_NO));
-                orders.setTrade_no(packageParams.get(Common.PAY_WECHAT_TRANSACTION_ID));
-                Purchase.updateOrderStatus(orders);
-
-            } else {
-                WechatPay.logger.warn("WeChatPay failure");
+        try {
+            //获取WeChatPay的notify数据
+            String text = TextData.getText(msg);
+            Map<String, String> packageParams = XMLWechatPayUtil.xmlToMap(text);
+            //打印查看微信回传的信息
+            for (Map.Entry<String, String> entry : packageParams.entrySet()) {
+                logger.info("key= " + entry.getKey() + " and value= " + entry.getValue());
             }
 
-        } else {
-            //通知微信.异步确认，签名失败
-            resXml = PayCommonUtil.packNotifyResXml(false);
-            WechatPay.logger.info("Notify Wechat Sign-Name failure");
+            //判断签名是否正确
+            if (PayCommonUtil.isTenpaySign(Common.UTF8, packageParams, GlobalConfig.getProperties(Common.PAY_WECHAT_API_KEY))) {
+                //通知微信.异步确认成功.必写.不然会一直通知后台.八次之后就认为交易失败了.
+                resXml = PayCommonUtil.packNotifyResXml(true);
+
+                //判断支付状态是否成功支付
+                if (Common.PAY_WECHAT_NOTIFY_RESULT_CODE_SUCCESS.equals(packageParams.get(Common.PAY_WECHAT_NOTIFY_RESULT_CODE))) {
+                    WechatPay.logger.debug("Get WechatPay Notify Success");
+
+                    //获取回传的附加数据，并更新数据库
+                    Orders orders = JSON.parseObject(URLDecoder.decode(
+                            packageParams.get(Common.PAY_WECHAT_KEY_ATTACH), Common.UTF8), Orders.class);
+                    //设置订单的购买时间和到期时间
+                    Purchase.updateOrderTime(orders);
+                    //设置外部订单号和支付宝交易号
+                    orders.setOut_trade_no(packageParams.get(Common.PAY_WECHAT_KEY_OUT_TRADE_NO));
+                    orders.setTrade_no(packageParams.get(Common.PAY_WECHAT_TRANSACTION_ID));
+                    Purchase.updateOrderStatus(orders);
+
+                } else {
+                    WechatPay.logger.warn("WeChatPay failure");
+                }
+
+            } else {
+                //通知微信.异步确认，签名失败
+                resXml = PayCommonUtil.packNotifyResXml(false);
+                WechatPay.logger.info("Notify Wechat Sign-Name failure");
+            }
+        } catch (Exception e) {
+            WechatPay.logger.error("weChat pay error: ", e);
 
         }
         return resXml;

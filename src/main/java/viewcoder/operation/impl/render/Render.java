@@ -1,5 +1,7 @@
 package viewcoder.operation.impl.render;
 
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpRequest;
 import viewcoder.exception.render.RenderException;
 import viewcoder.tool.common.Assemble;
 import viewcoder.tool.common.Common;
@@ -168,7 +170,7 @@ public class Render {
         try {
             UserUploadFile userUploadFile = (UserUploadFile) FormData.getParam(msg, UserUploadFile.class);
             String resourceRemain = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, userUploadFile.getUser_id());
-            long newUserResSpace = Integer.parseInt(resourceRemain) - userUploadFile.getFile().length();
+            long newUserResSpace = Integer.parseInt(resourceRemain) - Integer.parseInt(userUploadFile.getFile_size());
             if(newUserResSpace>0){
                 Assemble.responseSuccessSetting(responseData,null);
             }else {
@@ -194,7 +196,6 @@ public class Render {
      * @return
      */
     public static ResponseData uploadResource(Object msg) {
-
         String message = "";
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         try {

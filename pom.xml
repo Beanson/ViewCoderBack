@@ -51,7 +51,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>viewcoder.WebBackGroundServer</mainClass>
+                            <mainClass>viewcoder.ViewCoderServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

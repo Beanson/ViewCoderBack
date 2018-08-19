@@ -82,6 +82,7 @@ public class Mapper {
     public static final String UPDATE_USER_TOTAL_POINTS = "updateUserTotalPoints";
     public static final String REMOVE_EXPIRE_INSTANCE_SPACE = "removeExpireInstanceSpace";
     public static final String UPDATE_EXPORT_DEFAULT_SETTING = "updateExportDefaultSetting";
+    public static final String UPDATE_WECHAT_INFO_TO_USER = "updateWeChatInfoToUser";
 
 
     //order表数据库操作mapper************************************************************************
