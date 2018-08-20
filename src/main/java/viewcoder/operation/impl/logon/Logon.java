@@ -45,7 +45,7 @@ public class Logon {
 
         try {
             user = (User) FormData.getParam(msg, User.class);
-            //检查该邮件地址是否已被注册过
+            //检查该邮件和电话是否已被注册过
             User userDB = sqlSession.selectOne(Mapper.REGISTER_ACCOUNT_CHECK, user);
             //进行新用户注册逻辑并对responseData进行相应赋值
             Logon.signUpLogic(responseData, userDB, user, sqlSession);
