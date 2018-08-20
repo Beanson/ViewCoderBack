@@ -53,6 +53,9 @@ public interface UserMapper {
     @Select("select resource_remain, resource_used, timestamp from user where id=#{userId}")
     public User getUserSpaceInfo(int userId);
 
+    //根据open_id获取用户的数据
+    @Select("select * from user where open_id=#{openId}")
+    public User getUserByOpenId(String openId);
 
 
 

@@ -176,35 +176,35 @@ public class Logon {
 
     /**
      * 注册成功后扫码绑定二维码操作
+     *
      * @param msg
      */
-    public static ResponseData updateWeChatInfoToUser (Object msg){
+    public static ResponseData updateWeChatInfoToUser(Object msg) {
         ResponseData responseData = new ResponseData();
         SqlSession sqlSession = MybatisUtils.getSession();
         String message = "";
 
-        try{
+        try {
             WeChatInfo weChatInfo = (WeChatInfo) FormData.getParam(msg, WeChatInfo.class);
-            int num = sqlSession.update(Mapper.UPDATE_WECHAT_INFO_TO_USER,weChatInfo);
-            if(num>0){
-                Assemble.responseSuccessSetting(responseData,null);
-            }else {
+            int num = sqlSession.update(Mapper.UPDATE_WECHAT_INFO_TO_USER, weChatInfo);
+            if (num > 0) {
+                Assemble.responseSuccessSetting(responseData, null);
+            } else {
                 message = "Db Insert Error";
                 Logon.logger.warn(message);
                 Assemble.responseErrorSetting(responseData, 401, message);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             message = "System error";
             Logon.logger.error(message, e);
             Assemble.responseErrorSetting(responseData, 500, message);
 
-        }finally {
+        } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
         }
         return responseData;
     }
-
 
 
     /**
@@ -348,6 +348,48 @@ public class Logon {
     }
 
 
+    /**
+     * 用户直接扫描微信二维码登录
+     *
+     * @param msg
+     * @return
+     */
+    public static ResponseData weChatUserLogin(Object msg) {
+        ResponseData responseData = new ResponseData();
+        SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
+
+        try {
+            //获取用户open_id
+            String openId = FormData.getParam(msg, Common.OPEN_ID);
+            //数据库读取到该open_id对应的user记录
+            User user = sqlSession.selectOne(Mapper.GET_USER_BY_OPEN_ID, openId);
+
+            if (CommonService.checkNotNull(user)) {
+                //更新sessionid内存数据
+                String timestamp = CommonService.getTimeStamp();
+                CommonObject.getLoginVerify().put(user.getId(), timestamp);
+                user.setSession_id(timestamp);
+                user.setPassword(null);
+
+                Assemble.responseSuccessSetting(responseData, user);
+
+            } else {
+                message = "Not such openId in user db";
+                Logon.logger.error(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
+            }
+
+        } catch (Exception e) {
+            message = "System error";
+            Logon.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
+        }
+        return responseData;
+    }
 
 
 }

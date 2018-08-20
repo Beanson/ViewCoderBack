@@ -215,6 +215,7 @@ public class Common {
     public static final String PAGE_PARENT = "parent"; //页面的父页面
     public static final String OPT = "opt"; //具体操作类型
     public static final String COMPANY_CREDIT = "company_credit"; //公司credit, company_credit
+    public static final String OPEN_ID = "open_id"; //获取用户扫码登录的open_id
 
 
     //数字证书

@@ -68,6 +68,7 @@ public class Mapper {
     public static final String GET_TOTAL_POINTS = "getTotalPoints";
     public static final String GET_USER_SPACE_INFO = "getUserSpaceInfo";
     public static final String GET_PHONE_ACCOUNT = "getPhoneAccount";
+    public static final String GET_USER_BY_OPEN_ID = "getUserByOpenId";
 
     //insert
     public static final String REGISTER_NEW_ACCOUNT = "registerNewAccount";

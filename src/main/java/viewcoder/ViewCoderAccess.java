@@ -76,6 +76,11 @@ public class ViewCoderAccess {
             ResponseData response = Logon.updateWeChatInfoToUser(msg);
             httpResponse(ctx, msg, response);
         }
+        //用户直接手机微信登录
+        else if (uri.equals("/weChatUserLogin")) {
+            ResponseData response = Logon.weChatUserLogin(msg);
+            httpResponse(ctx, msg, response);
+        }
 
         /* **************************************************************/
          /*Overall专区*/
