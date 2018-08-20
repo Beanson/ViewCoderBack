@@ -188,7 +188,8 @@ public class Logon {
             WeChatInfo weChatInfo = (WeChatInfo) FormData.getParam(msg, WeChatInfo.class);
             int num = sqlSession.update(Mapper.UPDATE_WECHAT_INFO_TO_USER, weChatInfo);
             if (num > 0) {
-                Assemble.responseSuccessSetting(responseData, null);
+                User user = sqlSession.selectOne(Mapper.GET_USER_DATA, weChatInfo.getUser_id());
+                Assemble.responseSuccessSetting(responseData, user);
             } else {
                 message = "Db Insert Error";
                 Logon.logger.warn(message);

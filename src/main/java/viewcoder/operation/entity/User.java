@@ -34,6 +34,7 @@ public class User implements Serializable{
     private String province;
     private String city;
     private String unionid; //各种微信平台唯一识别id
+    private int sex; //性别
     private String session_id; //该用户的session_id
 
     public User(){}
@@ -257,6 +258,14 @@ public class User implements Serializable{
         this.unionid = unionid;
     }
 
+    public int getSex() {
+        return sex;
+    }
+
+    public void setSex(int sex) {
+        this.sex = sex;
+    }
+
     public String getSession_id() {
         return session_id;
     }
@@ -293,6 +302,7 @@ public class User implements Serializable{
                 ", province='" + province + '\'' +
                 ", city='" + city + '\'' +
                 ", unionid='" + unionid + '\'' +
+                ", sex=" + sex +
                 ", session_id='" + session_id + '\'' +
                 '}';
     }
