@@ -216,6 +216,7 @@ public class Common {
     public static final String OPT = "opt"; //具体操作类型
     public static final String COMPANY_CREDIT = "company_credit"; //公司credit, company_credit
     public static final String OPENID = "openid"; //获取用户扫码登录的openid
+    public static final String ACCOUNT = "account"; //获取用户登录的账号信息
 
 
     //数字证书

@@ -53,15 +53,10 @@ public class ViewCoderAccess {
         boolean messagePurchase = true;
          /* **************************************************************/
          /*Login专区*/
-         /*注册操作----------------*/
+         /*注册操作---------------------------*/
         //新用户注册请求
         if (uri.equals("/viewCoderRegister")) {
             ResponseData response = Register.ViewCoderRegister(msg);
-            httpResponse(ctx, msg, response);
-        }
-        //获取注册验证码
-        else if (uri.equals("/getRegisterVerifyCode")) {
-            ResponseData response = Register.getRegisterVerifyCode(msg);
             httpResponse(ctx, msg, response);
         }
         //注册成功后扫码绑定手机操作
@@ -69,11 +64,21 @@ public class ViewCoderAccess {
             ResponseData response = Register.updateWeChatInfoToUser(msg);
             httpResponse(ctx, msg, response);
         }
+        //获取注册验证码
+        if (uri.equals("/getRegisterVerifyCode")) {
+            ResponseData response = Register.getRegisterVerifyCode(msg);
+            httpResponse(ctx, msg, response);
+        }
 
-        /*登录操作----------------*/
-        //老用户登录请求
+        /*登录操作----------------------------*/
+        //用户登录请求
         else if (uri.equals("/viewCoderLogin")) {
             ResponseData response = SignIn.ViewCoderLogin(msg);
+            httpResponse(ctx, msg, response);
+        }
+        //获取手机验证码信息
+        else if (uri.equals("/getSignVerifyCode")) {
+            ResponseData response = SignIn.getSignVerifyCode(msg);
             httpResponse(ctx, msg, response);
         }
         //验证登录验证码是否一致

@@ -100,6 +100,48 @@ public class SignIn {
 
 
     /**
+     * 获取手机验证码操作
+     *
+     * @param msg 前端传递过来的数据
+     * @return
+     */
+    public static ResponseData getSignVerifyCode(Object msg) {
+        ResponseData responseData = new ResponseData();
+        SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
+
+        try {
+            //获取从前端传递过来的account
+            String account = FormData.getParam(msg, Common.ACCOUNT);
+            //查看数据库中该account对应的user信息
+            User user = sqlSession.selectOne(Mapper.SIGN_ACCOUNT_CHECK, account);
+
+            if (CommonService.checkNotNull(user)) {
+                //生成验证码并发送到手机
+                Logon.generatePhoneVerifyCode(user.getPhone());
+                //返回成功数据
+                Assemble.responseSuccessSetting(responseData, user.getPhone());
+
+            } else {
+                //告知用户该账号尚未注册
+                message = "account has not been registered";
+                SignIn.logger.debug(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
+            }
+
+        } catch (Exception e) {
+            message = "system error";
+            SignIn.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
+        } finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
+        }
+        return responseData;
+    }
+
+
+    /**
      * 验证登录验证码是否一致
      *
      * @param msg
@@ -114,10 +156,12 @@ public class SignIn {
             User user = (User) FormData.getParam(msg, User.class);
             //检查是否已存在有该用户
             User userDB = sqlSession.selectOne(Mapper.LOGON_VALIDATION, user);
-            if (userDB != null) {
+            if (CommonService.checkNotNull(userDB)) {
+
                 String targetVerifyCode = GlobalCache.getRegisterVerifyCache().get(userDB.getPhone());
                 //比较系统验证码和用户填写的验证码是否一致，是则返回成功，否则返回false
                 if (CommonService.checkNotNull(targetVerifyCode) && Objects.equals(user.getVerifyCode(), targetVerifyCode)) {
+
                     //验证成功，更新该用户对应的sessionId
                     userDB.setSession_id(CommonService.getTimeStamp());
                     CommonObject.getLoginVerify().put(userDB.getId(), userDB.getSession_id());
@@ -164,10 +208,12 @@ public class SignIn {
             User user = sqlSession.selectOne(Mapper.GET_USER_BY_OPEN_ID, openId);
 
             if (CommonService.checkNotNull(user)) {
+
                 //更新sessionid内存数据
                 String timestamp = CommonService.getTimeStamp();
                 user.setSession_id(timestamp);
                 CommonObject.getLoginVerify().put(user.getId(), user.getSession_id());
+
                 //设置user脱敏信息，返回user相关数据
                 user.setPassword(null);
                 Assemble.responseSuccessSetting(responseData, user);
@@ -188,5 +234,4 @@ public class SignIn {
         }
         return responseData;
     }
-
 }
