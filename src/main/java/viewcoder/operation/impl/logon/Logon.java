@@ -189,6 +189,8 @@ public class Logon {
             int num = sqlSession.update(Mapper.UPDATE_WECHAT_INFO_TO_USER, weChatInfo);
             if (num > 0) {
                 User user = sqlSession.selectOne(Mapper.GET_USER_DATA, weChatInfo.getUser_id());
+                user.setSession_id(CommonService.getTimeStamp());
+                CommonObject.getLoginVerify().put(user.getId(), user.getSession_id());
                 Assemble.responseSuccessSetting(responseData, user);
             } else {
                 message = "Db Insert Error";
