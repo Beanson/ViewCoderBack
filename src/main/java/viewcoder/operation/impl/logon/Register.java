@@ -1,7 +1,9 @@
 package viewcoder.operation.impl.logon;
 
+import com.aliyun.oss.OSSClient;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
+import org.junit.Test;
 import viewcoder.operation.entity.Project;
 import viewcoder.operation.entity.User;
 import viewcoder.operation.entity.WeChatInfo;
@@ -9,13 +11,13 @@ import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.operation.impl.project.ProjectList;
 import viewcoder.tool.cache.GlobalCache;
-import viewcoder.tool.common.Assemble;
-import viewcoder.tool.common.Common;
-import viewcoder.tool.common.CommonObject;
-import viewcoder.tool.common.Mapper;
+import viewcoder.tool.common.*;
+import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.parser.form.FormData;
 import viewcoder.tool.util.MybatisUtils;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Objects;
 
 /**
@@ -177,23 +179,45 @@ public class Register {
     public static ResponseData updateWeChatInfoToUser(Object msg) {
         ResponseData responseData = new ResponseData();
         SqlSession sqlSession = MybatisUtils.getSession();
+        OSSClient ossClient = OssOpt.initOssClient();
         String message = "";
 
         try {
             WeChatInfo weChatInfo = (WeChatInfo) FormData.getParam(msg, WeChatInfo.class);
-            int num = sqlSession.update(Mapper.UPDATE_WECHAT_INFO_TO_USER, weChatInfo);
-            if (num > 0) {
-                User user = sqlSession.selectOne(Mapper.GET_USER_DATA, weChatInfo.getUser_id());
-                user.setSession_id(CommonService.getTimeStamp());
-                CommonObject.getLoginVerify().put(user.getId(), user.getSession_id());
-                //给user信息脱敏，返回user数据
-                user.setPassword(null);
-                Assemble.responseSuccessSetting(responseData, user);
+            if (CommonService.checkNotNull(weChatInfo)) {
+                //保存微信头像到oss
+                if (CommonService.checkNotNull(weChatInfo.getHeadimgurl())) {
+                    //OSS保存头像为PNG图片
+                    URL url = new URL(weChatInfo.getHeadimgurl());
+                    InputStream is = url.openStream();
+                    String portrait = CommonService.getUnionId() + Common.IMG_PNG;
+                    OssOpt.uploadFileToOss((GlobalConfig.getOssFileUrl(Common.PORTRAIT_IMG) + portrait), is, ossClient);
+                    //更新微信信息，即将插入数据库
+                    weChatInfo.setHeadimgurl(portrait);
+
+                }else {
+                    weChatInfo.setHeadimgurl(Common.DEFAULT_PORTRAIT);
+                }
+
+                int num = sqlSession.update(Mapper.UPDATE_WECHAT_INFO_TO_USER, weChatInfo);
+                if (num > 0) {
+                    User user = sqlSession.selectOne(Mapper.GET_USER_DATA, weChatInfo.getUser_id());
+                    user.setSession_id(CommonService.getTimeStamp());
+                    CommonObject.getLoginVerify().put(user.getId(), user.getSession_id());
+                    //给user信息脱敏，返回user数据
+                    user.setPassword(null);
+                    Assemble.responseSuccessSetting(responseData, user);
+
+                } else {
+                    message = "Db Insert Error";
+                    Register.logger.warn(message);
+                    Assemble.responseErrorSetting(responseData, 401, message);
+                }
 
             } else {
-                message = "Db Insert Error";
+                message = "WeChat info null";
                 Register.logger.warn(message);
-                Assemble.responseErrorSetting(responseData, 401, message);
+                Assemble.responseErrorSetting(responseData, 402, message);
             }
 
         } catch (Exception e) {
@@ -205,5 +229,24 @@ public class Register {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
         }
         return responseData;
+    }
+
+
+    @Test
+    public void test() {
+        OSSClient ossClient = OssOpt.initOssClient();
+        try {
+            URL url = new URL("http://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83er3ia6sH9icnpfY6RUk1Ir8YmAWjr6skbDDLZicqZonrssJsib0v5IHBcaTouiaMYIUg3SqqfNox25G8mg/132");
+            InputStream is = url.openStream();
+            String portrait = CommonService.getUnionId() + ".png";
+            OssOpt.uploadFileToOss("portrait_img/" + portrait, is, ossClient);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        } finally {
+            OssOpt.shutDownOssClient(ossClient);
+        }
+
     }
 }

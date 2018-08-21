@@ -26,6 +26,15 @@ public class CommonService {
     private static Logger logger = Logger.getLogger(CommonService.class);
 
     /**
+     * 获取唯一序列号字符串
+     *
+     * @return
+     */
+    public static String getUnionId() {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+
+    /**
      * 返回时间戳公用方法
      *
      * @return
@@ -149,13 +158,14 @@ public class CommonService {
 
     /**
      * 生成6位数验证码
+     *
      * @return
      */
-    public static String generateSixDigits(){
+    public static String generateSixDigits() {
         Random random = new Random();
-        String result="";
-        for (int i=0;i<6;i++) {
-            result+=random.nextInt(10);
+        String result = "";
+        for (int i = 0; i < 6; i++) {
+            result += random.nextInt(10);
         }
         return result;
     }
