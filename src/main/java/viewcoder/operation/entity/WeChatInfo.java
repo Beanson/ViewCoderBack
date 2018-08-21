@@ -1,5 +1,7 @@
 package viewcoder.operation.entity;
 
+import java.util.List;
+
 /**
  * Created by Administrator on 2018/8/19.
  */
@@ -14,7 +16,7 @@ public class WeChatInfo {
     private String province;
     private String country;
     private String headimgurl;
-    private String privilege;
+    private List<String> privilege;
     private String unionid;
 
     public WeChatInfo() {
@@ -92,11 +94,11 @@ public class WeChatInfo {
         this.headimgurl = headimgurl;
     }
 
-    public String getPrivilege() {
+    public List<String> getPrivilege() {
         return privilege;
     }
 
-    public void setPrivilege(String privilege) {
+    public void setPrivilege(List<String> privilege) {
         this.privilege = privilege;
     }
 
@@ -110,8 +112,9 @@ public class WeChatInfo {
 
     @Override
     public String toString() {
-        return "WechatInfo{" +
-                "openid='" + openid + '\'' +
+        return "WeChatInfo{" +
+                "user_id=" + user_id +
+                ", openid='" + openid + '\'' +
                 ", nickname='" + nickname + '\'' +
                 ", sex=" + sex +
                 ", language='" + language + '\'' +
@@ -119,7 +122,7 @@ public class WeChatInfo {
                 ", province='" + province + '\'' +
                 ", country='" + country + '\'' +
                 ", headimgurl='" + headimgurl + '\'' +
-                ", privilege='" + privilege + '\'' +
+                ", privilege=" + privilege +
                 ", unionid='" + unionid + '\'' +
                 '}';
     }

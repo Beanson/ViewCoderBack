@@ -5,7 +5,7 @@ package viewcoder;
  */
 
 import viewcoder.operation.entity.response.StatusCode;
-import viewcoder.operation.impl.logon.ReLoginVerify;
+import viewcoder.operation.impl.logon.QuickLoginVerify;
 import viewcoder.tool.common.Common;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.common.CommonService;
@@ -45,7 +45,7 @@ public class ViewCoderServerHandler extends SimpleChannelInboundHandler<Object> 
                 if (!ViewCoderAccess.nonLoginAccess(uri, msg, ctx)) {
 
                     //需要获取登录状态才能访问的链接请求，防止重复登录可操作的请求
-                    if (ReLoginVerify.checkLoginSession(request) == Common.RELOGIN_ALERT) {
+                    if (QuickLoginVerify.checkLoginSession(request) == Common.RELOGIN_ALERT) {
                         ResponseData responseData = new ResponseData();
                         responseData.setVerify_code(StatusCode.RELOGIN_ALERT.getValue());
                         ViewCoderAccess.httpResponse(ctx, msg, responseData);

@@ -12,6 +12,8 @@ import org.apache.log4j.Logger;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.company.CompanyOpt;
 import viewcoder.operation.impl.logon.Logon;
+import viewcoder.operation.impl.logon.Register;
+import viewcoder.operation.impl.logon.SignIn;
 import viewcoder.operation.impl.overall.Overall;
 import viewcoder.operation.impl.personal.Personal;
 import viewcoder.operation.impl.project.CreateProject;
@@ -51,34 +53,37 @@ public class ViewCoderAccess {
         boolean messagePurchase = true;
          /* **************************************************************/
          /*Login专区*/
+         /*注册操作----------------*/
         //新用户注册请求
         if (uri.equals("/viewCoderRegister")) {
-            ResponseData response = Logon.ViewCoderRegister(msg);
-            httpResponse(ctx, msg, response);
-        }
-        //老用户登录请求
-        else if (uri.equals("/viewCoderLogin")) {
-            ResponseData response = Logon.ViewCoderLogin(msg);
+            ResponseData response = Register.ViewCoderRegister(msg);
             httpResponse(ctx, msg, response);
         }
         //获取注册验证码
         else if (uri.equals("/getRegisterVerifyCode")) {
-            ResponseData response = Logon.getRegisterVerifyCode(msg);
-            httpResponse(ctx, msg, response);
-        }
-        //验证登录验证码是否一致
-        else if (uri.equals("/signInVerifyCodeCheck")) {
-            ResponseData response = Logon.signInVerifyCodeCheck(msg);
+            ResponseData response = Register.getRegisterVerifyCode(msg);
             httpResponse(ctx, msg, response);
         }
         //注册成功后扫码绑定手机操作
         else if (uri.equals("/updateWeChatInfoToUser")) {
-            ResponseData response = Logon.updateWeChatInfoToUser(msg);
+            ResponseData response = Register.updateWeChatInfoToUser(msg);
+            httpResponse(ctx, msg, response);
+        }
+
+        /*登录操作----------------*/
+        //老用户登录请求
+        else if (uri.equals("/viewCoderLogin")) {
+            ResponseData response = SignIn.ViewCoderLogin(msg);
+            httpResponse(ctx, msg, response);
+        }
+        //验证登录验证码是否一致
+        else if (uri.equals("/signInVerifyCodeCheck")) {
+            ResponseData response = SignIn.signInVerifyCodeCheck(msg);
             httpResponse(ctx, msg, response);
         }
         //用户直接手机微信登录
         else if (uri.equals("/weChatUserLogin")) {
-            ResponseData response = Logon.weChatUserLogin(msg);
+            ResponseData response = SignIn.weChatUserLogin(msg);
             httpResponse(ctx, msg, response);
         }
 
