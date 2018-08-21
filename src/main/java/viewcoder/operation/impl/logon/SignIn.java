@@ -159,7 +159,7 @@ public class SignIn {
 
         try {
             //获取用户open_id
-            String openId = FormData.getParam(msg, Common.OPEN_ID);
+            String openId = FormData.getParam(msg, Common.OPENID);
             //数据库读取到该open_id对应的user记录
             User user = sqlSession.selectOne(Mapper.GET_USER_BY_OPEN_ID, openId);
 

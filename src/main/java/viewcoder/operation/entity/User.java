@@ -16,7 +16,7 @@ public class User implements Serializable{
     private String user_name;
     private String email;
     private String password;
-    private String open_id;
+    private String openid;
     private String phone;
     private String verifyCode; //用于注册时使用和登录验证使用
     private String role;
@@ -146,12 +146,12 @@ public class User implements Serializable{
         this.nation = nation;
     }
 
-    public String getOpen_id() {
-        return open_id;
+    public String getOpenid() {
+        return openid;
     }
 
-    public void setOpen_id(String open_id) {
-        this.open_id = open_id;
+    public void setOpenid(String openid) {
+        this.openid = openid;
     }
 
     public FileUpload getPortrait_file() {
@@ -284,7 +284,7 @@ public class User implements Serializable{
                 ", user_name='" + user_name + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", open_id='" + open_id + '\'' +
+                ", openid='" + openid + '\'' +
                 ", phone='" + phone + '\'' +
                 ", verifyCode='" + verifyCode + '\'' +
                 ", role='" + role + '\'' +

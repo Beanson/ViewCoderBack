@@ -53,8 +53,8 @@ public interface UserMapper {
     @Select("select resource_remain, resource_used, timestamp from user where id=#{userId}")
     public User getUserSpaceInfo(int userId);
 
-    //根据open_id获取用户的数据
-    @Select("select * from user where open_id=#{openId}")
+    //根据openid获取用户的数据
+    @Select("select * from user where openid=#{openId}")
     public User getUserByOpenId(String openId);
 
 
@@ -101,7 +101,8 @@ public interface UserMapper {
     public int updateExportDefaultSetting(User user);
 
     //更新用户微信昵称和微信的头像等信息
-    @Update("update user set user_name=#{nickname}, portrait=#{headimgurl} where id=#{user_id}")
+    @Update("update user set user_name=#{nickname}, openid=#{openid}, portrait=#{headimgurl}, province=#{province}, " +
+            "city=#{city}, unionid=#{unionid}, sex=#{sex} where id=#{user_id}")
     public int updateWeChatInfoToUser(WeChatInfo weChatInfo);
 
 }
