@@ -117,7 +117,6 @@ public class SignIn {
 
             //查看数据库中该account对应的user信息
             User user = sqlSession.selectOne(Mapper.LOGON_VALIDATION, map);
-
             if (CommonService.checkNotNull(user)) {
                 //生成验证码并发送到手机
                 Logon.generatePhoneVerifyCode(user.getPhone());
@@ -126,9 +125,9 @@ public class SignIn {
 
             } else {
                 //告知用户该账号尚未注册
-                message = "account has not been registered";
+                message = "account or password not right";
                 SignIn.logger.debug(message);
-                Assemble.responseErrorSetting(responseData, 401, message, user.getPhone());
+                Assemble.responseErrorSetting(responseData, 401, message);
             }
 
         } catch (Exception e) {
