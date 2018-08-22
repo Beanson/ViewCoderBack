@@ -4,7 +4,6 @@ package viewcoder;
  * Created by Administrator on 2017/2/8.
  */
 
-import com.sun.xml.internal.ws.api.message.Packet;
 import viewcoder.operation.entity.response.StatusCode;
 import viewcoder.operation.impl.logon.QuickLoginVerify;
 import viewcoder.tool.common.Common;

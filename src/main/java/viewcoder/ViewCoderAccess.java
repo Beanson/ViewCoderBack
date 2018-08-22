@@ -11,7 +11,6 @@ import io.netty.handler.codec.http.HttpUtil;
 import org.apache.log4j.Logger;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.company.CompanyOpt;
-import viewcoder.operation.impl.logon.Logon;
 import viewcoder.operation.impl.logon.Register;
 import viewcoder.operation.impl.logon.SignIn;
 import viewcoder.operation.impl.overall.Overall;
