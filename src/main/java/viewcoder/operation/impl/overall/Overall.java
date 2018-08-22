@@ -1,11 +1,10 @@
 package viewcoder.operation.impl.overall;
 
 import com.aliyun.oss.OSSClient;
+import viewcoder.ViewCoderServer;
 import viewcoder.operation.entity.Feedback;
-import viewcoder.tool.common.Assemble;
-import viewcoder.tool.common.Common;
-import viewcoder.tool.common.Mapper;
-import viewcoder.tool.common.OssOpt;
+import viewcoder.operation.entity.response.StatusCode;
+import viewcoder.tool.common.*;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.parser.form.FormData;
 import viewcoder.tool.util.MybatisUtils;
@@ -15,6 +14,9 @@ import viewcoder.operation.impl.common.CommonService;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 
+import java.util.Map;
+import java.util.Objects;
+
 /**
  * Created by Administrator on 2018/2/28.
  */
@@ -23,20 +25,48 @@ public class Overall {
     private static Logger logger = Logger.getLogger(Overall.class);
 
 
-    public static ResponseData getUserInfoById(Object msg) {
-        ResponseData responseData = new ResponseData();
+    /**
+     * overall中刷新页面时重新获取用户信息
+     *
+     * @param msg
+     * @return
+     */
+    public static ResponseData getUserInfoByIdAndSessionId(Object msg) {
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
 
         try {
-            String userId = FormData.getParam(msg, Common.USER_ID);
-            //根据userId从数据库中查找对应的user信息
-            User user = sqlSession.selectOne(Mapper.GET_USER_DATA, Integer.parseInt(userId));
-            if (user != null && user.getId() > 0) {
-                user.setPassword(null);
-                Assemble.responseSuccessSetting(responseData, user);
+            Map<String, Object> map = FormData.getParam(msg);
+            String userId = String.valueOf(map.get(Common.USER_ID));
+            String sessionId = String.valueOf(map.get(Common.SESSION_ID));
+
+            if (CommonService.checkNotNull(userId) && CommonService.checkNotNull(sessionId)) {
+                String targetSessionId = CommonObject.getLoginVerify().get(Integer.parseInt(userId));
+                if (Objects.equals(sessionId, targetSessionId)){
+
+                    //根据userId从数据库中查找对应的user信息
+                    User user = sqlSession.selectOne(Mapper.GET_USER_DATA, Integer.parseInt(userId));
+                    if (user != null && user.getId() > 0) {
+                        user.setPassword(null);
+                        user.setSession_id(targetSessionId);
+                        Assemble.responseSuccessSetting(responseData, user);
+
+                    } else {
+                        message = "Get user info from database null error";
+                        Overall.logger.warn(message);
+                        Assemble.responseErrorSetting(responseData, 401, message);
+                    }
+                }else {
+                    message = "reLogin suspect";
+                    Overall.logger.warn(message);
+                    Assemble.responseErrorSetting(responseData, 402, message);
+                }
+
             } else {
-                Assemble.responseErrorSetting(responseData, 401,
-                        "Get user info from database null error");
+                message = "user or session null";
+                Overall.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 403, message);
             }
 
         } catch (Exception e) {
@@ -51,11 +81,11 @@ public class Overall {
     }
 
 
-
     /**
      * 接收客户的建议和反馈消息
      * 1、数据库中添加新记录
      * 2、oss中存储feedback的信息
+     *
      * @param msg
      * @return
      */
@@ -90,6 +120,51 @@ public class Overall {
 
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
+        }
+        return responseData;
+    }
+
+
+    /**
+     * 用户退出登录，sessionId记录移除
+     *
+     * @param msg
+     * @return
+     */
+    public static ResponseData logoutUserAccount(Object msg) {
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        String message = "";
+
+        try {
+            Map<String, Object> map = FormData.getParam(msg);
+            int userId = Integer.parseInt(String.valueOf(map.get(Common.USER_ID)));
+            String sessionId = String.valueOf(map.get(Common.SESSION_ID));
+
+            //保证传递的数据正确性
+            if (CommonService.checkNotNull(sessionId) && userId > 0) {
+
+                String targetSessionId = CommonObject.getLoginVerify().get(userId);
+                //验证若传递的sessionId和后台记录的sessionId一致则后台取消该sessionId的记录条目
+                if (Objects.equals(sessionId, targetSessionId)) {
+                    CommonObject.getLoginVerify().remove(userId);
+                    Assemble.responseSuccessSetting(responseData, null);
+
+                } else {
+                    message = "sessionId not match. request sessionId: " + sessionId + " , target sessionId: " + targetSessionId;
+                    Assemble.responseErrorSetting(responseData, 401, message);
+                    Overall.logger.warn(message);
+                }
+
+            } else {
+                message = "request data error. sessionId: " + sessionId + " , userId: " + userId;
+                Assemble.responseErrorSetting(responseData, 402, message);
+                Overall.logger.warn(message);
+            }
+
+        } catch (Exception e) {
+            message = "system error";
+            Assemble.responseErrorSetting(responseData, 500, message);
+            Overall.logger.error(message, e);
         }
         return responseData;
     }

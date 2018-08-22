@@ -14,6 +14,7 @@ import viewcoder.tool.parser.form.FormData;
 import viewcoder.tool.util.MybatisUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -66,10 +67,10 @@ public class SignIn {
             userDB.setPassword(null);//不会传密码
 
             //查看该userId是否已经存在登录信息，若是则发消息回去告知要短信验证，否则走登录成功流程
-            if (CommonService.checkNotNull(CommonObject.getLoginVerify().get(user.getId()))) {
+            if (CommonService.checkNotNull(CommonObject.getLoginVerify().get(userDB.getId()))) {
                 //若已经系统存在该user登录信息，则可能多用户同时登录状态，此时发送验证码进行验证
-                Logon.generatePhoneVerifyCode(user.getPhone());
-                Assemble.responseErrorSetting(responseData, 301, "Multi Login");
+                Logon.generatePhoneVerifyCode(userDB.getPhone());
+                Assemble.responseErrorSetting(responseData, 301, "Multi Login", userDB.getPhone());
 
             } else {
                 //赋予该用户session_id
@@ -112,9 +113,10 @@ public class SignIn {
 
         try {
             //获取从前端传递过来的account
-            String account = FormData.getParam(msg, Common.ACCOUNT);
+            Map<String, Object> map = FormData.getParam(msg);
+
             //查看数据库中该account对应的user信息
-            User user = sqlSession.selectOne(Mapper.SIGN_ACCOUNT_CHECK, account);
+            User user = sqlSession.selectOne(Mapper.LOGON_VALIDATION, map);
 
             if (CommonService.checkNotNull(user)) {
                 //生成验证码并发送到手机
@@ -126,7 +128,7 @@ public class SignIn {
                 //告知用户该账号尚未注册
                 message = "account has not been registered";
                 SignIn.logger.debug(message);
-                Assemble.responseErrorSetting(responseData, 401, message);
+                Assemble.responseErrorSetting(responseData, 401, message, user.getPhone());
             }
 
         } catch (Exception e) {
@@ -210,8 +212,7 @@ public class SignIn {
             if (CommonService.checkNotNull(user)) {
 
                 //更新sessionid内存数据
-                String timestamp = CommonService.getTimeStamp();
-                user.setSession_id(timestamp);
+                user.setSession_id(CommonService.getTimeStamp());
                 CommonObject.getLoginVerify().put(user.getId(), user.getSession_id());
 
                 //设置user脱敏信息，返回user相关数据

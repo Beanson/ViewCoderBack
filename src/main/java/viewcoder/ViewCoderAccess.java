@@ -117,8 +117,13 @@ public class ViewCoderAccess {
         /* **************************************************************/
         /* Overall专区*/
         //根据用户id号来获取个人信息
-        if (uri.equals("/getUserInfoById")) {
-            ResponseData response = Overall.getUserInfoById(msg);
+        if (uri.equals("/getUserInfoByIdAndSessionId")) {
+            ResponseData response = Overall.getUserInfoByIdAndSessionId(msg);
+            httpResponse(ctx, msg, response);
+        }
+        //退出登录时操作
+        else if (uri.equals("/logoutUserAccount")) {
+            ResponseData response = Overall.logoutUserAccount(msg);
             httpResponse(ctx, msg, response);
         }
 
@@ -395,8 +400,8 @@ public class ViewCoderAccess {
         response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
         response.headers().set(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
         response.headers().set(ACCESS_CONTROL_ALLOW_METHODS, "POST");
-        response.headers().set(ACCESS_CONTROL_ALLOW_HEADERS, "*");
-        response.headers().set(ACCEPT, "*");
+        response.headers().set(ACCESS_CONTROL_ALLOW_HEADERS, "user_id, session_id, *");
+        //response.headers().set(ACCEPT, "*");
         if (!keepAlive) {
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         } else {

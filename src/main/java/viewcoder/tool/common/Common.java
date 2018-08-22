@@ -178,6 +178,7 @@ public class Common {
     public static final String PROJECT = "project";
     public static final String PROJECT_ID = "project_id";
     public static final String USER_ID = "user_id";
+    public static final String SESSION_ID = "session_id";
     public static final String FILE_TYPE = "file_type";
     public static final String NEW_FILE_NAME = "new_file_name";
     public static final String TIME_STAMP = "timestamp";
