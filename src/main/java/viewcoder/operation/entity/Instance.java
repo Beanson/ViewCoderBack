@@ -8,6 +8,7 @@ public class Instance {
 
     private int id;
     private int user_id;
+    private String timestamp;
     private int order_id;
     private int service_id;
     private String space;  //单位是KByte
@@ -32,6 +33,14 @@ public class Instance {
 
     public void setUser_id(int user_id) {
         this.user_id = user_id;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public int getOrder_id() {
@@ -87,6 +96,7 @@ public class Instance {
         return "Instance{" +
                 "id=" + id +
                 ", user_id=" + user_id +
+                ", timestamp='" + timestamp + '\'' +
                 ", order_id=" + order_id +
                 ", service_id=" + service_id +
                 ", space='" + space + '\'' +

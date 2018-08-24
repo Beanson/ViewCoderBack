@@ -14,7 +14,7 @@ public interface InstanceMapper {
 
     /********************以下是选择instance操作***********************/
     //根据user_id获得该相关的instance信息
-    @Select("select * from instance where id=#{user_id}")
+    @Select("select * from instance where user_id=#{user_id}")
     public List<Instance> getInstanceByUserId(int user_id);
 
     //选择即将过期和已经过期的实例

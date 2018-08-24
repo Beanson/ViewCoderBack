@@ -171,6 +171,7 @@ public class Register {
     }
 
 
+
     /**
      * 注册成功后扫码绑定二维码操作
      *
@@ -231,22 +232,4 @@ public class Register {
         return responseData;
     }
 
-
-    @Test
-    public void test() {
-        OSSClient ossClient = OssOpt.initOssClient();
-        try {
-            URL url = new URL("http://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83er3ia6sH9icnpfY6RUk1Ir8YmAWjr6skbDDLZicqZonrssJsib0v5IHBcaTouiaMYIUg3SqqfNox25G8mg/132");
-            InputStream is = url.openStream();
-            String portrait = CommonService.getUnionId() + ".png";
-            OssOpt.uploadFileToOss("portrait_img/" + portrait, is, ossClient);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-
-        } finally {
-            OssOpt.shutDownOssClient(ossClient);
-        }
-
-    }
 }

@@ -144,7 +144,9 @@ function getSimulateData() {
                 generalProperty(spans[i], objText, 3, "Common_Text");
                 getTextProperty(spans[i], objText, text);
                 objText['text-editable'] = false;
-                objText['width'] += 10; //文字需再加10才能正常显示
+                //文字的width和height不可小于21，不然边框将无法拖动
+                objText['width'] = objText['width'] < 21 ? 21 : objText['width'];
+                objText['height'] = objText['height'] < 21 ? 21 : objText['height'];
                 data['all_tools']['Common_Text'][objText['layer_id']] = objText; //装载text类型数据
             }
         }
