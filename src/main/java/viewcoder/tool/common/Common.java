@@ -246,7 +246,7 @@ public class Common {
     public static final String STORE_TYPE = "store";
     public static final Integer EXAMPLE_REF_ID = 140;
     public static final String EXAMPLE_CASE_1 = "样例1";
-    public static final String DEFAULT_PORTRAIT = "default.png";
+    public static final String DEFAULT_PORTRAIT = "default_portrait.png";
 
 
     //mail的其他配置

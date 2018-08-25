@@ -7,6 +7,7 @@ package viewcoder.operation.entity;
 public class Company {
 
     private int id;
+    private String timestamp;
     private String credit;
     private String name;
     private String address;
@@ -27,6 +28,14 @@ public class Company {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getCredit() {
@@ -113,6 +122,7 @@ public class Company {
     public String toString() {
         return "Company{" +
                 "id=" + id +
+                ", timestamp='" + timestamp + '\'' +
                 ", credit='" + credit + '\'' +
                 ", name='" + name + '\'' +
                 ", address='" + address + '\'' +

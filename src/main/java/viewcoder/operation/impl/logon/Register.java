@@ -105,7 +105,7 @@ public class Register {
             //验证手机验证码操作
             if (Objects.equals(user.getVerifyCode(), GlobalCache.getRegisterVerifyCache().get(user.getPhone()))) {
                 //插入数据库进行注册操作
-                user.setPortrait("default_portrait.png");//设置默认portrait
+                user.setTimestamp(CommonService.getTimeStamp());
                 int num = sqlSession.insert(Mapper.REGISTER_NEW_ACCOUNT, user);
                 Register.logger.debug("注册添加数：" + num + " ；用户id为：" + user.getId());
 
