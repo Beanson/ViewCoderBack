@@ -12,6 +12,8 @@ import java.util.Map;
 
 public interface OrderMapper {
 
+    //************************* 以下是orders表的我的订单面板数据操作 ******************************************
+
     /**************************以下是select操作**********************************/
     //根据用户user_id获取该用户所有订单order的数据
     @Select("select * from orders where user_id=#{userId}")
@@ -51,8 +53,29 @@ public interface OrderMapper {
     /**************************以下是update操作**********************************/
     //更新order支付状态的数据
     @Update("update orders set out_trade_no=#{out_trade_no}, trade_no=#{trade_no}, pay_date=#{pay_date}, " +
-            "expire_date=#{expire_date}, pay_status=1 where id=#{id}")
+            "expire_date=#{expire_date}, expire_days=#{expire_days}, pay_status=1 where id=#{id}")
     int updateOrderPayment(Orders orders);
+
+
+
+
+
+    //************************* 以下是orders表的我的套餐面板数据操作 ******************************************
+
+    /**************************以下是select操作**********************************/
+    @Select("select out_trade_no, service_id, service_num, pay_date, expire_date, expire_days from " +
+            "orders where user_id=#{user_id}")
+    List<Orders> getInstanceByUserId (int userId);
+
+    //选择即将过期和已经过期的订单实例
+    @Select("select * from orders where expire_days in (0, 1, 3, 7)")
+    public List<Orders> getToExpireInstance(int user_id);
+
+
+    /**************************以下是update操作**********************************/
+    //设置过期时间减少一天，每天跑batch job测试该部分代码
+    @Update("update orders set expire_days=(expire_days-1)")
+    public int updateInstanceExpireDays(int instanceId);
 }
 
 

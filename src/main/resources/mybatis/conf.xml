@@ -57,8 +57,7 @@
                     <property user_name="password" value="intellectual" />-->
 
     <mappers>
-        <!--<mapper userUploadFile="mybatis/Mapper/UserMapper.xml"/> &lt;!&ndash; xml文件的话查找需要用/ 路径&ndash;&gt;-->
-        <mapper class="viewcoder.operation.mapper.InstanceMapper"/> <!--类的话查找全类名 需要用.标识-->
+        <!--类的话查找全类名 需要用.标识-->
         <mapper class="viewcoder.operation.mapper.UserMapper"/>
         <mapper class="viewcoder.operation.mapper.ProjectMapper"/>
         <mapper class="viewcoder.operation.mapper.ChiefMapper"/>

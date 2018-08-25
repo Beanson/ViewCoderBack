@@ -4,7 +4,6 @@ package viewcoder.operation.mapper;
  * Created by Administrator on 2017/2/8.
  */
 
-import viewcoder.operation.entity.Instance;
 import viewcoder.operation.entity.User;
 import org.apache.ibatis.annotations.*;
 import viewcoder.operation.entity.WeChatInfo;
@@ -60,8 +59,8 @@ public interface UserMapper {
 
 
     /********************以下是插入user操作***********************/
-    //注册操作
-    @Insert("insert into user(portrait,user_name,email,password,phone) values(#{portrait},#{user_name},#{email},#{password},#{phone})")
+    //注册操作， 默认用户名为手机号，因为注册时需要验证码，验证过该手机用户存在，绑定微信后再进行update个人信息处理
+    @Insert("insert into user(portrait,user_name,email,password,phone) values(#{portrait},#{phone},#{email},#{password},#{phone})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int registerNewAccount(User user);
 
@@ -93,8 +92,8 @@ public interface UserMapper {
     public int updateUserTotalPoints(User user);
 
     //释放用户表中过期的实例的空间
-    @Update("update user set resource_remain=resource_remain-#{space_expire} where user_id=#{user_id}")
-    public int removeExpireInstanceSpace(Instance instance);
+//    @Update("update user set resource_remain=resource_remain-#{space_expire} where user_id=#{user_id}")
+//    public int removeExpireInstanceSpace(Instance instance);
 
     //更新用户framework和package_way的信息
     @Update("update user set framework=#{framework}, package_way=#{package_way} where id=#{id}")

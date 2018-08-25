@@ -14,6 +14,7 @@ public class Orders {
     private String order_date;
     private String pay_date;
     private String expire_date;
+    private String expire_days;
     private int pay_status;
     private int pay_way;
     private String price;
@@ -96,6 +97,14 @@ public class Orders {
         this.expire_date = expire_date;
     }
 
+    public String getExpire_days() {
+        return expire_days;
+    }
+
+    public void setExpire_days(String expire_days) {
+        this.expire_days = expire_days;
+    }
+
     public int getPay_way() {
         return pay_way;
     }
@@ -148,6 +157,7 @@ public class Orders {
                 ", order_date='" + order_date + '\'' +
                 ", pay_date='" + pay_date + '\'' +
                 ", expire_date='" + expire_date + '\'' +
+                ", expire_days='" + expire_days + '\'' +
                 ", pay_status=" + pay_status +
                 ", pay_way=" + pay_way +
                 ", price='" + price + '\'' +

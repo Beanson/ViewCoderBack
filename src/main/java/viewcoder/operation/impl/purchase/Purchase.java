@@ -1,6 +1,7 @@
 package viewcoder.operation.impl.purchase;
 
 import org.apache.commons.codec.binary.Hex;
+import org.junit.Test;
 import viewcoder.exception.purchase.PayException;
 import viewcoder.tool.common.Assemble;
 import viewcoder.tool.common.Common;
@@ -8,9 +9,7 @@ import viewcoder.tool.common.CommonObject;
 import viewcoder.tool.common.Mapper;
 import viewcoder.tool.encrypt.ECCUtil;
 import viewcoder.tool.parser.form.FormData;
-import viewcoder.tool.parser.text.TextData;
 import viewcoder.tool.util.MybatisUtils;
-import viewcoder.operation.entity.Instance;
 import viewcoder.operation.entity.Orders;
 import viewcoder.operation.entity.User;
 import viewcoder.operation.entity.response.ResponseData;
@@ -21,7 +20,9 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 
 import java.text.SimpleDateFormat;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Administrator on 2018/3/11.
@@ -45,7 +46,7 @@ public class Purchase {
             //根据user_id获取user表resource_remain和resource_used的数据
             User user = sqlSession.selectOne(Mapper.GET_USER_SPACE_INFO, userId);
             //根据user_id获取instance表数据
-            List<Instance> instances = sqlSession.selectList(Mapper.GET_INSTANCE_BY_USER_ID, userId);
+            List<Orders> instances = sqlSession.selectList(Mapper.GET_INSTANCE_BY_USER_ID, userId);
             //准备返回数据
             Map<String, Object> map = new HashMap<>();
             map.put(Common.SPACE_INFO, user);
@@ -251,19 +252,24 @@ public class Purchase {
         int serviceId = orders.getService_id();
         SimpleDateFormat sdf = new SimpleDateFormat(Common.TIME_FORMAT_1);
         Date date = new Date();
+        Calendar currentDate = Calendar.getInstance();
         Calendar expireDate = Calendar.getInstance();
 
         //根据不同的订单类型设置不同的过期时间区间
         switch (serviceId) {
-            case 0: {
+            case 1: {
                 expireDate.add(Calendar.DATE, orders.getService_num());
                 break;
             }
-            case 1: {
+            case 2: {
                 expireDate.add(Calendar.MONTH, orders.getService_num());
                 break;
             }
-            case 2: {
+            case 3: {
+                expireDate.add(Calendar.YEAR, orders.getService_num());
+                break;
+            }
+            case 4: {
                 expireDate.add(Calendar.YEAR, orders.getService_num());
                 break;
             }
@@ -281,7 +287,14 @@ public class Purchase {
         //设置订单order的支付和过期时间
         orders.setPay_date(sdf.format(date));
         orders.setExpire_date(sdf.format(expireDate.getTime()));
+
+        //设置过期天数，跑batch job时用到此数据
+        long start = currentDate.getTimeInMillis();
+        long end = expireDate.getTimeInMillis();
+        long days =  TimeUnit.MILLISECONDS.toDays(Math.abs(end - start));
+        orders.setExpire_days(String.valueOf(days));
     }
+
 
 
     /**

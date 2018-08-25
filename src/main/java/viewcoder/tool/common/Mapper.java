@@ -103,7 +103,7 @@ public class Mapper {
     public static final String DELETE_ORDER_ITEM = "deleteOrderItem";
 
 
-    //instance表数据库操作mapper************************************************************************
+    //orders表的instance面板数据库操作mapper************************************************************************
     //select
     public static final String GET_INSTANCE_BY_USER_ID = "getInstanceByUserId";
     public static final String GET_TO_EXPIRE_INSTANCE = "getToExpireInstance";

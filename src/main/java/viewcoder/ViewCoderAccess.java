@@ -24,6 +24,10 @@ import viewcoder.operation.impl.purchase.wechat.WechatPay;
 import viewcoder.operation.impl.render.Render;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.encrypt.ECCUtil;
+import viewcoder.tool.parser.form.FormData;
+
+import java.text.Normalizer;
+import java.util.Map;
 
 import static com.aliyun.oss.internal.OSSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static io.netty.handler.codec.http.HttpHeaderNames.*;
@@ -344,6 +348,7 @@ public class ViewCoderAccess {
         /* **************************************************************/
         /*测试专区*/
         else if (uri.equals("/netty")) {
+            Map<String, Object> map =  FormData.getParam(msg);
             ViewCoderAccess.logger.debug("come to netty test link");
             httpResponse(ctx, msg, JSON.toJSONString("hello world"));
 
@@ -400,7 +405,7 @@ public class ViewCoderAccess {
         response.headers().set(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
         response.headers().set(ACCESS_CONTROL_ALLOW_METHODS, "POST");
         response.headers().set(ACCESS_CONTROL_ALLOW_HEADERS, "user_id, session_id, *");
-        //response.headers().set(ACCEPT, "*");
+        response.headers().set(ACCEPT, "*");
         if (!keepAlive) {
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         } else {
