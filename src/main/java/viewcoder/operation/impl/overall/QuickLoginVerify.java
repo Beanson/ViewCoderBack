@@ -1,9 +1,8 @@
-package viewcoder.operation.impl.logon;
+package viewcoder.operation.impl.overall;
 
 import io.netty.handler.codec.http.HttpRequest;
 import org.apache.log4j.Logger;
 import viewcoder.operation.impl.common.CommonService;
-import viewcoder.tool.common.Common;
 import viewcoder.tool.common.CommonObject;
 
 import java.util.Objects;

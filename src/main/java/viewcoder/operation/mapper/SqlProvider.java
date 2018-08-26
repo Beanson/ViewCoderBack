@@ -95,7 +95,7 @@ public class SqlProvider {
         if(CommonService.checkNotNull(files)){
             //数据插入字段定义
             stringBuilder.append("insert into user_upload_file(project_id, user_id, widget_type, file_type, is_folder, " +
-                    "time_stamp, suffix, file_name, relative_path, file_size, video_image_name, create_time) values \n");
+                    "time_stamp, suffix, file_name, relative_path, file_size, video_image_name) values \n");
 
             //数据级联添加
             for (int i = 0; i < files.size(); i++) {
@@ -103,7 +103,7 @@ public class SqlProvider {
                 stringBuilder.append("('" + file.getProject_id() + "', '" + file.getUser_id() + "', '" + file.getWidget_type() +
                         "', '" + file.getFile_type() + "', '" + file.getIs_folder() + "', '" + file.getTime_stamp() +
                         "', '" + file.getSuffix() + "', '" + file.getFile_name() + "', '" + file.getRelative_path() +
-                        "', '" + file.getFile_size() + "', '" + file.getVideo_image_name() + "', '" + file.getCreate_time() + "')");
+                        "', '" + file.getFile_size() + "', '" + file.getVideo_image_name() + "')");
 
                 //逗号分行
                 if (i + 1 < files.size()) {

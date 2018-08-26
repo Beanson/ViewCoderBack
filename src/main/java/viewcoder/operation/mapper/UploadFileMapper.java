@@ -53,8 +53,8 @@ public interface UploadFileMapper {
     /********************以下是插入文件操作***********************/
     //插入新文件信息记录
     @Insert("insert into user_upload_file(project_id,user_id,widget_type,file_type,is_folder,time_stamp,suffix,file_name,relative_path," +
-            "file_size,video_image_name,create_time) values(#{project_id},#{user_id},#{widget_type},#{file_type},#{is_folder},#{time_stamp}," +
-            "#{suffix},#{file_name},#{relative_path},#{file_size},#{video_image_name},#{create_time})")
+            "file_size,video_image_name) values(#{project_id},#{user_id},#{widget_type},#{file_type},#{is_folder},#{time_stamp}," +
+            "#{suffix},#{file_name},#{relative_path},#{file_size},#{video_image_name})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int insertNewResource(UserUploadFile userUploadFile);
 

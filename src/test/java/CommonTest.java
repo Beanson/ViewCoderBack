@@ -98,7 +98,7 @@ public class CommonTest {
         List<UserUploadFile> list = new ArrayList<>();
         UserUploadFile userUploadFile = new UserUploadFile(1, 1, null,
                 Common.FILE_TYPE_IMAGE, Common.FOLDER_FILE, CommonService.getTimeStamp(), null, "folder",
-                "", String.valueOf(0), null, CommonService.getDateTime());
+                "", String.valueOf(0), null);
         list.add(userUploadFile);
 
         sqlSession.insert(Mapper.INSERT_BATCH_NEW_RESOURCE, list);

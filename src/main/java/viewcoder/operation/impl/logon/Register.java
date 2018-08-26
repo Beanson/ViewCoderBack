@@ -10,6 +10,7 @@ import viewcoder.operation.entity.WeChatInfo;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.operation.impl.project.ProjectList;
+import viewcoder.operation.impl.purchase.Purchase;
 import viewcoder.tool.cache.GlobalCache;
 import viewcoder.tool.common.*;
 import viewcoder.tool.config.GlobalConfig;
@@ -54,18 +55,9 @@ public class Register {
 
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
+            //注册成功后操作，免费试用三天的使用套餐+提供一个example页面，放commit后操作防止多session死锁
+            afterRegisterSuccessLogic(responseData, user);
 
-            //给刚注册成功的用户提供example页面case
-            if (responseData.getStatus_code() == 200 && user != null && user.getId() > 0) {
-                Project project = new Project();
-                project.setUser_id(user.getId());
-                project.setRef_id(Common.EXAMPLE_REF_ID);
-                project.setOpt_type(Common.STORE_TYPE);
-                project.setProject_name(Common.EXAMPLE_CASE_1);
-                project.setNew_parent(0);
-                project.setOpt(1);//1代表从project面板中创建，3是重新生成页面，会重构当前页面
-                ProjectList.copyProject(project);
-            }
         }
         return responseData;
     }
@@ -106,11 +98,12 @@ public class Register {
             if (Objects.equals(user.getVerifyCode(), GlobalCache.getRegisterVerifyCache().get(user.getPhone()))) {
                 //插入数据库进行注册操作
                 user.setTimestamp(CommonService.getTimeStamp());
+                //注册并把用户id set进userId中
                 int num = sqlSession.insert(Mapper.REGISTER_NEW_ACCOUNT, user);
                 Register.logger.debug("注册添加数：" + num + " ；用户id为：" + user.getId());
 
+                //如果添加记录后影响记录数大于0，则添加成功
                 if (num > 0) {
-                    //如果添加记录后影响记录数大于0，则添加成功
                     //返回数据时不传递密码
                     user.setPassword(null);
                     //赋予该用户session_id
@@ -131,6 +124,33 @@ public class Register {
                 Assemble.responseErrorSetting(responseData, 405,
                         "verify code incorrect");
             }
+        }
+    }
+
+
+    /**
+     * 注册成功后相应后续逻辑操作
+     * 1、添加 example 实例
+     * 2、插入订单表和更新用户个人数据
+     *
+     * @param responseData 返回数据
+     * @param user 用户数据
+     */
+    private static void afterRegisterSuccessLogic(ResponseData responseData, User user) {
+
+        if (responseData.getStatus_code() == 200 && user != null && user.getId() > 0) {
+            //给刚注册成功的用户提供example页面case
+            Project project = new Project();
+            project.setUser_id(user.getId());
+            project.setRef_id(Common.EXAMPLE_REF_ID);
+            project.setOpt_type(Common.STORE_TYPE);
+            project.setProject_name(Common.EXAMPLE_CASE_1);
+            project.setNew_parent(0);
+            project.setOpt(1);//1代表从project面板中创建，3是重新生成页面，会重构当前页面
+            ProjectList.copyProject(project);
+
+            //插入orders表和更新user表相关数据
+            Purchase.newRegisterTryService(user.getId());
         }
     }
 
@@ -171,7 +191,6 @@ public class Register {
     }
 
 
-
     /**
      * 注册成功后扫码绑定二维码操作
      *
@@ -191,12 +210,12 @@ public class Register {
                     //OSS保存头像为PNG图片
                     URL url = new URL(weChatInfo.getHeadimgurl());
                     InputStream is = url.openStream();
-                    String portrait = CommonService.getUnionId() + Common.IMG_PNG;
+                    String portrait = CommonService.getTimeStamp() + Common.IMG_PNG;
                     OssOpt.uploadFileToOss((GlobalConfig.getOssFileUrl(Common.PORTRAIT_IMG) + portrait), is, ossClient);
                     //更新微信信息，即将插入数据库
                     weChatInfo.setHeadimgurl(portrait);
 
-                }else {
+                } else {
                     weChatInfo.setHeadimgurl(Common.DEFAULT_PORTRAIT);
                 }
 

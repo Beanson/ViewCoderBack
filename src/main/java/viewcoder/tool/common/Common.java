@@ -42,6 +42,15 @@ public class Common {
     public final static int FILE_TYPE_SOUND = 3;
     public final static int FILE_TYPE_DOWNLOAD = 4;
 
+    //各种类型套餐
+    public final static int SERVICE_TRY = 1;
+    public final static int SERVICE_TRY_NUM = 3;
+    public final static int SERVICE_TRY_RESOURCE = 20; //免费使用三天20M的使用空间
+    public final static int SERVICE_MONTH = 2;
+    public final static int SERVICE_YEAR = 3;
+    public final static int SERVICE_BUSINESS = 4;
+
+
     //user_upload_file的文件类型 is_folder
     public final static int FOLDER_FILE = 1;
     public final static int NOT_FOLDER_FILE = 0;
@@ -218,6 +227,7 @@ public class Common {
     public static final String COMPANY_CREDIT = "company_credit"; //公司credit, company_credit
     public static final String OPENID = "openid"; //获取用户扫码登录的openid
     public static final String ACCOUNT = "account"; //获取用户登录的账号信息
+    public static final String RESOURCE_REMAIN = "resource_remain"; //资源剩余空间
 
 
     //数字证书

@@ -5,7 +5,7 @@ package viewcoder;
  */
 
 import viewcoder.operation.entity.response.StatusCode;
-import viewcoder.operation.impl.logon.QuickLoginVerify;
+import viewcoder.operation.impl.overall.QuickLoginVerify;
 import viewcoder.tool.common.Common;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.common.CommonService;

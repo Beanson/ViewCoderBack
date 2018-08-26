@@ -14,7 +14,7 @@ public class Orders {
     private String order_date;
     private String pay_date;
     private String expire_date;
-    private String expire_days;
+    private int expire_days;
     private int pay_status;
     private int pay_way;
     private String price;
@@ -24,6 +24,21 @@ public class Orders {
     public Orders() {
     }
 
+    //新注册用户免费试用订单
+    public Orders(String out_trade_no, int user_id, int service_id, int service_num, String order_date, String pay_date,
+                  String expire_date, int expire_days, int pay_status, int pay_way, String price) {
+        this.out_trade_no = out_trade_no;
+        this.user_id = user_id;
+        this.service_id = service_id;
+        this.service_num = service_num;
+        this.order_date = order_date;
+        this.pay_date = pay_date;
+        this.expire_date = expire_date;
+        this.expire_days = expire_days;
+        this.pay_status = pay_status;
+        this.pay_way = pay_way;
+        this.price = price;
+    }
 
     public int getId() {
         return id;
@@ -97,11 +112,11 @@ public class Orders {
         this.expire_date = expire_date;
     }
 
-    public String getExpire_days() {
+    public int getExpire_days() {
         return expire_days;
     }
 
-    public void setExpire_days(String expire_days) {
+    public void setExpire_days(int expire_days) {
         this.expire_days = expire_days;
     }
 

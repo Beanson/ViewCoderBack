@@ -291,10 +291,9 @@ public class Purchase {
         //设置过期天数，跑batch job时用到此数据
         long start = currentDate.getTimeInMillis();
         long end = expireDate.getTimeInMillis();
-        long days =  TimeUnit.MILLISECONDS.toDays(Math.abs(end - start));
-        orders.setExpire_days(String.valueOf(days));
+        long days = TimeUnit.MILLISECONDS.toDays(Math.abs(end - start));
+        orders.setExpire_days(Integer.parseInt(String.valueOf(days)));
     }
-
 
 
     /**
@@ -481,6 +480,53 @@ public class Purchase {
                     "updateTotalPointsAfterExchange error: " + e);
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
+        }
+    }
+
+
+    /**
+     * 新注册用户享有三天免费使用期
+     *
+     * @param userId 用户id号
+     */
+    public static void newRegisterTryService(int userId) {
+
+        SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
+        try {
+            //三天免费试用订单数据初始化
+            String date = CommonService.getDateTime();
+            SimpleDateFormat sdf = new SimpleDateFormat(Common.TIME_FORMAT_1);
+            Calendar expireDate = Calendar.getInstance();
+            expireDate.add(Calendar.DATE, Common.SERVICE_TRY_NUM);
+            Orders tryOrder = new Orders(CommonService.getTimeStamp(), userId, Common.SERVICE_TRY, Common.SERVICE_TRY_NUM,
+                    date, date, sdf.format(expireDate.getTime()), Common.SERVICE_TRY_NUM, 1, 0, "0");
+            //三天免费试用订单插入数据库
+            int numOrder = sqlSession.insert(Mapper.NEW_REGISTER_TRY_ORDER, tryOrder);
+
+            //用户资源空间数据更新
+            Map<String, Object> map = new HashMap<>(2);
+            map.put(Common.ID, userId);
+            map.put(Common.RESOURCE_REMAIN, Common.SERVICE_TRY_RESOURCE);
+            int numUser = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, map);
+
+            //对更新数据库结果进行考核
+            if (numOrder > 0 && numUser > 0) {
+                //添加免费订单和更新相应的用户数据
+                sqlSession.commit();
+                message = "newRegisterTryService success";
+                Purchase.logger.debug(message);
+            } else {
+                message = "newRegisterTryService failure:" + numOrder + " , " + numUser;
+                Purchase.logger.debug(message);
+            }
+
+        } catch (Exception e) {
+            message = "newRegisterTryService error";
+            Purchase.logger.error(message, e);
+
+        } finally {
+            sqlSession.close();
         }
     }
 }

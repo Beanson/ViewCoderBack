@@ -20,14 +20,14 @@ public interface OrderMapper {
     List<Orders> getOrderList(int userId);
 
     //根据用户user_id获取该用户所有订单order的数据
-    @SelectProvider(type=SqlProvider.class,method="targetOrdersSqlProvider")
-    List<Orders> getTargetOrderList(Map<String,Object> map);
+    @SelectProvider(type = SqlProvider.class, method = "targetOrdersSqlProvider")
+    List<Orders> getTargetOrderList(Map<String, Object> map);
 
     //根据外部订单号out_trade_no获取数据库记录
     @Select("select count(*) from orders where out_trade_no=#{outTradeNo}")
     int getOrderNumByTradeNo(String outTradeNo);
 
-     //根据外部订单号out_trade_no获取数据库记录
+    //根据外部订单号out_trade_no获取数据库记录
     @Select("select * from orders where out_trade_no=#{out_trade_no} and trade_no=#{trade_no}")
     Orders getOrderByTradeNo(@Param("out_trade_no") String out_trade_no, @Param("trade_no") String trade_no);
 
@@ -43,6 +43,12 @@ public interface OrderMapper {
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     int insertNewOrderItem(Orders orders);
 
+    //新注册用户三天免费试用order的数据插入
+    @Insert("insert into orders(out_trade_no, user_id, service_id, service_num, order_date, pay_date, expire_date, " +
+            "expire_days, pay_status, pay_way, price) values(#{out_trade_no}, #{user_id}, #{service_id}, #{service_num}, " +
+            "#{order_date}, #{pay_date}, #{expire_date}, #{expire_days}, #{pay_status}, #{pay_way}, #{price})")
+    int newRegisterTryOrder(Orders orders);
+
 
     /**************************以下是delete操作**********************************/
     //更新order支付状态的数据
@@ -57,15 +63,12 @@ public interface OrderMapper {
     int updateOrderPayment(Orders orders);
 
 
-
-
-
     //************************* 以下是orders表的我的套餐面板数据操作 ******************************************
 
     /**************************以下是select操作**********************************/
     @Select("select out_trade_no, service_id, service_num, pay_date, expire_date, expire_days from " +
             "orders where user_id=#{user_id}")
-    List<Orders> getInstanceByUserId (int userId);
+    List<Orders> getInstanceByUserId(int userId);
 
     //选择即将过期和已经过期的订单实例
     @Select("select * from orders where expire_days in (0, 1, 3, 7)")

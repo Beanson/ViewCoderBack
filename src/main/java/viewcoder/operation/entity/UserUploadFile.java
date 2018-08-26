@@ -21,7 +21,6 @@ public class UserUploadFile implements Serializable{
     private String relative_path;
     private String file_size;
     private String video_image_name;
-    private String create_time;
     private FileUpload file;
 
     public UserUploadFile() {
@@ -35,7 +34,7 @@ public class UserUploadFile implements Serializable{
         this.relative_path = relative_path;
     }
 
-    public UserUploadFile(int project_id, int user_id, String widget_type, int file_type, int is_folder, String time_stamp, String suffix, String file_name, String relative_path, String file_size, String video_image_name, String create_time) {
+    public UserUploadFile(int project_id, int user_id, String widget_type, int file_type, int is_folder, String time_stamp, String suffix, String file_name, String relative_path, String file_size, String video_image_name) {
         this.project_id = project_id;
         this.user_id = user_id;
         this.widget_type = widget_type;
@@ -47,10 +46,9 @@ public class UserUploadFile implements Serializable{
         this.relative_path = relative_path;
         this.file_size = file_size;
         this.video_image_name=video_image_name;
-        this.create_time = create_time;
     }
 
-    public UserUploadFile(int id, int project_id, int user_id, String widget_type, int file_type, int is_folder, String time_stamp, String suffix, String file_name, String relative_path, String file_size, String video_image_name, String create_time, FileUpload file) {
+    public UserUploadFile(int id, int project_id, int user_id, String widget_type, int file_type, int is_folder, String time_stamp, String suffix, String file_name, String relative_path, String file_size, String video_image_name, FileUpload file) {
         this.id = id;
         this.project_id = project_id;
         this.user_id = user_id;
@@ -63,7 +61,6 @@ public class UserUploadFile implements Serializable{
         this.relative_path = relative_path;
         this.file_size = file_size;
         this.video_image_name = video_image_name;
-        this.create_time = create_time;
         this.file = file;
     }
 
@@ -155,13 +152,6 @@ public class UserUploadFile implements Serializable{
         this.file_size = file_size;
     }
 
-    public String getCreate_time() {
-        return create_time;
-    }
-
-    public void setCreate_time(String create_time) {
-        this.create_time = create_time;
-    }
 
     public FileUpload getFile() {
         return file;
@@ -195,7 +185,6 @@ public class UserUploadFile implements Serializable{
                 ", relative_path='" + relative_path + '\'' +
                 ", file_size='" + file_size + '\'' +
                 ", video_image_name='" + video_image_name + '\'' +
-                ", create_time='" + create_time + '\'' +
                 ", file=" + file +
                 '}';
     }

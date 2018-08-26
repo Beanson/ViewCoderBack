@@ -95,6 +95,7 @@ public class Mapper {
 
     //insert
     public static final String INSERT_NEW_ORDER_ITEM = "insertNewOrderItem";
+    public static final String NEW_REGISTER_TRY_ORDER = "newRegisterTryOrder";
 
     //update
     public static final String UPDATE_ORDER_PAYMENT="updateOrderPayment";
