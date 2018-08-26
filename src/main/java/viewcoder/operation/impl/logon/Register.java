@@ -98,6 +98,8 @@ public class Register {
             if (Objects.equals(user.getVerifyCode(), GlobalCache.getRegisterVerifyCache().get(user.getPhone()))) {
                 //插入数据库进行注册操作
                 user.setTimestamp(CommonService.getTimeStamp());
+                //插入用户默认portrait，万一用户不扫码绑定则也有默认portrait
+                user.setPortrait(Common.DEFAULT_PORTRAIT);
                 //注册并把用户id set进userId中
                 int num = sqlSession.insert(Mapper.REGISTER_NEW_ACCOUNT, user);
                 Register.logger.debug("注册添加数：" + num + " ；用户id为：" + user.getId());
