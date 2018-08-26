@@ -499,6 +499,8 @@ public class Purchase {
             SimpleDateFormat sdf = new SimpleDateFormat(Common.TIME_FORMAT_1);
             Calendar expireDate = Calendar.getInstance();
             expireDate.add(Calendar.DATE, Common.SERVICE_TRY_NUM);
+            //设置一直到最后一天的凌晨12点整
+            expireDate.add(Calendar.DATE,1);
             expireDate.set(Calendar.HOUR_OF_DAY, 0);
             expireDate.set(Calendar.MINUTE, 0);
             expireDate.set(Calendar.SECOND, 0);
