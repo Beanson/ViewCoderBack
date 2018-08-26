@@ -98,6 +98,8 @@ public class Register {
             if (Objects.equals(user.getVerifyCode(), GlobalCache.getRegisterVerifyCache().get(user.getPhone()))) {
                 //插入数据库进行注册操作
                 user.setTimestamp(CommonService.getTimeStamp());
+                //默认用户名称为电话，后续步骤微信扫码会update该名字，若不扫码则使用手机为用户名
+                user.setUser_name(user.getPhone());
                 //插入用户默认portrait，万一用户不扫码绑定则也有默认portrait
                 user.setPortrait(Common.DEFAULT_PORTRAIT);
                 //注册并把用户id set进userId中

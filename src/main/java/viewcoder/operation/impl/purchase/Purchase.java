@@ -502,6 +502,7 @@ public class Purchase {
             expireDate.set(Calendar.HOUR_OF_DAY, 0);
             expireDate.set(Calendar.MINUTE, 0);
             expireDate.set(Calendar.SECOND, 0);
+            System.out.println("expired time: " + sdf.format(expireDate.getTime()));
             Orders tryOrder = new Orders(CommonService.getTimeStamp(), userId, Common.SERVICE_TRY, Common.SERVICE_TRY_NUM,
                     date, date, sdf.format(expireDate.getTime()), Common.SERVICE_TRY_NUM, 1, 0, "0");
             //三天免费试用订单插入数据库

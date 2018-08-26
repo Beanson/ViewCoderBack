@@ -60,7 +60,7 @@ public interface UserMapper {
 
     /********************以下是插入user操作***********************/
     //注册操作， 默认用户名为手机号，因为注册时需要验证码，验证过该手机用户存在，绑定微信后再进行update个人信息处理
-    @Insert("insert into user(timestamp,user_name,email,password,phone) values(#{timestamp},#{phone},#{email},#{password},#{phone})")
+    @Insert("insert into user(timestamp,user_name,email,password,phone) values(#{timestamp},#{user_name},#{email},#{password},#{phone})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int registerNewAccount(User user);
 
