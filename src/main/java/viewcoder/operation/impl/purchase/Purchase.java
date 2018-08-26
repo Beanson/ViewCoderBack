@@ -505,10 +505,8 @@ public class Purchase {
             int numOrder = sqlSession.insert(Mapper.NEW_REGISTER_TRY_ORDER, tryOrder);
 
             //用户资源空间数据更新
-            Map<String, Object> map = new HashMap<>(2);
-            map.put(Common.ID, userId);
-            map.put(Common.RESOURCE_REMAIN, Common.SERVICE_TRY_RESOURCE);
-            int numUser = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, map);
+            User user = new User(userId, Common.SERVICE_TRY_RESOURCE);
+            int numUser = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, user);
 
             //对更新数据库结果进行考核
             if (numOrder > 0 && numUser > 0) {

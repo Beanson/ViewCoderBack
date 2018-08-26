@@ -45,7 +45,7 @@ public class Common {
     //各种类型套餐
     public final static int SERVICE_TRY = 1;
     public final static int SERVICE_TRY_NUM = 3;
-    public final static int SERVICE_TRY_RESOURCE = 20; //免费使用三天20M的使用空间
+    public final static String SERVICE_TRY_RESOURCE = "20"; //免费使用三天20M的使用空间
     public final static int SERVICE_MONTH = 2;
     public final static int SERVICE_YEAR = 3;
     public final static int SERVICE_BUSINESS = 4;
