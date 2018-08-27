@@ -20,7 +20,6 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 
 import java.text.SimpleDateFormat;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -46,7 +45,7 @@ public class Purchase {
             //根据user_id获取user表resource_remain和resource_used的数据
             User user = sqlSession.selectOne(Mapper.GET_USER_SPACE_INFO, userId);
             //根据user_id获取instance表数据
-            List<Orders> instances = sqlSession.selectList(Mapper.GET_INSTANCE_BY_USER_ID, userId);
+            List<Orders> instances = sqlSession.selectList(Mapper.GET_ORDER_INSTANCE_BY_USER_ID, userId);
             //准备返回数据
             Map<String, Object> map = new HashMap<>();
             map.put(Common.SPACE_INFO, user);
@@ -222,24 +221,38 @@ public class Purchase {
 
 
     /**
-     * 支付宝或微信支付后插入新订单到数据库
+     * 支付宝或微信支付生成订单时插入新订单到数据库
+     * 涉及到金钱交易，如果系统发生错误马上报错终止
      *
      * @param orders 订单详情
      */
-    public static void insertNewPaidOrderItem(Orders orders) {
+    public static void insertNewPaidOrderItem(Orders orders) throws Exception{
         SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
         try {
             //更新orders数据库条目，并返回影响条数
             int num = sqlSession.insert(Mapper.INSERT_NEW_ORDER_ITEM, orders);
-            Purchase.logger.debug("Purchase update database num is:" + num);
+            if (num > 0) {
+                //插入成功则commit
+                sqlSession.commit();
+
+            } else {
+                //出错抛出异常
+                message = "insertNewPaidOrderItem db error: " + num;
+                Purchase.logger.warn(message);
+                throw new Exception(message);
+            }
 
         } catch (Exception e) {
-            Purchase.logger.error("insertNewOrderItem error: ", e);
+            message = "sys error";
+            Purchase.logger.error(message, e);
+            throw new Exception(message);
 
         } finally {
-            CommonService.databaseCommitClose(sqlSession, new ResponseData(200), true);
+            sqlSession.close();
         }
     }
+
 
 
     /**
@@ -500,7 +513,7 @@ public class Purchase {
             Calendar expireDate = Calendar.getInstance();
             expireDate.add(Calendar.DATE, Common.SERVICE_TRY_NUM);
             //设置一直到最后一天的凌晨12点整
-            expireDate.add(Calendar.DATE,1);
+            expireDate.add(Calendar.DATE, 1);
             expireDate.set(Calendar.HOUR_OF_DAY, 0);
             expireDate.set(Calendar.MINUTE, 0);
             expireDate.set(Calendar.SECOND, 0);
@@ -511,7 +524,7 @@ public class Purchase {
             int numOrder = sqlSession.insert(Mapper.NEW_REGISTER_TRY_ORDER, tryOrder);
 
             //用户资源空间数据更新
-            User user = new User(userId, Common.SERVICE_TRY_RESOURCE);
+            User user = new User(userId, String.valueOf(Common.SERVICE_TRY_RESOURCE));
             int numUser = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, user);
 
             //对更新数据库结果进行考核

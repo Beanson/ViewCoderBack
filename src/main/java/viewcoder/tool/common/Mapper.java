@@ -9,6 +9,7 @@ public class Mapper {
     //select
     public static final String GET_PROJECT_LIST_DATA = "getProjectListData";
     public static final String GET_PROJECT_DATA = "getProjectData";
+    public static final String GET_PROJECT_VERSION_DATA = "getProjectVersionData";
     public static final String GET_ALL_RELATED_PROJECT = "getAllRelatedProject";
     public static final String GET_PROJECT_RESOURCE_SIZE = "getProjectResourceSize";
     public static final String GET_TARGET_STORE_DATA = "getTargetStoreData";
@@ -34,10 +35,12 @@ public class Mapper {
     public static final String UPDATE_CHILD_NUM_MINUS = "updateChildNumMinus";
 
 
+
     //user_upload_file表的数据库操作mapper**************************************************************
     //select
     public static final String GET_ALL_RESOURCE_BY_PROJECT_ID = "getAllResourceByProjectId";
     public static final String GET_RESOURCE_DATA = "getResourceData";
+    public static final String GET_RESOURCE_NAME_DATA = "getResourceNameData";
     public static final String GET_RESOURCE_BY_USERID_AND_FILETYPE = "getResourceByUserIdAndFileType";
     public static final String GET_RESOURCE_REF_COUNT = "getResourceRefCount";
     public static final String GET_FOLDER_SUB_RESOURCE = "getFolderSubResource";
@@ -57,6 +60,7 @@ public class Mapper {
     public static final String UPDATE_VIDEO_IMAGE = "updateVideoImage";
 
 
+
     //user 表数据库操作mapper************************************************************************
     //select
     public static final String GET_USER_DATA = "getUserData";
@@ -69,6 +73,7 @@ public class Mapper {
     public static final String GET_USER_SPACE_INFO = "getUserSpaceInfo";
     public static final String GET_PHONE_ACCOUNT = "getPhoneAccount";
     public static final String GET_USER_BY_OPEN_ID = "getUserByOpenId";
+    public static final String GET_USER_MAIL_PHONE_DATA = "getUserMailPhoneData";
 
     //insert
     public static final String REGISTER_NEW_ACCOUNT = "registerNewAccount";
@@ -81,9 +86,10 @@ public class Mapper {
     public static final String UPDATE_USER_RESOURCE_SPACE_REMAIN = "updateUserResourceSpaceRemain";
     public static final String UPDATE_USER_LAST_SELECTED_INDUSTRY = "updateLastSelectedIndustry";
     public static final String UPDATE_USER_TOTAL_POINTS = "updateUserTotalPoints";
-    public static final String REMOVE_EXPIRE_INSTANCE_SPACE = "removeExpireInstanceSpace";
+    public static final String REMOVE_EXPIRE_ORDER_SPACE = "removeExpireOrderSpace";
     public static final String UPDATE_EXPORT_DEFAULT_SETTING = "updateExportDefaultSetting";
     public static final String UPDATE_WECHAT_INFO_TO_USER = "updateWeChatInfoToUser";
+
 
 
     //order表数据库操作mapper************************************************************************
@@ -92,6 +98,9 @@ public class Mapper {
     public static final String GET_TARGET_ORDER_LIST = "getTargetOrderList";
     public static final String GET_ORDER_NUM_BY_TRADE_NO = "getOrderNumByTradeNo";
     public static final String GET_ORDER_BY_TRADE_NO = "getOrderByTradeNo";
+    public static final String GET_ORDER_INSTANCE_BY_USER_ID = "getOrderInstanceByUserId";
+    public static final String GET_EXPIRED_ORDER_INSTANCE = "getExpiredOrderInstance";
+    public static final String GET_TO_EXPIRE_ORDER_INSTANCE = "getToExpireOrderInstance";
 
     //insert
     public static final String INSERT_NEW_ORDER_ITEM = "insertNewOrderItem";
@@ -99,23 +108,10 @@ public class Mapper {
 
     //update
     public static final String UPDATE_ORDER_PAYMENT="updateOrderPayment";
+    public static final String UPDATE_ORDER_INSTANCE_EXPIRE_DAYS = "updateOrderInstanceExpireDays";
 
     //delete
     public static final String DELETE_ORDER_ITEM = "deleteOrderItem";
-
-
-    //orders表的instance面板数据库操作mapper************************************************************************
-    //select
-    public static final String GET_INSTANCE_BY_USER_ID = "getInstanceByUserId";
-    public static final String GET_TO_EXPIRE_INSTANCE = "getToExpireInstance";
-
-    //insert
-
-    //update
-    public static final String UPDATE_INSTANCE_EXPIRE_DAYS = "updateInstanceExpireDays";
-
-    //delete
-    public static final String DELETE_EXPIRE_INSTANCE = "deleteExpireInstance";
 
 
 

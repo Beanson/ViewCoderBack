@@ -172,7 +172,7 @@ public class Orders {
                 ", order_date='" + order_date + '\'' +
                 ", pay_date='" + pay_date + '\'' +
                 ", expire_date='" + expire_date + '\'' +
-                ", expire_days='" + expire_days + '\'' +
+                ", expire_days=" + expire_days +
                 ", pay_status=" + pay_status +
                 ", pay_way=" + pay_way +
                 ", price='" + price + '\'' +

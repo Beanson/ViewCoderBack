@@ -230,23 +230,15 @@ public class OssOpt {
      * 更新文件的ACL设置
      *
      * @param ossClient
+     * @param file
      * @param openness
      */
-    public static void updateAclConfig(OSSClient ossClient, String prefix, boolean openness) {
-        // 构造ListObjectsRequest请求
-        ListObjectsRequest listObjectsRequest = new ListObjectsRequest(VIEWCODER_BUCKET);
-        listObjectsRequest.setPrefix(prefix);
-        // 递归列出fun目录下的所有文件
-        ObjectListing listing = ossClient.listObjects(listObjectsRequest);
-        // 遍历该文件夹下的所有文件
-        for (OSSObjectSummary objectSummary : listing.getObjectSummaries()) {
-            //根据是否公开设置其访问权限
-            if (openness) {
-                ossClient.setObjectAcl(VIEWCODER_BUCKET, objectSummary.getKey(), CannedAccessControlList.PublicRead);
-            } else {
-                ossClient.setObjectAcl(VIEWCODER_BUCKET, objectSummary.getKey(), CannedAccessControlList.Private);
-            }
-
+    public static void updateAclConfig(OSSClient ossClient, String file, boolean openness) {
+        //根据是否公开设置其访问权限
+        if (openness) {
+            ossClient.setObjectAcl(VIEWCODER_BUCKET, file, CannedAccessControlList.PublicRead);
+        } else {
+            ossClient.setObjectAcl(VIEWCODER_BUCKET, file, CannedAccessControlList.Private);
         }
     }
 

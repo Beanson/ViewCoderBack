@@ -45,10 +45,15 @@ public class Common {
     //各种类型套餐
     public final static int SERVICE_TRY = 1;
     public final static int SERVICE_TRY_NUM = 3;
-    public final static String SERVICE_TRY_RESOURCE = "20"; //免费使用三天20M的使用空间
     public final static int SERVICE_MONTH = 2;
     public final static int SERVICE_YEAR = 3;
     public final static int SERVICE_BUSINESS = 4;
+
+    //各种套餐可使用空间
+    public final static int SERVICE_TRY_RESOURCE = 20; //免费使用三天20M的使用空间
+    public final static int SERVICE_MONTH_RESOURCE = 100; //一个月使用100M空间
+    public final static int SERVICE_YEAR_RESOURCE = 1024;//一年使用1024M空间
+    public final static int SERVICE_BUSINESS_RESOURCE = 1024;//一年使用1024M空间
 
 
     //user_upload_file的文件类型 is_folder
@@ -103,7 +108,7 @@ public class Common {
     public static String MAIL_PORT = "com.viewcoder.mail.port";
     public static String MAIL_AUTH = "com.viewcoder.mail.auth";
     public static String MAIL_TIMEOUT = "com.viewcoder.mail.timeout";
-    public static String MAIL_INSTANCE_EXPIRE_NOTIFICATION = "ViewCoder实例即将到期提醒";
+    public static String MAIL_SERVICE_EXPIRE_INFORM = "ViewCoder实例即将到期提醒";
 
     //阿里云短信服务配置
     public static final String MSG_PRODUCT = "com.viewcoder.msg.product";
@@ -215,6 +220,7 @@ public class Common {
     public static final String EXTEND_SIZE = "extend_size"; //扩容或续期的容量
     public static final String EXTEND_TYPE = "extend_type"; //是扩容还是续期的类型
     public static final String SPACE_INFO = "space_info"; //资源空间资料
+    public static final String SPACE_EXPIRE = "space_expire"; //过期的资源
     public static final String INSTANCE_INFO = "instance_info"; //实例资料
     public static final String REF_ID = "ref_id"; //引用参照的project_id
     public static final String PARENT = "parent"; //parent数据
@@ -267,10 +273,9 @@ public class Common {
     public static final String BASE_HTTP_URL = "http://127.0.0.1:8080/";
 
 
-    //获取阿里域账号的accessKey和accessSecret
-    public static String ALI_ACCESSKEY_ID = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_ID));
-    public static String ALI_ACCESSKEY_SECRET = AESEncryptor.AESDncode(Common.AES_KEY, GlobalConfig.getProperties(Common.ACCESS_KEY_SECRET));
+    //文件后缀的相关数据
     public static String PROJECT_FILE_SUFFIX = "-index.html"; //项目文件的后缀名
     public static String PROJECT_DATA_SUFFIX = ".txt"; //项目数据文件的后缀名
     public static String TEXT_FILE_SUFFIX = ".txt"; //txt文件的后缀名
+    public static String DOT_SUFFIX = "."; //中间分隔符
 }

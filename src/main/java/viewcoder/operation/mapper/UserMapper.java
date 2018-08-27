@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.*;
 import viewcoder.operation.entity.WeChatInfo;
 
 import java.util.List;
+import java.util.Map;
 
 //@CacheNamespace(flushInterval = 3000)
 public interface UserMapper {
@@ -18,7 +19,7 @@ public interface UserMapper {
     @Select("select * from user where id=#{user_id}")
     public User getUserData(int user_id);
 
-    /** 登录 *************************************************************/
+    /*-------- 登录 ----------*/
     //登录验证
     @Select("select * from user where (email=#{account} or phone=#{account}) and password=#{password}")
     public List<User> loginValidation(User user);
@@ -27,7 +28,7 @@ public interface UserMapper {
     @Select("select * from user where email=#{account} or phone=#{account}")
     public List<User> signAccountCheck(User user);
 
-    /** 注册 *************************************************************/
+    /*-------- 注册 ----------*/
     //手机号查重
     @Select("select count(*) from user where phone=#{phone}")
     public int getPhoneAccount(String phone);
@@ -55,6 +56,10 @@ public interface UserMapper {
     //根据openid获取用户的数据
     @Select("select * from user where openid=#{openId}")
     public User getUserByOpenId(String openId);
+
+    //根据openid获取用户的数据
+    @Select("select id, user_name, email, phone from user where id=#{userId}")
+    public User getUserMailPhoneData(String userId);
 
 
 
@@ -92,8 +97,8 @@ public interface UserMapper {
     public int updateUserTotalPoints(User user);
 
     //释放用户表中过期的实例的空间
-    //@Update("update user set resource_remain=resource_remain-#{space_expire} where id=#{user_id}")
-    //public int removeExpireInstanceSpace(Instance instance);
+    @Update("update user set resource_remain=resource_remain-#{space_expire} where id=#{user_id}")
+    public int removeExpireOrderSpace(Map map);
 
     //更新用户framework和package_way的信息
     @Update("update user set framework=#{framework}, package_way=#{package_way} where id=#{id}")

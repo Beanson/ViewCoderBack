@@ -19,6 +19,10 @@ public interface UploadFileMapper {
     @Select("select * from user_upload_file where id=#{id}")
     public UserUploadFile getResourceData(int id);
 
+    //查询对应user_id的所有资源的名称的信息
+    @Select("select time_stamp, suffix from user_upload_file where user_id=#{user_id} and suffix is not null")
+    public List<UserUploadFile> getResourceNameData(int user_id);
+
     //选择该用户对应类型的资源文件
     @Select("select * from user_upload_file where user_id=#{user_id} and file_type=#{file_type}")
     public List<UserUploadFile> getResourceByUserIdAndFileType(@Param("user_id") Integer user_id, @Param("file_type") String file_type);

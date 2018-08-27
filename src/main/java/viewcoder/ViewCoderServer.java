@@ -15,8 +15,12 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
+import viewcoder.operation.entity.Project;
+import viewcoder.tool.common.Mapper;
 import viewcoder.tool.pool.WebDriverPool;
+import viewcoder.tool.util.MybatisUtils;
 
 /**
  * An HTTP server that sends back the content of the received HTTP request
@@ -68,5 +72,26 @@ public class ViewCoderServer {
         ViewCoderServer.logger.debug("idle: " + WebDriverPool.getPool().getNumIdle() +
                         " num total:" + WebDriverPool.getPool().getNumActive() +
                         " waiter:" + WebDriverPool.getPool().getNumWaiters());
+
+        //test();
+    }
+
+
+    /**
+     * 研究connection expire 6 seconds
+     */
+    public static void test(){
+        SqlSession sqlSession = MybatisUtils.getSession();
+        try{
+            Project project = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, 140);
+            System.out.println(project);
+            Thread.sleep(10000);
+
+        }catch (Exception e){
+
+        }finally {
+            System.out.println("-----------------------------------come to close");
+            sqlSession.close();
+        }
     }
 }

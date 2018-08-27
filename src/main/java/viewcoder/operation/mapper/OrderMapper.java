@@ -35,6 +35,19 @@ public interface OrderMapper {
     @Select("select * from orders where company_credit=#{companyCredit}")
     List<Orders> getCompanyDiscountOrder(String companyCredit);
 
+    @Select("select out_trade_no, service_id, service_num, pay_date, expire_date, expire_days from " +
+            "orders where user_id=#{user_id} and expire_days>=0 ")
+    List<Orders> getOrderInstanceByUserId(int userId);
+
+    //获取已过期的实例订单，在每天update -1之前
+    @Select("select * from orders where expire_days=0")
+    public List<Orders> getExpiredOrderInstance(int user_id);
+
+    //选择即将过期和已经过期的订单实例
+    @Select("select * from orders where expire_days in (0, 1, 3, 7)")
+    public List<Orders> getToExpireOrderInstance();
+
+
 
     /**************************以下是insert操作**********************************/
     //插入新的order数据
@@ -62,23 +75,11 @@ public interface OrderMapper {
             "expire_date=#{expire_date}, expire_days=#{expire_days}, pay_status=1 where id=#{id}")
     int updateOrderPayment(Orders orders);
 
-
-    //************************* 以下是orders表的我的套餐面板数据操作 ******************************************
-
-    /**************************以下是select操作**********************************/
-    @Select("select out_trade_no, service_id, service_num, pay_date, expire_date, expire_days from " +
-            "orders where user_id=#{user_id}")
-    List<Orders> getInstanceByUserId(int userId);
-
-    //选择即将过期和已经过期的订单实例
-    @Select("select * from orders where expire_days in (0, 1, 3, 7)")
-    public List<Orders> getToExpireInstance(int user_id);
+    //设置过期时间减少一天，每天跑batch job测试该部分代码，针对尚未过期的订单，已过期订单不计算
+    @Update("update orders set expire_days=(expire_days-1) where expire_days>=0")
+    public int updateOrderInstanceExpireDays(int instanceId);
 
 
-    /**************************以下是update操作**********************************/
-    //设置过期时间减少一天，每天跑batch job测试该部分代码
-    @Update("update orders set expire_days=(expire_days-1)")
-    public int updateInstanceExpireDays(int instanceId);
 }
 
 

@@ -21,6 +21,10 @@ public interface ProjectMapper {
     @Select("select * from project where user_id=#{user_id} and parent=#{parent}")
     public List<Project> getProjectListData(@Param("user_id") String user_id, @Param("parent") String parent);
 
+    //根据user_id获取该用户所有项目的pc和mobile版本数据
+    @Select("select pc_version, mo_version from project where user_id=#{user_id}")
+    public List<Project> getProjectVersionData(int user_id);
+
     //根据项目id获取该项目数据信息
     @Select("select * from project where id=#{id}")
     public Project getProjectData(int id);
@@ -101,6 +105,11 @@ public interface ProjectMapper {
     //更新child页面的数目-1
     @Update("update project set child=child-1 where id=#{projectId}")
     public int updateChildNumMinus(int projectId);
+
+
+    //测试用的
+    @Update("update project set user_id=user_id where id=140")
+    public int updateForTest();
 
 }
 
