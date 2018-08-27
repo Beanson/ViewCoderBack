@@ -112,6 +112,7 @@ public class ViewCoderAccess {
 
     /**
      * 需要用户已登录状态才可访问的请求
+     *
      * @param uri uri请求地址
      * @param msg request请求护具
      * @param ctx 返回通道
@@ -132,12 +133,6 @@ public class ViewCoderAccess {
 
         /* **************************************************************/
         /*Personal专区**************************/
-        //更换用户portrait预览操作
-//        else if (uri.equals("/uploadPortrait")) {
-//            System.out.println("Come to uploadPortrait");
-//            ResponseData response = Personal.uploadPortrait(msg);
-//            httpResponse(ctx, msg, response);
-//        }
         //更新用户资料信息
         else if (uri.equals("/updateUserInfo")) {
             ResponseData response = Personal.updateUserInfo(msg);
@@ -198,11 +193,13 @@ public class ViewCoderAccess {
             httpResponsePureHtml(ctx, msg, response);
         }
         //下载支付哈希凭证信息
+        //Deprecated
         else if (uri.equals("/getPayInfo")) {
             ResponseData response = Purchase.getPayInfo(msg);
             httpResponse(ctx, msg, response);
         }
         //验证支付哈希凭证信息
+        //Deprecated
         else if (uri.equals("/verifyCert")) {
             ResponseData response = ECCUtil.verifyCert(msg);
             httpResponse(ctx, msg, response);
@@ -348,12 +345,12 @@ public class ViewCoderAccess {
         /* **************************************************************/
         /*测试专区*/
         else if (uri.equals("/netty")) {
-            Map<String, Object> map =  FormData.getParam(msg);
+            Map<String, Object> map = FormData.getParam(msg);
             ViewCoderAccess.logger.debug("come to netty test link");
             httpResponse(ctx, msg, JSON.toJSONString("hello world"));
 
         } else {
-            String message = "server do not serve such request";
+            String message = "server do not serve such request: " + uri;
             httpResponse(ctx, msg, message);
             ViewCoderAccess.logger.debug(message);
         }

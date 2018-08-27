@@ -83,9 +83,9 @@ public class AliPay {
      * 支付宝支付完成后，后台发送响应请求到notify_url中
      */
     public static String aliPayNotify(Object msg) {
-
         //初始化返回支付宝的response
         String notifyResponse = Common.FAIL;
+        String message = "";
         try {
             //获取支付宝POST过来反馈信息
             Map<String, String> params = new HashMap<String, String>();
@@ -103,16 +103,20 @@ public class AliPay {
 
             if (signVerified) {
                 notifyResponse = Common.SUCCESS;
-                AliPay.logger.debug("aliPayNotify signVerified success");
+                message = "aliPayNotify signVerified success";
+                AliPay.logger.debug(message);
+
                 //签名成功，进行业务逻辑处理
                 verifyOrderLogic(params);
 
             } else {
-                AliPay.logger.debug("aliPayNotify signVerified failure");
+                message = "aliPayNotify signVerified failure";
+                AliPay.logger.debug(message);
             }
 
         } catch (Exception e) {
-            AliPay.logger.error("aliPayNotify occurs error", e);
+            message = "aliPayNotify occurs error";
+            AliPay.logger.error(message, e);
         }
         return notifyResponse;
     }
@@ -125,6 +129,7 @@ public class AliPay {
      * @throws Exception
      */
     private static void verifyOrderLogic(Map<String, String> params) throws Exception {
+        String message = "";
         // 验签成功后，按照支付结果异步通知中的描述，对支付结果中的业务内容进行二次校验，
         // 校验成功后在response中返回success并继续商户自身业务处理，校验失败返回failure
         //商户订单号，查询交易订单详情记录，相当于查看订单详情
@@ -139,7 +144,8 @@ public class AliPay {
             //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
             //如果有做过处理，不执行商户的业务程序
             //注意：退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
-            AliPay.logger.debug("verifyOrderLogic Trade finish notify");
+            message = "verifyOrderLogic Trade finish notify";
+            AliPay.logger.debug(message);
 
         } else if (trade_status.equals("TRADE_SUCCESS")) {
             //判断该笔订单是否在商户网站中已经做过处理
@@ -157,6 +163,8 @@ public class AliPay {
             orders.setOut_trade_no(out_trade_no);
             orders.setTrade_no(trade_no);
             Purchase.updateOrderStatus(orders);
+            message = "verifyOrderLogic Trade success notify";
+            AliPay.logger.debug(message);
         }
     }
 }

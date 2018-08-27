@@ -107,15 +107,16 @@ public class WechatPay {
      * @return
      */
     public static String weChatPayNotify(Object msg) {
-
         String resXml = "";
+        String message = "";
         try {
             //获取WeChatPay的notify数据
             String text = TextData.getText(msg);
             Map<String, String> packageParams = XMLWechatPayUtil.xmlToMap(text);
             //打印查看微信回传的信息
             for (Map.Entry<String, String> entry : packageParams.entrySet()) {
-                logger.info("key= " + entry.getKey() + " and value= " + entry.getValue());
+                message = "key= " + entry.getKey() + " and value= " + entry.getValue();
+                WechatPay.logger.info(message);
             }
 
             //判断签名是否正确
@@ -125,8 +126,6 @@ public class WechatPay {
 
                 //判断支付状态是否成功支付
                 if (Common.PAY_WECHAT_NOTIFY_RESULT_CODE_SUCCESS.equals(packageParams.get(Common.PAY_WECHAT_NOTIFY_RESULT_CODE))) {
-                    WechatPay.logger.debug("Get WechatPay Notify Success");
-
                     //获取回传的附加数据，并更新数据库
                     Orders orders = JSON.parseObject(URLDecoder.decode(
                             packageParams.get(Common.PAY_WECHAT_KEY_ATTACH), Common.UTF8), Orders.class);
@@ -137,17 +136,24 @@ public class WechatPay {
                     orders.setTrade_no(packageParams.get(Common.PAY_WECHAT_TRANSACTION_ID));
                     Purchase.updateOrderStatus(orders);
 
+                    message = "Get wechatPay notify success";
+                    WechatPay.logger.debug(message);
+
                 } else {
-                    WechatPay.logger.warn("WeChatPay failure");
+                    message = "wechatPay failure";
+                    WechatPay.logger.warn(message);
                 }
 
             } else {
                 //通知微信.异步确认，签名失败
                 resXml = PayCommonUtil.packNotifyResXml(false);
-                WechatPay.logger.info("Notify Wechat Sign-Name failure");
+                message = "Notify Wechat Sign-Name failure";
+                WechatPay.logger.info(message);
             }
+
         } catch (Exception e) {
-            WechatPay.logger.error("weChat pay error: ", e);
+            message = "weChat pay error";
+            WechatPay.logger.error(message, e);
 
         }
         return resXml;

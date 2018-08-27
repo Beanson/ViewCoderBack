@@ -118,11 +118,15 @@ public class Common {
 
     //阿里云短信直接调用配置
     public static final String MSG_SIGNNAME_LIPHIN = "莱芬科技"; //短信签名
-    public static final String MSG_TEMPLEATE_RELEASE = "instance_release"; //instance释放提醒
-    public static final String MSG_TEMPLEATE_EXPIRE1 = "instance_expire1"; //instance过期还有剩余空间
+    public static final String MSG_TEMPLEATE_EXPIRE1 = "SMS_142954544"; //套餐服务到期提醒
+    public static final String MSG_TEMPLEATE_RELEASE = "instance_release"; //instance释放提醒, 暂时不提醒
     public static final String MSG_TEMPLEATE_EXPIRE2 = "instance_expire2"; //instance过期且无剩余空间
     public static final String MSG_TEMPLEATE_PURCHASE = "instance_purchase";//成功购买instance提醒
     public static final String MSG_TEMPLEATE_VERIFY = "verification_code"; //验证码提醒
+
+    //mail发送的HTML
+    public static final String MAIL_SERVICE_EXPIRE = "service_expire.html"; //套餐服务过期HTML
+
 
     //Test配置信息
     public static String PROJECT_TEST_INTEGRATION = "com.viewcoder.project.test.integration";

@@ -32,11 +32,9 @@ public class QuickLoginVerify {
                     QuickLoginVerify.logger.debug("reLogin suspect capture");
                 }
             } else {
-                if (CommonService.checkNotNull(userId) && CommonService.checkNotNull(sessionId)) {
-                    CommonObject.getLoginVerify().put(Integer.parseInt(userId), sessionId);
-                    statusCode = 1;
-                    QuickLoginVerify.logger.debug("reAssign capture");
-                }
+                //可能服务器重启
+                statusCode = -1; //两者sessionId不同，认为不同session
+                QuickLoginVerify.logger.debug("server reboot suspect capture");
             }
         }
         return statusCode;

@@ -38,6 +38,7 @@ public class Purchase {
     public static ResponseData refreshInstance(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
 
         try {
             Map<String, Object> data = FormData.getParam(msg);
@@ -53,8 +54,10 @@ public class Purchase {
             Assemble.responseSuccessSetting(responseData, map);
 
         } catch (Exception e) {
-            Assemble.responseErrorSetting(responseData, 500,
-                    "refreshInstance error: " + e);
+            message = "RefreshInstance error";
+            Purchase.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
@@ -70,6 +73,7 @@ public class Purchase {
      */
     public static ResponseData calculateExtendPrice(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        String message = "";
 
         try {
             Map<String, Object> data = FormData.getParam(msg);
@@ -81,8 +85,9 @@ public class Purchase {
             Assemble.responseSuccessSetting(responseData, priceTotal);
 
         } catch (Exception e) {
-            Assemble.responseErrorSetting(responseData, 500,
-                    "calculateExtendPrice error: " + e);
+            message = "System error";
+            Purchase.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
         }
         return responseData;
     }
@@ -95,24 +100,27 @@ public class Purchase {
      * @return
      */
     public static ResponseData getOrderList(Object msg) {
-
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
-
+        String message = "";
         try {
             //获取用户user_id
             String userId = FormData.getParam(msg, Common.USER_ID);
             List<Orders> orders = sqlSession.selectList(Mapper.GET_ORDER_LIST, Integer.parseInt(userId));
             if (orders != null) {
                 Assemble.responseSuccessSetting(responseData, orders);
+
             } else {
-                Assemble.responseErrorSetting(responseData, 401,
-                        "getOrderList from db null error ");
+                message = "getOrderList from db null error";
+                Purchase.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
             }
 
         } catch (Exception e) {
-            Assemble.responseErrorSetting(responseData, 500,
-                    "getOrderList error: " + e);
+            message = "System error";
+            Purchase.logger.warn(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
@@ -129,23 +137,27 @@ public class Purchase {
     public static ResponseData getTargetOrderList(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
-
+        String message = "";
         try {
             //获取用户user_id，service_id, pay_status, order_from_date, order_end_date等数据
-            Map<String, Object> map = FormData.getParam(msg, Common.USER_ID, Common.SERVICE_ID,
-                    Common.ORDER_FROM_DATE, Common.ORDER_END_DATE);
+            Map<String, Object> map = FormData.getParam(msg);
 
             //查询数据库相关数据
             List<Orders> orders = sqlSession.selectList(Mapper.GET_TARGET_ORDER_LIST, map);
             if (orders != null) {
                 Assemble.responseSuccessSetting(responseData, orders);
+
             } else {
-                Assemble.responseErrorSetting(responseData, 401,
-                        "getOrderList from db null error ");
+                message = "GetTargetOrderList from db null error";
+                Purchase.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
             }
+
         } catch (Exception e) {
-            Assemble.responseErrorSetting(responseData, 500,
-                    "getOrderList error: " + e);
+            message = "System error";
+            Purchase.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
@@ -161,15 +173,17 @@ public class Purchase {
      */
     public static ResponseData insertNewOrderItem(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        String message = "";
         try {
             //从http请求中获取要插入的orders实体类数据
             Orders orders = (Orders) FormData.getParam(msg, Orders.class);
-            //进入alipay或WeChatpay页面进行支付
+            //进入aliPay或wechatPay页面进行支付
             doPayment(responseData, orders);
 
         } catch (Exception e) {
-            Assemble.responseErrorSetting(responseData, 500,
-                    "insertNewOrderItem error: " + e);
+            message = "System error";
+            Purchase.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
         }
         return responseData;
     }
@@ -179,7 +193,7 @@ public class Purchase {
      * 根据不同支付方式进入不同支付页面
      */
     public static void doPayment(ResponseData responseData, Orders orders) throws Exception {
-
+        String message = "";
         //设置支付日期等
         orders.setOrder_date(CommonService.getDateTime());
         //插入订单条目到数据库操作
@@ -188,6 +202,10 @@ public class Purchase {
         //先插入数据库支付，后调用payment方法，这样可以获取新插入的id值作为附加数据添加上
         //根据不同支付方式进行不同逻辑处理
         switch (orders.getPay_way()) {
+            case 0: {
+                //新用户试用享用
+                break;
+            }
             case 1: {
                 //进行支付宝方式支付，并返回支付宝官方的支付页面HTML，以text/html方式返回
                 String aliPayHtml = AliPay.invokePayment(orders);
@@ -210,10 +228,14 @@ public class Purchase {
                 updateTotalPointsAfterExchange(orders, responseData);
                 break;
             }
+            case 4: {
+                //对公购置
+                break;
+            }
             default: {
                 //返回错误提示
-                Assemble.responseErrorSetting(responseData, 402,
-                        "doPayment with unknown payWay: " + orders.getPay_way());
+                message = "doPayment with unknown payWay: " + orders.getPay_way();
+                Assemble.responseErrorSetting(responseData, 402, message);
                 break;
             }
         }
@@ -226,7 +248,7 @@ public class Purchase {
      *
      * @param orders 订单详情
      */
-    public static void insertNewPaidOrderItem(Orders orders) throws Exception{
+    public static void insertNewPaidOrderItem(Orders orders) throws Exception {
         SqlSession sqlSession = MybatisUtils.getSession();
         String message = "";
         try {
@@ -244,7 +266,7 @@ public class Purchase {
             }
 
         } catch (Exception e) {
-            message = "sys error";
+            message = "System error";
             Purchase.logger.error(message, e);
             throw new Exception(message);
 
@@ -252,7 +274,6 @@ public class Purchase {
             sqlSession.close();
         }
     }
-
 
 
     /**
@@ -316,11 +337,13 @@ public class Purchase {
      */
     public static void updateOrderStatus(Orders orders) {
         SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
         try {
             sqlSession.update(Mapper.UPDATE_ORDER_PAYMENT, orders);
 
         } catch (Exception e) {
-            Purchase.logger.error("updateOrderStatus error: ", e);
+            message = "updateOrderStatus error";
+            Purchase.logger.error(message, e);
 
         } finally {
             //跟新数据库并关闭连接
@@ -410,6 +433,7 @@ public class Purchase {
     public static ResponseData deleteOrderItem(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
 
         try {
             //从http请求中获取要跟新的orders实体类数据
@@ -418,13 +442,18 @@ public class Purchase {
             int num = sqlSession.update(Mapper.DELETE_ORDER_ITEM, Integer.parseInt(id));
             if (num > 0) {
                 Assemble.responseSuccessSetting(responseData, null);
+
             } else {
-                Assemble.responseErrorSetting(responseData, 401,
-                        "deleteOrderItem update error, num is:" + num);
+                message = "deleteOrderItem update error, num is:" + num;
+                Purchase.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
             }
+
         } catch (Exception e) {
-            Assemble.responseErrorSetting(responseData, 500,
-                    "deleteOrderItem error: " + e);
+            message = "deleteOrderItem error";
+            Purchase.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
         }
@@ -441,6 +470,7 @@ public class Purchase {
     public static ResponseData getTotalPoints(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
 
         try {
             //从http请求中获取total_points数据
@@ -450,8 +480,10 @@ public class Purchase {
             Assemble.responseSuccessSetting(responseData, totalPoints);
 
         } catch (Exception e) {
-            Assemble.responseErrorSetting(responseData, 500,
-                    "getTotalPoints error: " + e);
+            message = "getTotalPoints error";
+            Purchase.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
         }

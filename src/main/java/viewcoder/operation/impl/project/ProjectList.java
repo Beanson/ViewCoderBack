@@ -33,26 +33,23 @@ public class ProjectList {
     public static ResponseData getProjectListData(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
-
+        String message = "";
         try {
             //接收前台传过来关于数据需要查询的userId
             Map<String, Object> map = FormData.getParam(msg);
-            sqlSession = MybatisUtils.getSession();
             //查找数据库返回projects数据
             List<Project> projects = sqlSession.selectList(Mapper.GET_PROJECT_LIST_DATA, map);
-
             //进行projects数据,并打包成ResponseData格式并回传
             getProjectDataLogic(projects, responseData);
 
         } catch (Exception e) {
-            ProjectList.logger.error("getProjectData catch exception", e);
-            Assemble.responseErrorSetting(responseData, 500,
-                    "Get ProjectList Data with System Error");
+            message = "System error";
+            ProjectList.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
 
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
-
         return responseData;
     }
 
@@ -63,16 +60,18 @@ public class ProjectList {
      * @param responseData 返回数据打包
      */
     private static void getProjectDataLogic(List<Project> projects, ResponseData responseData) {
-
-        //如果projects不为null则数据库查询projects成功，返回该projects数据到前端。 preProjects已经初始化，不为null
+        String message = "";
+        //preProjects已经初始化，不为null
         //projects.size()为0也是可以的，说明该用户尚未创建任何项目
         if (projects != null) {
             Map<String, Object> map = new HashMap<>(1);
             map.put("myProjects", projects);
             Assemble.responseSuccessSetting(responseData, map);
+
         } else {
-            ProjectList.logger.error("Get ProjectList Data with Database Error");
-            Assemble.responseErrorSetting(responseData, 401, "Get ProjectList Data with Database Error");
+            message = "Get ProjectList Data with Database Error";
+            ProjectList.logger.error(message);
+            Assemble.responseErrorSetting(responseData, 401, message);
         }
     }
 

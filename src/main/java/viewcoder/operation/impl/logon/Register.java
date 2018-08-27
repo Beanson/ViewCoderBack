@@ -251,6 +251,7 @@ public class Register {
 
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
+            OssOpt.shutDownOssClient(ossClient);
         }
         return responseData;
     }

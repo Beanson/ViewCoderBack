@@ -4,6 +4,7 @@ package viewcoder;
  * Created by Administrator on 2017/2/8.
  */
 
+import com.aliyun.oss.OSSClient;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
@@ -18,9 +19,13 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import viewcoder.operation.entity.Project;
+import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.common.Mapper;
+import viewcoder.tool.common.OssOpt;
 import viewcoder.tool.pool.WebDriverPool;
 import viewcoder.tool.util.MybatisUtils;
+
+import java.util.List;
 
 /**
  * An HTTP server that sends back the content of the received HTTP request
@@ -78,16 +83,17 @@ public class ViewCoderServer {
 
 
     /**
-     * 研究connection expire 6 seconds
+     * 临时测试方法
      */
     public static void test(){
         SqlSession sqlSession = MybatisUtils.getSession();
         try{
-            Project project = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, 140);
-            System.out.println(project);
-            Thread.sleep(10000);
+            List<Project> projects = sqlSession.selectList("getAllRelatedProject", 140);
+            System.out.println(projects);
+            System.out.println(CommonService.checkNotNull(projects));
 
         }catch (Exception e){
+            logger.error(e);
 
         }finally {
             System.out.println("-----------------------------------come to close");

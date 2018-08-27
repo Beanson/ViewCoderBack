@@ -34,6 +34,7 @@ public class Personal {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
+        String message = "";
 
         try {
             //获取用户新数据信息
@@ -45,6 +46,7 @@ public class Personal {
             if (num > 0) {
                 //如果上传有新的portrait文件则进行更新到OSS操作
                 if (user.getPortrait_file() != null) {
+                    //TODO 直接覆盖旧的portrait也可
                     //删除旧portrait操作
                     String oldPortraitToOss = GlobalConfig.getOssFileUrl(Common.PORTRAIT_IMG) + userOrigin.getPortrait();
                     OssOpt.deleteFileInOss(oldPortraitToOss, ossClient);
@@ -54,12 +56,16 @@ public class Personal {
                 }
                 //返回封装数据到前端
                 Assemble.responseSuccessSetting(responseData, null);
+
             } else {
-                Assemble.responseErrorSetting(responseData, 401,
-                        "Personal updateUserInfo num: " + num);
+                message = "Personal updateUserInfo num: " + num;
+                Personal.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
             }
         } catch (Exception e) {
-            Assemble.responseErrorSetting(responseData, 500, "Personal updateUserInfo error");
+            message = "Personal updateUserInfo error";
+            Personal.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
 
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);

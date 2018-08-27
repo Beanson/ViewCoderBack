@@ -86,6 +86,7 @@ public class MidNightJob implements Job {
                     map.put(Common.SPACE_EXPIRE, space);
                     map.put(Common.USER_ID, order.getUser_id());
                     int update_num = sqlSession.update(Mapper.REMOVE_EXPIRE_ORDER_SPACE, map);
+
                     if (update_num <= 0) {
                         //更新失败进行下一个操作
                         message = "updateUserSpace num<=0 error:" + order.toString();
@@ -221,8 +222,8 @@ public class MidNightJob implements Job {
 
             //对每条order信息进行发送信息提醒
             Map<String, String> replaceData = new HashMap<String, String>();
-            String mailUrl = "", templateId = "";
-            String url = GlobalConfig.getProperties(Common.SERVICE_SPACE_URL);
+            String templateId = Common.MSG_TEMPLEATE_EXPIRE1;
+            String mailUrl = GlobalConfig.getProperties(Common.MAIL_BASE_URL) + Common.MAIL_SERVICE_EXPIRE; //本地网页数据
 
             for (Orders order : orders) {
                 int space = getToReleaseSpace(order);
@@ -235,31 +236,14 @@ public class MidNightJob implements Job {
                 MailEntity mailEntity = new MailEntity(user.getEmail(), Common.MAIL_SERVICE_EXPIRE_INFORM, Common.MAIL_HTML_TYPE);
 
                 //准备替换原文的用户数据
-                int spaceRemain = Integer.parseInt(user.getResource_remain()) - space;
+                //int spaceRemain = Integer.parseInt(user.getResource_remain()) - space;
                 int expireDays = order.getExpire_days();
                 replaceData.put("name", user.getUser_name());
-                replaceData.put("service_name", CommonObject.getServiceName(order.getService_id()));
-                replaceData.put("expire_date", order.getExpire_date());
-                replaceData.put("url", url);
+                replaceData.put("service", CommonObject.getServiceName(order.getService_id()));
+                replaceData.put("time", order.getExpire_date());
                 replaceData.put("days", String.valueOf(expireDays));
-                replaceData.put("space_remain", String.valueOf(spaceRemain));
 
-                //根据剩余空间大小对应发送不同手机短信和邮件模板
-                if (spaceRemain > 0) {
-                    templateId = Common.MSG_TEMPLEATE_EXPIRE1;
-                    mailUrl = GlobalConfig.getProperties(Common.MAIL_BASE_URL) + "expire_with_space.html"; //本地网页数据
-
-                } else {
-                    templateId = Common.MSG_TEMPLEATE_EXPIRE2;
-                    mailUrl = GlobalConfig.getProperties(Common.MAIL_BASE_URL) + "expire_no_space.html"; //本地网页数据
-                }
-
-                //针对0的实例，提醒实例即将释放
-//                templateId = Common.MSG_TEMPLEATE_RELEASE;
-//                mailUrl = GlobalConfig.getProperties(Common.MAIL_BASE_URL) + "expire_release.html";
-
-
-                //发送短信操作
+                //发送短信操作${name} ${service} ${time} ${days}
                 MsgHelper.sendSingleMsg(templateId, replaceData, user.getPhone(), Common.MSG_SIGNNAME_LIPHIN);
 
                 //发送邮件操作
@@ -269,6 +253,8 @@ public class MidNightJob implements Job {
             }
 
         } catch (Exception e) {
+            message = "Send mail and text err";
+            MidNightJob.logger.error(message, e);
 
         } finally {
             sqlSession.close();

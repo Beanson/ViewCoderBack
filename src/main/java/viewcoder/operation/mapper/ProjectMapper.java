@@ -109,7 +109,7 @@ public interface ProjectMapper {
 
     //测试用的
     @Update("update project set user_id=user_id where id=140")
-    public int updateForTest();
+    public int updateForTest(int id);
 
 }
 

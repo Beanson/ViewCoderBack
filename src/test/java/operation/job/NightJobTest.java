@@ -21,7 +21,7 @@ public class NightJobTest {
 
     @Test
     public void testMail(){
-        MailEntity mailEntity = new MailEntity("2920248385@qq.com", Common.MAIL_INSTANCE_EXPIRE_NOTIFICATION, Common.MAIL_HTML_TYPE);
+        MailEntity mailEntity = new MailEntity("2920248385@qq.com", Common.MAIL_SERVICE_EXPIRE, Common.MAIL_HTML_TYPE);
         String mailUrl = GlobalConfig.getProperties(Common.MAIL_BASE_URL) + "expire_no_space.html"; //本地网页数据
         Map<String, String> replaceData = new HashMap<String, String>();
         replaceData.put("name", "张斌");
