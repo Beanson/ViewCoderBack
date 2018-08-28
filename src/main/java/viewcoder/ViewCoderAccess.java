@@ -337,6 +337,7 @@ public class ViewCoderAccess {
 
         /* **************************************************************/
         /*Company专区*/
+        //企业获取订单折扣条目操作
         else if (uri.equals("/getCompanyDiscountOrder")) {
             ResponseData response = CompanyOpt.getCompanyDiscountOrder(msg);
             httpResponse(ctx, msg, response);

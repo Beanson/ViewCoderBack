@@ -1,7 +1,5 @@
 package viewcoder.operation.impl.render;
 
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpRequest;
 import viewcoder.exception.render.RenderException;
 import viewcoder.tool.common.Assemble;
 import viewcoder.tool.common.Common;
@@ -21,10 +19,7 @@ import io.netty.handler.codec.http.multipart.FileUpload;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Created by Administrator on 2018/2/16.
@@ -45,6 +40,7 @@ public class Render {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
+        String message = "";
         try {
             //从http中获取项目id数据
             Map<String, Object> data = FormData.getParam(msg);
@@ -54,6 +50,7 @@ public class Render {
 
             //从数据库中根据项目Id获取项目渲染数据
             Project project = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, Integer.parseInt(projectId));
+
             if (project != null && project.getUser_id() == Integer.parseInt(userId)) {
                 //获取的结果数据记录初始化
                 Map<String, Object> map = new HashMap<>(2);
@@ -67,20 +64,22 @@ public class Render {
                     Assemble.responseSuccessSetting(responseData, map);
 
                 } else {
-                    Assemble.responseErrorSetting(responseData, 400,
-                            "RenderException getProjectRenderData: project data from oss null");
+                    message = "getProjectRenderData data from oss null";
+                    Render.logger.warn(message);
+                    Assemble.responseErrorSetting(responseData, 400, message);
                 }
             } else {
-                Assemble.responseErrorSetting(responseData, 401,
-                        "RenderException getProjectRenderData: project null");
+                message = "project data from http null";
+                Render.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
             }
+
         } catch (Exception e) {
-            Render.logger.error("===RenderException getProjectRenderData with error: ", e);
-            Assemble.responseErrorSetting(responseData, 500,
-                    "RenderException getProjectRenderData: system error");
+            message = "System error";
+            Render.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
 
         } finally {
-            //对数据库进行后续提交和关闭操作等
             CommonService.databaseCommitClose(sqlSession, responseData, true);
             OssOpt.shutDownOssClient(ossClient);
         }
@@ -132,10 +131,9 @@ public class Render {
      * @return
      */
     public static ResponseData getUploadResource(Object msg) {
-
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
-
+        String message = "";
         try {
             //从http请求中获取用户需要的resource文件信息，并查找数据库
             HashMap<String, Object> map = FormData.getParam(msg, Common.USER_ID, Common.FILE_TYPE);
@@ -143,46 +141,47 @@ public class Render {
             Assemble.responseSuccessSetting(responseData, userUploadFiles);
 
         } catch (Exception e) {
-            Render.logger.debug("===RenderException getUploadResource with error: " + e);
-            Assemble.responseErrorSetting(responseData, 500,
-                    "RenderException getUploadResource system error");
+            message = "System error";
+            Render.logger.debug(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
 
         } finally {
-            //对数据库进行后续提交和关闭操作等
             CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
         return responseData;
     }
 
 
-
     /**
      * ****************************************************************************
      * 试探上传资源前是否有足够容纳空间
+     *
      * @param msg
      * @return
      */
-    public static ResponseData uploadSpaceDetect(Object msg){
+    public static ResponseData uploadSpaceDetect(Object msg) {
         String message = "";
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
-
         try {
             UserUploadFile userUploadFile = (UserUploadFile) FormData.getParam(msg, UserUploadFile.class);
-            String resourceRemain = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, userUploadFile.getUser_id());
-            long newUserResSpace = Integer.parseInt(resourceRemain) - Integer.parseInt(userUploadFile.getFile_size());
-            if(newUserResSpace>0){
-                Assemble.responseSuccessSetting(responseData,null);
-            }else {
-                Assemble.responseErrorSetting(responseData, 400, "No enough space");
+            long newUserResSpace = checkSpace(userUploadFile);
+
+            if (newUserResSpace > 0) {
+                Assemble.responseSuccessSetting(responseData, null);
+
+            } else {
+                message = "No enough space";
+                Render.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 400, message);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             message = "System error";
             Render.logger.error(message, e);
             Assemble.responseErrorSetting(responseData, 500, message);
 
-        }finally {
+        } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, false);
         }
         return responseData;
@@ -205,11 +204,7 @@ public class Render {
 
             if (userUploadFile.getIs_folder() != 1) {
                 //查看检查是否有足够空间接收该上传文件资源
-                SqlSession sqlSession = MybatisUtils.getSession();
-                String resourceRemain = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, userUploadFile.getUser_id());
-                newUserResSpace = Integer.parseInt(resourceRemain) - userUploadFile.getFile().length();
-                sqlSession.close();
-
+                newUserResSpace = checkSpace(userUploadFile);
                 //如果接收资源后用户可用空间大于0则接收资源文件
                 if (newUserResSpace > 0) {
                     uploadResourceOpt(userUploadFile, responseData, newUserResSpace);
@@ -219,7 +214,9 @@ public class Render {
                     Render.logger.warn(message);
                     Assemble.responseErrorSetting(responseData, 403, message);
                 }
+
             } else {
+                //文件夹类型，无需检查空间直接上传
                 uploadResourceOpt(userUploadFile, responseData, newUserResSpace);
             }
 
@@ -227,9 +224,33 @@ public class Render {
             message = "System error";
             Render.logger.error(message, e);
             Assemble.responseErrorSetting(responseData, 500, message);
-
         }
         return responseData;
+    }
+
+
+    /**
+     * 检查是否有足够空间上传
+     *
+     * @param userUploadFile
+     * @return
+     */
+    private static long checkSpace(UserUploadFile userUploadFile) {
+        SqlSession sqlSession = MybatisUtils.getSession();
+        long newUserResSpace = 0;
+        String message = "";
+        try {
+            String resourceRemain = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, userUploadFile.getUser_id());
+            newUserResSpace = Integer.parseInt(resourceRemain) - userUploadFile.getFile().length();
+
+        } catch (Exception e) {
+            message = "System error";
+            Render.logger.error(message, e);
+
+        } finally {
+            sqlSession.close();
+        }
+        return newUserResSpace;
     }
 
     /**
@@ -240,20 +261,29 @@ public class Render {
      * @param newUserResSpace 预添加后的空间
      * @throws Exception
      */
-    private static void uploadResourceOpt(UserUploadFile userUploadFile, ResponseData responseData, long newUserResSpace) throws Exception {
-
+    private static void uploadResourceOpt(UserUploadFile userUploadFile, ResponseData responseData,
+                                          long newUserResSpace) throws Exception {
         String message = "";
 
-        //上传到oss中
+        //A. 上传到oss中---------------------------------------------------------------------
         if (userUploadFile.getIs_folder() != 1) {
-            //文件保存文件到OSS
             OSSClient ossClient = OssOpt.initOssClient();
-            String fileName = GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES) + userUploadFile.getTime_stamp() + "." + userUploadFile.getSuffix();
-            OssOpt.uploadFileToOss(fileName, userUploadFile.getFile().get(), ossClient);
-            OssOpt.shutDownOssClient(ossClient);
+            try {
+                String fileName = GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES) + userUploadFile.getTime_stamp() +
+                        Common.DOT_SUFFIX + userUploadFile.getSuffix();
+                OssOpt.uploadFileToOss(fileName, userUploadFile.getFile().get(), ossClient);
+
+            } catch (Exception e) {
+                message = "System error";
+                Render.logger.error(message);
+                throw new Exception(message);
+
+            } finally {
+                OssOpt.shutDownOssClient(ossClient);
+            }
         }
 
-        //数据库更新操作，因为上传到oss步骤是耗时步骤，因此sql数据库直到该步骤才开启
+        //B. 数据库更新操作，因为上传到oss步骤是耗时步骤，因此sql数据库直到该步骤才开启-------------------
         SqlSession sqlSession = MybatisUtils.getSession();
         try {
             //插入数据库操作
@@ -262,23 +292,31 @@ public class Render {
             if (influence_num > 0) {
                 //准备返回的结果数据
                 Map<String, Object> backData = new HashMap<>();
-                backData.put("id", userUploadFile.getId());
+                backData.put(Common.ID, userUploadFile.getId());
 
+                //非文件夹则更新占用空间数据
                 if (userUploadFile.getIs_folder() != 1) {
                     //更新project的占用空间大小的数据
                     String projectResSpace = sqlSession.selectOne(Mapper.GET_PROJECT_RESOURCE_SIZE, userUploadFile.getProject_id());
                     long newProjectResSpace = Integer.parseInt(projectResSpace) + userUploadFile.getFile().length();
 
                     //更新用户resource_remain大小
-                    int userUpdateNum = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(userUploadFile.getUser_id(), String.valueOf(newUserResSpace)));
+                    int userUpdateNum = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN,
+                            new User(userUploadFile.getUser_id(), String.valueOf(newUserResSpace)));
                     //跟新项目占用空间大小
-                    int projectUpdateNum = sqlSession.update(Mapper.UPDATE_PROJECT_RESOURCE_SIZE, new Project(userUploadFile.getProject_id(), String.valueOf(newProjectResSpace)));
+                    int projectUpdateNum = sqlSession.update(Mapper.UPDATE_PROJECT_RESOURCE_SIZE,
+                            new Project(userUploadFile.getProject_id(), String.valueOf(newProjectResSpace)));
 
                     //返回成功信息
                     if (userUpdateNum > 0 && projectUpdateNum > 0) {
                         backData.put("user_resource_remain", newUserResSpace);
                         backData.put("project_resource_space", newProjectResSpace);
                         Assemble.responseSuccessSetting(responseData, backData);
+
+                    } else {
+                        message = "update resource size db error:" + userUpdateNum + "," + projectUpdateNum;
+                        Render.logger.warn(message);
+                        Assemble.responseErrorSetting(responseData, 432, message);
                     }
 
                 } else {
@@ -291,6 +329,7 @@ public class Render {
                 Render.logger.error(message);
                 Assemble.responseErrorSetting(responseData, 402, message);
             }
+
         } catch (Exception e) {
             message = "System error";
             Render.logger.error(message, e);
@@ -299,6 +338,7 @@ public class Render {
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
         }
+
     }
 
 
@@ -336,31 +376,29 @@ public class Render {
      * @return
      */
     public static ResponseData renameResource(Object msg) {
-
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
-
+        String message = "";
         try {
             //获取要重命名resource的id，和resource的名称
-            HashMap<String, Object> map = FormData.getParam(msg, Common.ID, Common.NEW_FILE_NAME);
-            //更新资源名称到数据库操作
+            HashMap<String, Object> map = FormData.getParam(msg);
             int influence_num = sqlSession.update(Mapper.RENAME_RESOURCE_BY_ID, map);
             if (influence_num > 0) {
                 //如果更新数据库成功则成功返回
                 Assemble.responseSuccessSetting(responseData, null);
 
             } else {
-                //否则返回401 错误代号
-                Assemble.responseErrorSetting(responseData, 401,
-                        "RenderException renameResource update database error");
+                message = "update database error";
+                Render.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
             }
+
         } catch (Exception e) {
-            Render.logger.error("RenderException renameResource: ", e);
-            Assemble.responseErrorSetting(responseData, 500,
-                    "RenderException renameResource system error");
+            message = "System error";
+            Render.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
 
         } finally {
-            //对数据库进行后续提交和关闭操作等
             CommonService.databaseCommitClose(sqlSession, responseData, true);
         }
         return responseData;
@@ -375,36 +413,54 @@ public class Render {
      * @return
      */
     public static ResponseData deleteResource(Object msg) {
-
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
-
+        String message = "";
         try {
             //获取要删除的resource的id，project_id和user_id,后两个参数做校验
-            Map<String, Object> map = FormData.getParam(msg, Common.PROJECT_ID, Common.USER_ID, Common.ID);
+            Map<String, Object> map = FormData.getParam(msg);
             int id = Integer.parseInt(String.valueOf(map.get(Common.ID)));
             int user_id = Integer.parseInt(String.valueOf(map.get(Common.USER_ID)));
             int project_id = Integer.parseInt(String.valueOf(map.get(Common.PROJECT_ID)));
 
+            //记录删除资源数目条目的记录
+            Map<String, Integer> record = new HashMap<>(3);
+            record.put(Common.RESOURCE_DELETE_DB_NUM, 0);
+            record.put(Common.RESOURCE_DELETE_SIZE, 0);
+
             //验证删除resource要求是否合法
             Project project = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, project_id);
-            //如果确认该user有对应project的resource后开始删除操作
             if (project.getUser_id() == user_id) {
+                //即将删除的oss资源数据装载，一起batch删除操作
+                List<String> widgetList = new ArrayList<>();
+
+                //A. 获取数据库中该资源相关信息
                 UserUploadFile userUploadFile = sqlSession.selectOne(Mapper.GET_RESOURCE_DATA, id);
-                //删除该资源在oss中的占用
-                deleteResourceLogic(userUploadFile, responseData, ossClient, sqlSession);
+                //删除该资源在oss中的占用和数据库中信息
+                deleteResourceLogic(userUploadFile, ossClient, sqlSession, record, widgetList);
+
+                //B. OSS删除resource文件
+                OssOpt.deleteFileInOssBatch(widgetList, ossClient);
+
+                //C. 更新删除资源后user表对应的空间
+                updateDelResRemain(sqlSession, userUploadFile, record);
+
+                //返回成功数据
+                Assemble.responseSuccessSetting(responseData, null);
 
             } else {
-                Assemble.responseErrorSetting(responseData, 402,
-                        "deleteResource invalid delete opt");
+                message = "deleteResource invalid delete opt";
+                Render.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 402, message);
             }
+
         } catch (Exception e) {
-            Render.logger.error("RenderException deleteResource error: ", e);
-            Assemble.responseErrorSetting(responseData, 500,
-                    "RenderException deleteResource system error");
+            message = "System error";
+            Render.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
         } finally {
-            //对数据库进行后续提交和关闭操作等
             CommonService.databaseCommitClose(sqlSession, responseData, true);
             OssOpt.shutDownOssClient(ossClient);
         }
@@ -415,19 +471,27 @@ public class Render {
      * 删除OSS中的resource操作
      *
      * @param userUploadFile 删除的resource信息
-     * @param responseData   返回信息组装
      * @param ossClient      oss句柄
      * @param sqlSession     sql句柄
+     * @param record         记录删除资源数据
      */
-    private static void deleteResourceLogic(UserUploadFile userUploadFile, ResponseData responseData,
-                                            OSSClient ossClient, SqlSession sqlSession) throws RenderException {
-        int deleteNum = 0, deleteResourceSize = 0;
+    private static void deleteResourceLogic(UserUploadFile userUploadFile, OSSClient ossClient, SqlSession sqlSession,
+                                            Map<String, Integer> record, List<String> widgetList)
+            throws RenderException {
+
+        int deleteNum = 0;
+        int deleteResourceSize = 0;
+        String message = "";
+
+        //根据该文件本身是文件夹还是文件进行相应操作
         if (userUploadFile.getIs_folder() != 1) {
-            //如果删除的文件资源是文件
-            //删除文件在数据库user_upload_file的条目
+            //如果删除的文件资源是文件, a. 删除文件在数据库user_upload_file的; 2. 装载对应的OSS文件，后续删除
             deleteNum = sqlSession.delete(Mapper.DELETE_RESOURCE_BY_ID, userUploadFile.getId());
+            OssOpt.addToOssDeleteList(userUploadFile, widgetList);
+
             deleteResourceSize = Integer.parseInt(userUploadFile.getFile_size());
-            OssOpt.deleteResourceOSSFile(userUploadFile, ossClient, sqlSession);
+            record.put(Common.RESOURCE_DELETE_OSS_NUM, record.get(Common.RESOURCE_DELETE_DB_NUM) + 1);
+            record.put(Common.RESOURCE_DELETE_SIZE, record.get(Common.RESOURCE_DELETE_SIZE) + deleteResourceSize);
 
         } else {
             //如果删除的文件资源是文件夹则进行级联删除
@@ -439,22 +503,12 @@ public class Render {
             deleteNum = sqlSession.delete(Mapper.DELETE_RESOURCE_BY_ID, userUploadFile.getId());
 
             //循环监测并监测是否引用数为零并删除oss中对应文件数据
-            for (UserUploadFile eachUploadFile :
-                    list) {
-                //数据库删除resource条目操作
-                int temp = sqlSession.delete(Mapper.DELETE_RESOURCE_BY_ID, eachUploadFile.getId());
-                if (temp > 0) {
-                    deleteResourceSize += Integer.parseInt(eachUploadFile.getFile_size());
-                    deleteNum++;
-                } else {
-                    throw new RenderException("===Delete relative path resources error, id: " + eachUploadFile.getId());
-                }
+            for (UserUploadFile eachUploadFile : list) {
+                deleteResourceLogic(eachUploadFile, ossClient, sqlSession, record, widgetList);
             }
-            //OSS删除resource文件
-            OssOpt.deleteResourceBatch(list, sqlSession, ossClient);
         }
-        //删除资源后对User和Project的资源空间的更新
-        updateDelResRemain(sqlSession, userUploadFile, deleteResourceSize, deleteNum, responseData);
+        //数据库删除记录操作数目添加
+        record.put(Common.RESOURCE_DELETE_DB_NUM, record.get(Common.RESOURCE_DELETE_DB_NUM) + deleteNum);
     }
 
     /**
@@ -462,63 +516,35 @@ public class Render {
      *
      * @param sqlSession         sql句柄
      * @param userUploadFile     用户提交需删除的资源文件信息
-     * @param deleteResourceSize 删除的资源文件空间
-     * @param deleteNum          删除数量
-     * @param responseData       返回数据包装
+     * @param record             记录删除资源空间大小和数量等信息
      */
-    private static void updateDelResRemain(SqlSession sqlSession, UserUploadFile userUploadFile, int deleteResourceSize,
-                                           int deleteNum, ResponseData responseData) {
-
+    private static void updateDelResRemain(SqlSession sqlSession, UserUploadFile userUploadFile, Map<String, Integer> record) {
         //更新User的资源剩余空间
         String userResourceRemain = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, userUploadFile.getUser_id());
-        int newUserResourceRemain = Integer.parseInt(userResourceRemain) + deleteResourceSize;
-        int userUpdateNum = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(userUploadFile.getUser_id(),
-                String.valueOf(newUserResourceRemain)));
-
-        //更新Project的资源占用空间
-        String projectResourceSpace = sqlSession.selectOne(Mapper.GET_PROJECT_RESOURCE_SIZE, userUploadFile.getProject_id());
-        int newProjectResourceSpace = Integer.parseInt(projectResourceSpace) - deleteResourceSize;
-        int projectUpdateNum = sqlSession.update(Mapper.UPDATE_PROJECT_RESOURCE_SIZE, new Project(userUploadFile.getProject_id(),
-                String.valueOf(newProjectResourceSpace)));
-
-        //返回数据包装
-        if (deleteNum > 0 && userUpdateNum > 0 && projectUpdateNum > 0) {
-            Map<String, Integer> map = new HashMap<>();
-            map.put("user_resource_remain", newUserResourceRemain);
-            map.put("project_resource_space", newProjectResourceSpace);
-            Assemble.responseSuccessSetting(responseData, map);
-
-        } else {
-            Assemble.responseErrorSetting(responseData, 401,
-                    "delete db or oss error");
-        }
-        Render.logger.debug("===Delete Resource: \n" +
-                "deleteNum: " + deleteNum +
-                "userUpdateNum" + userUpdateNum +
-                "projectUpdateNum" + projectUpdateNum);
+        int newUserResourceRemain = Integer.parseInt(userResourceRemain) + record.get(Common.RESOURCE_DELETE_SIZE);
+        User user = new User(userUploadFile.getUser_id(), String.valueOf(newUserResourceRemain));
+        int userUpdateNum = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, user);
     }
 
 
     /**
      * ****************************************************************************
      * 上传video的一帧截图
+     * 视频图片更新数据库操作，之前只上传处理了视频，
+     * 还未添加媒体截图，现添加视频截图到数据库
      *
      * @param msg http上传数据
      * @return 返回视频某一帧图片的URL
      */
     public static ResponseData uploadVideoImage(Object msg) {
-
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
-
+        String message = "";
         try {
-            //获取video的image信息
-            HashMap<String, Object> videoImage = FormData.getParam(msg, Common.VIDEO_IMAGE, Common.VIDEO_ID,
-                    Common.VIDEO_IMAGE_NAME);
+            HashMap<String, Object> videoImage = FormData.getParam(msg);
             //获取视频截帧的帧文件信息
             FileUpload fileUpload = (FileUpload) videoImage.get(Common.VIDEO_IMAGE);
-            //视频图片更新数据库操作，之前只上传处理了视频，还未添加媒体截图，现添加视频截图到数据库
             int num = sqlSession.update(Mapper.UPDATE_VIDEO_IMAGE, videoImage);
 
             if (num > 0) {
@@ -527,18 +553,20 @@ public class Render {
                         videoImage.get(Common.VIDEO_IMAGE_NAME);
                 OssOpt.uploadFileToOss(uploadFileName, fileUpload.get(), ossClient);
                 Assemble.responseSuccessSetting(responseData, null);
+
             } else {
-                Assemble.responseErrorSetting(responseData, 401,
-                        "RenderException uploadVideoImage: insert to db error");
+                message = "uploadVideoImage insert db error";
+                Render.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
             }
+
         } catch (Exception e) {
-            Render.logger.error("uploadVideoImage error: ", e);
-            Assemble.responseErrorSetting(responseData, 500,
-                    "RenderException deleteResource system error");
+            message = "System error";
+            Render.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
         } finally {
-            //对数据库进行后续提交和关闭操作等
             CommonService.databaseCommitClose(sqlSession, responseData, true);
-            //对OSS资源连接释放
             OssOpt.shutDownOssClient(ossClient);
         }
         return responseData;
@@ -552,35 +580,40 @@ public class Render {
      * @return
      */
     public static ResponseData saveProjectData(Object msg) {
-
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
-
+        String message = "";
         try {
             Project project = (Project) FormData.getParam(msg, Project.class);
             int num = sqlSession.update(Mapper.SAVE_PROJECT_DATA, project);
+
             if (num > 0) {
-                String projectDataFile = null;
                 //根据version值对应同步不同oss文件
+                String projectDataFile = null;
                 if (Objects.equals(project.getVersion(), Common.MOBILE_V)) {
+                    //移动端版本
                     projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getMo_version() + Common.PROJECT_DATA_SUFFIX;
                 } else {
+                    //PC端版本
                     projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getPc_version() + Common.PROJECT_DATA_SUFFIX;
                 }
                 //创建新的project_data数据并同步到OSS中
                 OssOpt.uploadFileToOss(projectDataFile, project.getProject_data().getBytes(), ossClient);
                 Assemble.responseSuccessSetting(responseData, null);
+
             } else {
-                Assemble.responseErrorSetting(responseData, 401,
-                        "RenderException saveProjectData: ");
+                message = "saveProjectData db error";
+                Render.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
             }
+
         } catch (Exception e) {
-            Render.logger.error("RenderException saveProjectData error: ", e);
-            Assemble.responseErrorSetting(responseData, 500,
-                    "RenderException saveProjectData system error");
+            message = "System error";
+            Render.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
         } finally {
-            //对数据库进行后续提交和关闭操作等
             CommonService.databaseCommitClose(sqlSession, responseData, true);
             OssOpt.shutDownOssClient(ossClient);
         }
@@ -597,23 +630,27 @@ public class Render {
     public static ResponseData updateExportDefaultSetting(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
-
+        String message = "";
         try {
             User user = (User) FormData.getParam(msg, User.class);
             int num = sqlSession.update(Mapper.UPDATE_EXPORT_DEFAULT_SETTING, user);
+
             if (num > 0) {
                 //更新成功，则返回成功
                 Assemble.responseSuccessSetting(responseData, null);
+
             } else {
-                //更新失败
-                Assemble.responseErrorSetting(responseData, 401, "Db update error");
+                message = "Db update error";
+                Render.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
             }
+
         } catch (Exception e) {
-            //系统错误
-            Assemble.responseErrorSetting(responseData, 500, "system error");
+            message = "System error";
+            Render.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
 
         } finally {
-            //对数据库进行后续提交和关闭操作等
             CommonService.databaseCommitClose(sqlSession, responseData, true);
         }
         return responseData;

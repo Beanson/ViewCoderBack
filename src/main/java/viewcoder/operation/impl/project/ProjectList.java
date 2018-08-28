@@ -84,6 +84,7 @@ public class ProjectList {
 
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
 
         try {
             Project project = (Project) FormData.getParam(msg, Project.class);
@@ -92,16 +93,17 @@ public class ProjectList {
             //根据影响条目是否大于0判断是否更新项目名称成功
             if (num > 0) {
                 Assemble.responseSuccessSetting(responseData, project.getProject_name());
+
             } else {
-                ProjectList.logger.error("Modify Project Name with Database Error");
-                Assemble.responseErrorSetting(responseData, 401,
-                        "Modify Project Name with Database Error");
+                message = "ModifyProjectName Database Error";
+                ProjectList.logger.error(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
             }
 
         } catch (Exception e) {
-            ProjectList.logger.error("modifyProjectName catch exception", e);
-            Assemble.responseErrorSetting(responseData, 500,
-                    "Modify Project Name with System Error");
+            message = "System exception";
+            ProjectList.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
 
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
@@ -119,6 +121,7 @@ public class ProjectList {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
+        String message = "";
 
         try {
             //1、获取前端传递过来的数据
@@ -165,8 +168,9 @@ public class ProjectList {
 
 
         } catch (Exception e) {
-            ProjectList.logger.debug("copyProject occurs error", e);
-            Assemble.responseErrorSetting(responseData, 500, e.toString());
+            message = "copyProject occurs error";
+            ProjectList.logger.debug(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
 
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);

@@ -21,19 +21,22 @@ public class CompanyOpt {
 
     private static Logger logger = Logger.getLogger(CompanyOpt.class);
 
+    /**
+     * 企业级获取折扣订单数据操作
+     * @param msg
+     * @return
+     */
     public static ResponseData getCompanyDiscountOrder(Object msg){
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         String message = "";
-
         try {
-            //获取
             String companyCredit = FormData.getParam(msg, Common.COMPANY_CREDIT);
             List<Orders> list = sqlSession.selectList(Mapper.GET_COMPANY_DISCOUNT_ORDER, companyCredit);
             Assemble.responseSuccessSetting(responseData, list);
 
         }catch (Exception e){
-            message = "getCompanyDiscountOrder err";
+            message = "System error";
             CompanyOpt.logger.error(message, e);
             Assemble.responseErrorSetting(responseData, 500, message);
 

@@ -238,6 +238,9 @@ public class Common {
     public static final String OPENID = "openid"; //获取用户扫码登录的openid
     public static final String ACCOUNT = "account"; //获取用户登录的账号信息
     public static final String RESOURCE_REMAIN = "resource_remain"; //资源剩余空间
+    public static final String RESOURCE_DELETE_SIZE = "resource_delete_size"; //删除该资源可释放的空间
+    public static final String RESOURCE_DELETE_DB_NUM = "resource_delete_db_num"; //资源在数据库中删除数目
+    public static final String RESOURCE_DELETE_OSS_NUM = "resource_delete_oss_num"; //资源在oss中删除数目
 
 
     //数字证书

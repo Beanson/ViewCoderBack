@@ -114,12 +114,10 @@ public class OssOpt {
      */
     public static void deleteFileInOssBatch(List<String> list, OSSClient ossClient) {
         if (list != null && list.size() > 0) {
-            DeleteObjectsResult deleteObjectsResult = ossClient.deleteObjects(
-                    new DeleteObjectsRequest(VIEWCODER_BUCKET).withKeys(list));
+            DeleteObjectsRequest request = new DeleteObjectsRequest(VIEWCODER_BUCKET).withKeys(list);
+            DeleteObjectsResult deleteObjectsResult = ossClient.deleteObjects(request);
             List<String> deletedObjects = deleteObjectsResult.getDeletedObjects();
-            OssOpt.logger.debug("===delete batch resource files in common: \n" +
-                    "list list: " + list + "\n" +
-                    "delete result: " + deletedObjects + "\n");
+            OssOpt.logger.debug("delete batch file: \nlist: " + list + "\n result: " + deletedObjects + "\n");
         }
     }
 
@@ -128,58 +126,19 @@ public class OssOpt {
      *
      * @param userUploadFile 上传的文件
      */
-    public static void deleteResourceOSSFile(UserUploadFile userUploadFile, OSSClient ossClient, SqlSession sqlSession) {
-        //查看该文件在数据库中的引用数
-        int refCount = sqlSession.selectOne(Mapper.GET_RESOURCE_REF_COUNT, userUploadFile.getTime_stamp());
-        //如果无记录再引用该资源，则允许删除操作
-        if (refCount <= 0) {
-            //如果数据库中无该字段的其他引用，则删除OSS对应文件
-            String deleteFileName = GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES) +
-                    userUploadFile.getTime_stamp() + "." + userUploadFile.getSuffix();
-            OssOpt.deleteFileInOss(deleteFileName, ossClient);
+    public static void addToOssDeleteList(UserUploadFile userUploadFile, List<String> widgetList) {
+        //如果数据库中无该字段的其他引用，则删除OSS对应文件
+        String deleteFileName = GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES) + userUploadFile.getTime_stamp()
+                + Common.DOT_SUFFIX + userUploadFile.getSuffix();
+        widgetList.add(deleteFileName);
 
-            //如果video_image_name不为空，且file_type为2，则也删除对应的video_image
-            if (userUploadFile.getVideo_image_name() != null && !userUploadFile.getVideo_image_name().isEmpty() &&
-                    userUploadFile.getFile_type() == 2) {
-                String deleteVideoName = GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES) +
-                        userUploadFile.getVideo_image_name();
-                //oss删除video图片资源
-                OssOpt.deleteFileInOss(deleteVideoName, ossClient);
-            }
+        //如果是video组件，则添加对应的video_image_name到删除列表
+        if (CommonService.checkNotNull(userUploadFile.getVideo_image_name()) && userUploadFile.getFile_type() == 2) {
+            String deleteVideoName = GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES) + userUploadFile.getVideo_image_name();
+            widgetList.add(deleteVideoName);
         }
     }
 
-    /**
-     * 批量删除OSS文件
-     *
-     * @param list       即将删除的组件的列表
-     * @param sqlSession sql句柄
-     * @param ossClient  oss句柄
-     */
-    public static void deleteResourceBatch(List<UserUploadFile> list, SqlSession sqlSession, OSSClient ossClient) {
-        //装载到即将删除列表中
-        List<String> widgetList = new ArrayList<>();
-        List<String> videoImageList = new ArrayList<>();
-        for (UserUploadFile userUploadFile :
-                list) {
-            //查看该文件在数据库中的引用数
-            int refCount = sqlSession.selectOne(Mapper.GET_RESOURCE_REF_COUNT, userUploadFile.getTime_stamp());
-            //如果引用计数为0则添加该文件名到即将删除列表
-            if (refCount <= 0) {
-                widgetList.add(GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES) +
-                        userUploadFile.getTime_stamp() + "." + userUploadFile.getSuffix());
-
-                if (userUploadFile.getVideo_image_name() != null && !userUploadFile.getVideo_image_name().isEmpty() &&
-                        userUploadFile.getFile_type() == 2) {
-                    videoImageList.add(GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES) + userUploadFile.getVideo_image_name());
-                }
-            }
-        }
-        //批量删除资源文件
-        OssOpt.deleteFileInOssBatch(widgetList, ossClient);
-        //批量删除video图片资源文件
-        OssOpt.deleteFileInOssBatch(videoImageList, ossClient);
-    }
 
 
     /**************************** 拷贝资源文件方法 ***************************/

@@ -42,10 +42,9 @@ public class CreateProject {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
-
+        String message = "";
         try {
             Project project = (Project) FormData.getParam(msg, Project.class);
-
             /*新创建空项目数据插入数据库*/
             int num = optHandler(sqlSession, project, Mapper.CREATE_EMPTY_PROJECT);
 
@@ -53,23 +52,22 @@ public class CreateProject {
             if (num > 0) {
                 //OSS创建空项目的project的数据文件
                 insertNewProjectToOss(project, ossClient);
-
                 //返回新建项目的project数据
                 Assemble.responseSuccessSetting(responseData, project);
 
             } else {
-                CreateProject.logger.error("Insert Empty Project Data To Database Error");
-                Assemble.responseErrorSetting(responseData, 401,
-                        "Insert Empty Project Data To Database Error");
+                message = "Insert Empty Project Data To Database Error";
+                CreateProject.logger.error(message);
+                Assemble.responseErrorSetting(responseData, 401, message);
             }
+
         } catch (Exception e) {
-            CreateProject.logger.error("createEmptyProject Server Error", e);
-            Assemble.responseErrorSetting(responseData, 500,
-                    "Server Error");
+            message = "System error";
+            CreateProject.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
         } finally {
-            //如果整个流程准确无误地实现则对数据库操作进行提交，否则不提交
             CommonService.databaseCommitClose(sqlSession, responseData, true);
-            //关闭oss对象
             OssOpt.shutDownOssClient(ossClient);
         }
         return responseData;
@@ -101,7 +99,7 @@ public class CreateProject {
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
         Project project = new Project();
-
+        String message = "";
         try {
             //如果保存成功，则对该文件进行解析处理
             //解析psd文件参数变量数据
@@ -120,16 +118,19 @@ public class CreateProject {
                 parsePSDFileLogic(responseData, project.getPsd_file().getFile(), project, sqlSession, ossClient, preRemainSize);
 
             } else {
-                Assemble.responseErrorSetting(responseData, 402,
-                        "User resource space not enough");
+                message = "User resource space not enough";
+                CreateProject.logger.warn(message);
+                Assemble.responseErrorSetting(responseData, 402, message);
             }
+
         } catch (Exception e) {
-            CreateProject.logger.error("createPSDProject Server Error", e);
-            Assemble.responseErrorSetting(responseData, 500,
-                    "Server Error");
+            message = "System error";
+            CreateProject.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
 
         } finally {
             //如果该PSD文件无法解析则上传到OSS云端
+            //TODO 该步骤重新开ossClient实例并异步处理
             uploadErrorPsdFile(responseData, project, ossClient);
 
             //资源关闭和释放
@@ -211,7 +212,6 @@ public class CreateProject {
     }
 
 
-
     /**
      * ****************************************************************************
      * 生成Simulate类型的project，根据URL地址，生成和其类似的网页
@@ -219,8 +219,8 @@ public class CreateProject {
      * @param msg 传递的消息类型
      */
     public static ResponseData createSimulateProject(Object msg) {
-
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        String message = "";
         try {
             //获取从前端传递过来的数据
             Project project = (Project) FormData.getParam(msg, Project.class);
@@ -229,13 +229,16 @@ public class CreateProject {
             ProjectProgress projectProgress = new ProjectProgress(project.getUser_id(), Common.PROJECT_SIMULATE,
                     project.getProject_name(), project.getPc_version(), 0);
             CommonObject.getProgressList().add(projectProgress);
+
             //异步解析URL网站元素操作
             createSimulateOpt(project, projectProgress);
             //正确解析传递的参数及其类型，并成功调用URL解析网站元素操作，返回正确数据
             Assemble.responseSuccessSetting(responseData, null);
 
         } catch (Exception e) {
-            CreateProject.logger.debug("createSimulateProject error:", e);
+            message = "System error";
+            CreateProject.logger.debug(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
         }
         return responseData;
     }
@@ -250,9 +253,10 @@ public class CreateProject {
         Thread simulateParseThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                SqlSession sqlSession = null;
                 ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());//用来记录程序执行状态
                 OSSClient ossClient = OssOpt.initOssClient();
+                SqlSession sqlSession = null;
+                String message = "";
                 try {
                     //获取URL资源项目元数据
                     String projectData = Simulate.createProject(project.getWeb_url(), projectProgress, project.getTarget_width());
@@ -266,23 +270,31 @@ public class CreateProject {
                         //把新创建的simulate的project插入数据库, 在这里启动数据库操作，不然可能会报超时错
                         sqlSession = MybatisUtils.getSession();
                         int num = optHandler(sqlSession, project, Mapper.CREATE_SIMULATE_PROJECT);
+
                         if (num > 0) {
                             //project_data数据同步到OSS中
                             insertNewProjectToOss(project, ossClient);
                             Assemble.responseSuccessSetting(responseData, null);
-                            CreateProject.logger.debug("createSimulateOpt success, project id is: " + project.getId());
+                            message = "createSimulateOpt success, project id is: " + project.getId();
+                            CreateProject.logger.debug(message);
                             projectProgress.setProgress(100);
+
                         } else {
                             projectProgress.setProgress(-1); //设置进度信息，插入数据库操作失败
-                            CreateProject.logger.debug("createSimulateOpt with DB error, num<=0 ");
+                            message = "createSimulateOpt with DB error, num<=0 ";
+                            CreateProject.logger.warn(message);
+
                         }
                     } else {
                         projectProgress.setProgress(-2); //设置进度信息，获取project信息失败
-                        CreateProject.logger.debug("createSimulateOpt with error, get projectData null ");
+                        message = "createSimulateOpt with error, get projectData null ";
+                        CreateProject.logger.warn(message);
                     }
+
                 } catch (Exception e) {
-                    CreateProject.logger.debug("createSimulateOpt error:", e);
                     projectProgress.setProgress(-3); //设置进度信息，系统发生错误
+                    message = "createSimulateOpt error";
+                    CreateProject.logger.error(message, e);
 
                 } finally {
                     OssOpt.shutDownOssClient(ossClient);
@@ -312,7 +324,7 @@ public class CreateProject {
      */
     public static ResponseData getProjectRate(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
-
+        String message = "";
         try {
             //获取解析的项目标识参数
             Map<String, Object> map = FormData.getParam(msg);
@@ -323,8 +335,9 @@ public class CreateProject {
             Iterator<ProjectProgress> iterator = list.iterator();
             while (iterator.hasNext()) {
                 ProjectProgress progress = iterator.next();
+
+                //找到条目，则返回进度信息
                 if (progress.getPc_version() != null && progress.getPc_version().equals(pcVersion)) {
-                    //找到条目，则返回进度信息
                     Assemble.responseSuccessSetting(responseData, progress.getProgress());
 
                     //如果解析URL的元素比例已经到达100，则把该缓存参数去掉
@@ -352,7 +365,9 @@ public class CreateProject {
                 }
             }
         } catch (Exception e) {
-            CreateProject.logger.debug("getSimulateRate error:", e);
+            message = "System error";
+            CreateProject.logger.debug(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
         }
         return responseData;
     }
@@ -368,11 +383,13 @@ public class CreateProject {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
+        String message = "";
         try {
             //获取解析的项目标识参数
             Map<String, Object> map = FormData.getParam(msg);
             String pcVersion = (String) map.get(Common.PC_VERSION);
             Project project = sqlSession.selectOne(Mapper.GET_PROJECT_BY_PCVERSION, pcVersion);
+
             //如果项目数据不为空则返回该数据
             if (project != null) {
                 //从OSS中获取pc version版本的project data
@@ -386,12 +403,16 @@ public class CreateProject {
                     Assemble.responseSuccessSetting(responseData, project);
 
                 } else {
-                    Assemble.responseErrorSetting(responseData, 400,
-                            "getProjectByPCVersion: project data from oss null");
+                    message = "getProjectByPCVersion data from oss null";
+                    CreateProject.logger.warn(message);
+                    Assemble.responseErrorSetting(responseData, 400, message);
                 }
             }
+
         } catch (Exception e) {
-            CreateProject.logger.debug("getProjectByPCVersion error:", e);
+            message = "System error";
+            CreateProject.logger.debug(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
 
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, false);

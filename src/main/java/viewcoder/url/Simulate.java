@@ -60,6 +60,7 @@ public class Simulate {
 
             //慢加载操作，后期前端设置允许用户调节每次滚动的等待时间
             for (int i = Simulate.TOTAL_HEIGHT; i < contentHeight; i += Simulate.TOTAL_HEIGHT) {
+                //两个参数分别文档向右移动和向下移动位置
                 js.executeScript("window.scrollBy(0, " + i + ")");
                 Thread.sleep(500);
             }
