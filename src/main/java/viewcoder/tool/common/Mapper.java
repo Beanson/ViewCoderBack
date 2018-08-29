@@ -91,6 +91,7 @@ public class Mapper {
     public static final String REMOVE_EXPIRE_ORDER_SPACE = "removeExpireOrderSpace";
     public static final String UPDATE_EXPORT_DEFAULT_SETTING = "updateExportDefaultSetting";
     public static final String UPDATE_WECHAT_INFO_TO_USER = "updateWeChatInfoToUser";
+    public static final String UPDATE_USER_ACK = "updateUserAck";
 
 
 

@@ -376,13 +376,15 @@ public class Purchase {
             map.put(Common.RESOURCE_ADD, resourceAdd);
 
             //数据库更新操作
-            int num = sqlSession.update(Mapper.ADD_USER_RESOURCE_SPACE_USED, map);
-            User user = sqlSession.selectOne(Mapper.GET_USER_DATA, orders.getUser_id());
+            sqlSession.update(Mapper.ADD_USER_RESOURCE_SPACE_USED, map);
             sqlSession.commit();
 
-            //如果用户之前ACK被锁定了
-            if(){
-                CommonService.setACKOpt(sqlSession, ossClient, orders.getUser_id(),true);
+            //若该user之前由于到期而禁用访问权限ack，购买成功过后重新设置
+            User user = sqlSession.selectOne(Mapper.GET_USER_DATA, orders.getUser_id());
+            if(user.getAck()==0){
+                if(user.getResource_total()-user.getResource_used()>0){
+                    CommonService.setACKOpt(sqlSession, ossClient, orders.getUser_id(),true);
+                }
             }
 
             //发送邮件和短信通知用户购置成功

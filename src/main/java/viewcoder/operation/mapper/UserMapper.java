@@ -119,4 +119,6 @@ public interface UserMapper {
             "city=#{city}, unionid=#{unionid}, sex=#{sex} where id=#{user_id}")
     public int updateWeChatInfoToUser(WeChatInfo weChatInfo);
 
+    @Update("update user set ack=#{ack} where id=#{id}")
+    public int updateUserAck(User user);
 }

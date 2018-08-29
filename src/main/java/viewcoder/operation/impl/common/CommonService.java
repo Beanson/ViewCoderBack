@@ -176,12 +176,13 @@ public class CommonService {
 
     /**
      * 设置用户的single_export和upload_file资源信息的ACK操作
+     *
      * @param sqlSession sql的session操作
-     * @param ossClient oss句柄
-     * @param userId 用户id
-     * @param ACK 访问权限ACK
+     * @param ossClient  oss句柄
+     * @param userId     用户id
+     * @param ACK        访问权限ACK
      */
-    public static void setACKOpt(SqlSession sqlSession, OSSClient ossClient, int userId, boolean ACK){
+    public static void setACKOpt(SqlSession sqlSession, OSSClient ossClient, int userId, boolean ACK) {
         //对single_export资源文件设置ACK禁用操作
         List<Project> projects = sqlSession.selectList(Mapper.GET_PROJECT_VERSION_DATA, userId);
         if (CommonService.checkNotNull(projects)) {
@@ -202,6 +203,11 @@ public class CommonService {
                 OssOpt.updateAclConfig(ossClient, pathFile, ACK);
             }
         }
+
+        //更新数据的ACK数据
+        int targetACK = ACK ? 1 : 0;
+        User user = new User(userId, targetACK);
+        sqlSession.update(Mapper.UPDATE_USER_ACK, user);
     }
 
 }

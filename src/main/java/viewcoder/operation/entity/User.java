@@ -36,6 +36,7 @@ public class User implements Serializable{
     private String unionid; //各种微信平台唯一识别id
     private int sex; //性别
     private String session_id; //该用户的session_id
+    private int ack; //标识该用户下的项目资源可访问状态，1可访问，0被锁定
 
     //辅助数据
     private int newUserResSpace;
@@ -44,6 +45,12 @@ public class User implements Serializable{
 
     public User(int id) {
         this.id = id;
+    }
+
+    //设置ack权限时初始化操作
+    public User(int id, int ack) {
+        this.id = id;
+        this.ack = ack;
     }
 
     //注册登录时使用
@@ -278,6 +285,14 @@ public class User implements Serializable{
         this.newUserResSpace = newUserResSpace;
     }
 
+    public int getAck() {
+        return ack;
+    }
+
+    public void setAck(int ack) {
+        this.ack = ack;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -308,6 +323,7 @@ public class User implements Serializable{
                 ", unionid='" + unionid + '\'' +
                 ", sex=" + sex +
                 ", session_id='" + session_id + '\'' +
+                ", ack=" + ack +
                 ", newUserResSpace=" + newUserResSpace +
                 '}';
     }
