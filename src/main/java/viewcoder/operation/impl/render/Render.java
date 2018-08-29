@@ -418,7 +418,6 @@ public class Render {
             //返回成功数据
             Assemble.responseSuccessSetting(responseData, null);
 
-
         } catch (Exception e) {
             message = "System error";
             Render.logger.error(message, e);
@@ -444,7 +443,7 @@ public class Render {
         int deleteNum = 0;
 
         //根据该文件本身是文件夹还是文件进行相应操作
-        if (userUploadFile.getIs_folder() != 1) {
+        if (userUploadFile.getIs_folder() ==0) {
             //如果删除的文件资源是文件, a. 删除文件在数据库user_upload_file的; 2. 装载对应的OSS文件，后续删除
             deleteNum = sqlSession.delete(Mapper.DELETE_RESOURCE_BY_ID, userUploadFile.getId());
             OssOpt.addToOssDeleteList(userUploadFile, widgetList);

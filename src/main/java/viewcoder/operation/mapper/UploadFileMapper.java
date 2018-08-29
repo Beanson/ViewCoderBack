@@ -29,7 +29,7 @@ public interface UploadFileMapper {
 
     //如果删除的是文件夹则查找该文件夹下所有子文件资源
     @Select("select * from user_upload_file where user_id=#{user_id} and file_type=#{file_type} and " +
-            "relative_path like concat(#{relative_path},'%') ")
+            "relative_path=#{relative_path} ")
     public List<UserUploadFile> getFolderSubResource(UserUploadFile userUploadFile);
 
     //查找是否存在该记录在数据库中

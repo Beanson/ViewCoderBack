@@ -46,11 +46,12 @@ public class Personal {
             if (num > 0) {
                 //如果上传有新的portrait文件则进行更新到OSS操作
                 if (user.getPortrait_file() != null) {
-                    //TODO 直接覆盖旧的portrait也可
-                    //删除旧portrait操作
-                    String oldPortraitToOss = GlobalConfig.getOssFileUrl(Common.PORTRAIT_IMG) + userOrigin.getPortrait();
-                    OssOpt.deleteFileInOss(oldPortraitToOss, ossClient);
-                    //创建新的portrait操作
+                    //若非默认portrait则删除旧portrait
+                    if(!userOrigin.getPortrait().equals(Common.DEFAULT_PORTRAIT)){
+                        String oldPortraitToOss = GlobalConfig.getOssFileUrl(Common.PORTRAIT_IMG) + userOrigin.getPortrait();
+                        OssOpt.deleteFileInOss(oldPortraitToOss, ossClient);
+                    }
+                    //创建新的portrait
                     String newPortraitToOss = GlobalConfig.getOssFileUrl(Common.PORTRAIT_IMG) + user.getPortrait();
                     OssOpt.uploadFileToOss(newPortraitToOss, user.getPortrait_file().get(), ossClient);
                 }

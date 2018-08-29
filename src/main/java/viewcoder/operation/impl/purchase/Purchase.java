@@ -627,15 +627,14 @@ public class Purchase {
             //三天免费试用订单数据初始化
             String date = CommonService.getDateTime();
             SimpleDateFormat sdf = new SimpleDateFormat(Common.TIME_FORMAT_1);
+
+            //设置一直到最后一天的凌晨12点整
             Calendar expireDate = Calendar.getInstance();
             expireDate.add(Calendar.DATE, Common.SERVICE_TRY_NUM);
-            //设置一直到最后一天的凌晨12点整
-            expireDate.add(Calendar.DATE, 1);
+            expireDate.add(Calendar.DATE,1);
             expireDate.set(Calendar.HOUR_OF_DAY, 0);
             expireDate.set(Calendar.MINUTE, 0);
             expireDate.set(Calendar.SECOND, 0);
-            message = "expired time: " + sdf.format(expireDate.getTime());
-            Purchase.logger.debug(message);
             Orders tryOrder = new Orders(CommonService.getTimeStamp(), userId, Common.SERVICE_TRY, Common.SERVICE_TRY_NUM,
                     date, date, sdf.format(expireDate.getTime()), Common.SERVICE_TRY_NUM, 1, 0, "0");
             //三天免费试用订单插入数据库
