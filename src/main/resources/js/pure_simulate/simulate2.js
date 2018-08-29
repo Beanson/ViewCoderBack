@@ -68,19 +68,16 @@ function getSimulateData() {
                 var objImg = {};
                 generalProperty(divs[i], objImg, 2, "Common_Image");
                 var imgSrc = (imgUrl).substring(4, imgUrl.length - 1);
-                //对于image对象，如果img url为空值或undefined则不添加该元素
-                if (checkStrNotNull(imgUrl)) {
-                    getImgProperty(divs[i], objImg, imgSrc);
-                    getBgProperty(divs[i], objImg);
-                    data['all_tools']['Common_Image'][objImg['layer_id']] = objImg; //装载image类型数据
-                } else {
-                    continue;
-                }
+                getImgProperty(divs[i], objImg, imgSrc);
+                getBgProperty(divs[i], objImg);
+                responsiveSetting(objImg);
+                data['all_tools']['Common_Image'][objImg['layer_id']] = objImg; //装载image类型数据
 
             } else if (checkBackground(divs[i])) {
                 var objBg = {};
                 generalProperty(divs[i], objBg, 1, "Common_Background");
                 getBgProperty(divs[i], objBg);
+                responsiveSetting(objImg);
                 data['all_tools']['Common_Background'][objBg['layer_id']] = objBg; //装载background类型数据
             }
 
@@ -131,6 +128,7 @@ function getSimulateData() {
 
             getImgProperty(imgs[i], objImg, src);
             getBgProperty(imgs[i], objImg);
+            responsiveSetting(objImg);
             data['all_tools']['Common_Image'][objImg['layer_id']] = objImg; //装载image类型数据
         }
     }
@@ -270,6 +268,17 @@ function getSimulateData() {
     //console.log('data', data);
 }
 
+/**
+ * 针对image和background的响应式设置
+ * @param ele
+ */
+function responsiveSetting(ele) {
+    if (Math.abs(windowsWidth - ele['width']) < 10) {
+        ele['responsive'] = true;
+    } else {
+        ele['responsive'] = false;
+    }
+}
 
 function css(ele, cssProperty) {
     return window.getComputedStyle(ele, null).getPropertyValue(cssProperty)

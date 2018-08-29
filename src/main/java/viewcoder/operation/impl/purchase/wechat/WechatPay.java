@@ -77,6 +77,7 @@ public class WechatPay {
         //附加数据，在查询API和支付通知中原样返回，该字段主要用于商户携带订单的自定义数据，该数据记录哪条订单数据新插入了，在notification时update即可
         Map<String, Object> map = new HashMap<>(2);
         map.put(Common.ID, orders.getId());
+        map.put(Common.USER_ID, orders.getUser_id());
         map.put(Common.SERVICE_ID, orders.getService_id());
         map.put(Common.SERVICE_NUM, orders.getService_num());
         packageParams.put(Common.PAY_WECHAT_KEY_ATTACH, URLEncoder.encode(JSON.toJSONString(map), Common.UTF8));
@@ -135,6 +136,7 @@ public class WechatPay {
                     orders.setOut_trade_no(packageParams.get(Common.PAY_WECHAT_KEY_OUT_TRADE_NO));
                     orders.setTrade_no(packageParams.get(Common.PAY_WECHAT_TRANSACTION_ID));
                     Purchase.updateOrderStatus(orders);
+                    Purchase.updateUserResourceSpace(orders);
 
                     message = "Get wechatPay notify success";
                     WechatPay.logger.debug(message);

@@ -68,7 +68,7 @@ public class Mapper {
     public static final String SIGN_ACCOUNT_CHECK = "signAccountCheck";
     public static final String REGISTER_ACCOUNT_CHECK = "registerAccountCheck";
     public static final String GET_ORIGIN_PORTRAIT_NAME = "getOriginPortraitName";
-    public static final String GET_USER_RESOURCE_SPACE_REMAIN = "getUserResourceSpaceRemain";
+    public static final String GET_USER_RESOURCE_SPACE_INFO = "getUserResourceSpaceInfo";
     public static final String GET_TOTAL_POINTS = "getTotalPoints";
     public static final String GET_USER_SPACE_INFO = "getUserSpaceInfo";
     public static final String GET_PHONE_ACCOUNT = "getPhoneAccount";
@@ -83,7 +83,9 @@ public class Mapper {
 
     //update
     public static final String UPDATE_USER_INFO = "updateUserInfo";
-    public static final String UPDATE_USER_RESOURCE_SPACE_REMAIN = "updateUserResourceSpaceRemain";
+    public static final String UPDATE_USER_RESOURCE_SPACE_USED = "updateUserResourceSpaceUsed";
+    public static final String REDUCE_USER_RESOURCE_SPACE_USED = "reduceUserResourceSpaceUsed";
+    public static final String ADD_USER_RESOURCE_SPACE_USED = "addUserResourceSpaceTotal";
     public static final String UPDATE_USER_LAST_SELECTED_INDUSTRY = "updateLastSelectedIndustry";
     public static final String UPDATE_USER_TOTAL_POINTS = "updateUserTotalPoints";
     public static final String REMOVE_EXPIRE_ORDER_SPACE = "removeExpireOrderSpace";

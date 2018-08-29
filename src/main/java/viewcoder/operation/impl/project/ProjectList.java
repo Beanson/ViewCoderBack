@@ -81,11 +81,9 @@ public class ProjectList {
      * 更新project名称
      */
     public static ResponseData modifyProjectName(Object msg) {
-
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         String message = "";
-
         try {
             Project project = (Project) FormData.getParam(msg, Project.class);
             int num = sqlSession.update(Mapper.MODIFY_PROJECT_NAME, project);
@@ -117,12 +115,10 @@ public class ProjectList {
      * 对项目进行拷贝操作，被拷贝的可以是 自己项目/project store中项目
      */
     public static ResponseData copyProject(Object msg) {
-
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
         String message = "";
-
         try {
             //1、获取前端传递过来的数据
             Project project = null;
@@ -166,7 +162,6 @@ public class ProjectList {
             //7、返回生成的根项目元素，200成功信息
             Assemble.responseSuccessSetting(responseData, projects.get(projectRef.getParent()).get(0));
 
-
         } catch (Exception e) {
             message = "copyProject occurs error";
             ProjectList.logger.debug(message, e);
@@ -205,6 +200,7 @@ public class ProjectList {
             //保证parent为根的project只能是传入的projectId；（第二个条件比较若不相等continue不添加）
             if (project.getParent() == parent && project.getId() != projectId) {
                 continue;
+
             } else {
                 //赋值该project根路径下的名称
                 project.setProject_name(projectName);
@@ -466,7 +462,6 @@ public class ProjectList {
             for (Project project : children) {
                 //1、删除该projectId的数据库条目
                 sqlSession.delete(Mapper.DELETE_PROJECT_BY_ID, project.getId());
-                sqlSession.delete(Mapper.DELETE_RESOURCE_BY_PROJECT_ID, project.getId());
 
                 //2、添加即将删除oss中html和project data数据
                 files.add(GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + project.getPc_version() + Common.PROJECT_FILE_SUFFIX);

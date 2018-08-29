@@ -140,7 +140,6 @@ public class OssOpt {
     }
 
 
-
     /**************************** 拷贝资源文件方法 ***************************/
     /**
      * 拷贝OSS文件
@@ -150,10 +149,17 @@ public class OssOpt {
      * @param destFileName   目标文件名
      */
     public static void copyObjectOss(OSSClient ossClient, String sourceFileName, String destFileName) {
-        // 拷贝Object
-        CopyObjectResult result = ossClient.copyObject(VIEWCODER_BUCKET, sourceFileName, VIEWCODER_BUCKET, destFileName);
-        OssOpt.logger.debug("===Copy resource file: source: " + sourceFileName + ", dest: " + destFileName +
-                "ETag: " + result.getETag() + ", LastModified: " + result.getLastModified());
+        String message = "";
+        if (getObjectExist(ossClient, sourceFileName)) {
+            CopyObjectResult result = ossClient.copyObject(VIEWCODER_BUCKET, sourceFileName, VIEWCODER_BUCKET, destFileName);
+            message = "Copy oss, source: " + sourceFileName + ", dest: " + destFileName +
+                    "ETag: " + result.getETag() + ", LastModified: " + result.getLastModified();
+            OssOpt.logger.debug(message);
+        } else {
+            message = "Resource " + sourceFileName + " not exist, could not copy";
+            OssOpt.logger.warn(message);
+        }
+
     }
 
     /**
@@ -178,7 +184,7 @@ public class OssOpt {
      */
     public static boolean getObjectExist(OSSClient ossClient, String fileName) {
         boolean found = ossClient.doesObjectExist(VIEWCODER_BUCKET, fileName);
-        OssOpt.logger.debug("===get Object exist: " + found);
+        OssOpt.logger.debug("===get Object" + fileName + " exist: " + found);
         return found;
     }
 

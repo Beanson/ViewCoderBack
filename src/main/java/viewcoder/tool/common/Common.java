@@ -50,10 +50,10 @@ public class Common {
     public final static int SERVICE_BUSINESS = 4;
 
     //各种套餐可使用空间
-    public final static int SERVICE_TRY_RESOURCE = 20; //免费使用三天20M的使用空间
-    public final static int SERVICE_MONTH_RESOURCE = 100; //一个月使用100M空间
-    public final static int SERVICE_YEAR_RESOURCE = 1024;//一年使用1024M空间
-    public final static int SERVICE_BUSINESS_RESOURCE = 1024;//一年使用1024M空间
+    public final static int SERVICE_TRY_RESOURCE = 20480; //免费使用三天20M的使用空间
+    public final static int SERVICE_MONTH_RESOURCE = 102400; //一个月使用100M空间
+    public final static int SERVICE_YEAR_RESOURCE = 1048576;//一年使用1024M空间
+    public final static int SERVICE_BUSINESS_RESOURCE = 1048576;//一年使用1024M空间
 
 
     //user_upload_file的文件类型 is_folder
@@ -71,7 +71,7 @@ public class Common {
     public final static String CODE = "code";
 
     //短信数据
-    public final static String MESG_REGISTER_VERIFY_CODE = "SMS_142010203";
+    public final static String MESG_VERIFY_CODE = "SMS_143700298";
     public final static String MESG_ALERT_EXPIRY = "SMS_142000294";
     public final static String MESG_PURCHASE_SUCCESS = "SMS_142020247";
 
@@ -118,14 +118,15 @@ public class Common {
 
     //阿里云短信直接调用配置
     public static final String MSG_SIGNNAME_LIPHIN = "莱芬科技"; //短信签名
+    public static final String MSG_TEMPLEATE_PURCHASE = "SMS_143700133"; //套餐服务订购成功
     public static final String MSG_TEMPLEATE_EXPIRE1 = "SMS_142954544"; //套餐服务到期提醒
     public static final String MSG_TEMPLEATE_RELEASE = "instance_release"; //instance释放提醒, 暂时不提醒
     public static final String MSG_TEMPLEATE_EXPIRE2 = "instance_expire2"; //instance过期且无剩余空间
-    public static final String MSG_TEMPLEATE_PURCHASE = "instance_purchase";//成功购买instance提醒
     public static final String MSG_TEMPLEATE_VERIFY = "verification_code"; //验证码提醒
 
     //mail发送的HTML
     public static final String MAIL_SERVICE_EXPIRE = "service_expire.html"; //套餐服务过期HTML
+    public static final String MAIL_SERVICE_PURCHASE= "service_purchase.html"; //套餐服务购置成功HTML
 
 
     //Test配置信息
@@ -196,6 +197,8 @@ public class Common {
     public static final String PROJECT = "project";
     public static final String PROJECT_ID = "project_id";
     public static final String USER_ID = "user_id";
+    public static final String RESOURCE_TOTAL = "resource_total";
+    public static final String RESOURCE_USED = "resource_used";
     public static final String SESSION_ID = "session_id";
     public static final String FILE_TYPE = "file_type";
     public static final String NEW_FILE_NAME = "new_file_name";
@@ -251,6 +254,7 @@ public class Common {
     public static final String SIGN_PRIVATE_KEY = "com.pay.sign.private_key";
     public static final String SIGN_PUBLIC_KEY = "com.pay.sign.public_key";
     public static final String STATUS = "status";//支付凭证验证情况
+    public static final String RESOURCE_ADD = "resource_add";
 
     //的AES加解密的key
     public static final String AES_KEY = "@Admin123*Go";
@@ -270,6 +274,7 @@ public class Common {
     public static final Integer EXAMPLE_REF_ID = 140;
     public static final String EXAMPLE_CASE_1 = "样例1";
     public static final String DEFAULT_PORTRAIT = "default_portrait.png";
+    public static final double FILE_SIZE_TO_KB = 1024;
 
 
     //mail的其他配置

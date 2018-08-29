@@ -33,11 +33,7 @@ public interface ProjectMapper {
     @Select("select * from project where pc_version=#{pcVersion}")
     public Project getProjectDataByPCVersion(String pcVersion);
 
-    //根据项目id获取对应project的resource_size数据信息
-    @Select("select resource_size from project where id=#{id}")
-    public String getProjectResourceSize(int id);
-
-    //根据项目id获取对应project的resource_size数据信息
+    //根据项目id获取对应project的所有数据信息
     @Select("select * from project where is_public=1 and industry_code=#{industry_code} and industry_sub_code=#{industry_sub_code}")
     public List<Project> getTargetStoreData(@Param("industry_code") String industry_code, @Param("industry_sub_code") String industry_sub_code);
 
@@ -51,8 +47,8 @@ public interface ProjectMapper {
 
     //创建新建PSD的project
     //不需insert psd_file_name这条记录，因为psd文件只在内存中解析，如果解析出错保存psd文件到OSS中的error_psd_file中
-    @Insert("insert into project(user_id,project_name,pc_version,mo_version,last_modify_time,resource_size,parent) " +
-            "values(#{user_id},#{project_name},#{pc_version},#{mo_version},#{last_modify_time},#{resource_size},#{parent})")
+    @Insert("insert into project(user_id,project_name,pc_version,mo_version,last_modify_time,parent) " +
+            "values(#{user_id},#{project_name},#{pc_version},#{mo_version},#{last_modify_time},#{parent})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createPSDProject(Project project);
 
@@ -86,10 +82,6 @@ public interface ProjectMapper {
     @Update("update project set last_modify_time=#{last_modify_time} where id=#{id}")
     public int saveProjectData(Project project);
 
-    //更新project的resource_size的大小
-    @Update("update project set resource_size=#{resource_size} where id=#{id}")
-    public int updateProjectResourceSize(Project Project);
-
     //根据项目传递过来参数进行更新项目公开程度状态
     @UpdateProvider(type = SqlProvider.class, method = "updateProjectOpenness")
     public int updateProjectOpenness(Map<String, Object> map);
@@ -105,11 +97,6 @@ public interface ProjectMapper {
     //更新child页面的数目-1
     @Update("update project set child=child-1 where id=#{projectId}")
     public int updateChildNumMinus(int projectId);
-
-
-    //测试用的
-    @Update("update project set user_id=user_id where id=140")
-    public int updateForTest(int id);
 
 }
 

@@ -1,5 +1,7 @@
 package viewcoder.operation.impl.common;
 
+import viewcoder.operation.entity.Project;
+import viewcoder.operation.entity.User;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.common.Mapper;
 import viewcoder.tool.common.OssOpt;
@@ -14,6 +16,7 @@ import com.aliyun.oss.OSSClient;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import viewcoder.tool.util.MybatisUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -169,6 +172,38 @@ public class CommonService {
         }
         return result;
     }
+
+
+    /**
+     * 设置用户的single_export和upload_file资源信息的ACK操作
+     * @param sqlSession sql的session操作
+     * @param ossClient oss句柄
+     * @param userId 用户id
+     * @param ACK 访问权限ACK
+     */
+    public static void setACKOpt(SqlSession sqlSession, OSSClient ossClient, int userId, boolean ACK){
+        //对single_export资源文件设置ACK禁用操作
+        List<Project> projects = sqlSession.selectList(Mapper.GET_PROJECT_VERSION_DATA, userId);
+        if (CommonService.checkNotNull(projects)) {
+            String projectPrefix = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT);
+            for (Project project : projects) {
+                String pathPc = projectPrefix + project.getPc_version() + Common.PROJECT_FILE_SUFFIX;
+                String pathMo = projectPrefix + project.getMo_version() + Common.PROJECT_FILE_SUFFIX;
+                OssOpt.updateAclConfig(ossClient, pathPc, ACK);
+                OssOpt.updateAclConfig(ossClient, pathMo, ACK);
+            }
+        }
+        //对upload_files资源文件设置ACK禁用操作
+        List<UserUploadFile> files = sqlSession.selectList(Mapper.GET_RESOURCE_NAME_DATA, userId);
+        if (CommonService.checkNotNull(files)) {
+            String filePrefix = GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES);
+            for (UserUploadFile file : files) {
+                String pathFile = filePrefix + file.getTime_stamp() + Common.DOT_SUFFIX + file.getSuffix();
+                OssOpt.updateAclConfig(ossClient, pathFile, ACK);
+            }
+        }
+    }
+
 }
 
 

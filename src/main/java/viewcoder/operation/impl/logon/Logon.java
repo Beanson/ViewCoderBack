@@ -28,7 +28,7 @@ public class Logon {
         Map<String, String> map = new HashMap<>();
         map.put(Common.CODE, sixDigits);
         //发送短信验证码
-        MsgHelper.sendSingleMsg(Common.MESG_REGISTER_VERIFY_CODE, map, phone, Common.MSG_SIGNNAME_LIPHIN);
+        MsgHelper.sendSingleMsg(Common.MESG_VERIFY_CODE, map, phone, Common.MSG_SIGNNAME_LIPHIN);
         //验证码存储到cache中
         GlobalCache.getRegisterVerifyCache().put(phone, sixDigits);
     }

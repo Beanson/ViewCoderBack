@@ -11,10 +11,6 @@ import java.util.List;
 public interface UploadFileMapper {
 
     /********************以下是选择文件操作***********************/
-    //查询对应project_id下的所有资源文件
-    @Select("select * from user_upload_file where project_id=#{project_id}")
-    public List<UserUploadFile> getAllResourceByProjectId(int project_id);
-
     //查询对应id的资源信息
     @Select("select * from user_upload_file where id=#{id}")
     public UserUploadFile getResourceData(int id);
@@ -32,8 +28,8 @@ public interface UploadFileMapper {
     public int getResourceRefCount(String timeStamp);
 
     //如果删除的是文件夹则查找该文件夹下所有子文件资源
-    @Select("select * from user_upload_file where project_id=#{project_id} and user_id=#{user_id} " +
-            "and file_type=#{file_type} and relative_path like concat(#{relative_path},'%') ")
+    @Select("select * from user_upload_file where user_id=#{user_id} and file_type=#{file_type} and " +
+            "relative_path like concat(#{relative_path},'%') ")
     public List<UserUploadFile> getFolderSubResource(UserUploadFile userUploadFile);
 
     //查找是否存在该记录在数据库中
@@ -48,20 +44,14 @@ public interface UploadFileMapper {
     @Delete("delete from user_upload_file where id=#{id}")
     public int deleteResourceById(int id);
 
-    //根据project_id删除user_upload_file表对应条目的数据
-    @Delete("delete from user_upload_file where project_id=#{project_id}")
-    public int deleteResourceByProjectId(int project_id);
-
-
 
     /********************以下是插入文件操作***********************/
     //插入新文件信息记录
-    @Insert("insert into user_upload_file(project_id,user_id,widget_type,file_type,is_folder,time_stamp,suffix,file_name,relative_path," +
-            "file_size,video_image_name) values(#{project_id},#{user_id},#{widget_type},#{file_type},#{is_folder},#{time_stamp}," +
-            "#{suffix},#{file_name},#{relative_path},#{file_size},#{video_image_name})")
+    @Insert("insert into user_upload_file(user_id,widget_type,file_type,is_folder,time_stamp,suffix,file_name,relative_path," +
+            "file_size,video_image_name) values(#{user_id}, #{widget_type}, #{file_type}, #{is_folder}, #{time_stamp}, " +
+            "#{suffix}, #{file_name}, #{relative_path}, #{file_size}, #{video_image_name})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int insertNewResource(UserUploadFile userUploadFile);
-
 
     @InsertProvider(type = SqlProvider.class, method = "insertBatchNewResource")
     public int insertBatchNewResource(@Param("list") List<UserUploadFile> files);

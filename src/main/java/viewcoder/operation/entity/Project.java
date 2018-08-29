@@ -15,7 +15,6 @@ public class Project {
     private String pc_version; //电脑版在oss中的文件名
     private String mo_version; //手机版在oss中的文件名
     private String project_data; //项目数据， 用于接收项目数据，进行OSS操作，不进行数据库操作
-    private String resource_size;
     private int is_public;
     private String industry_code;
     private String industry_sub_code;
@@ -45,18 +44,8 @@ public class Project {
     }
 
     //更新project的resource_size时用到此方法
-    public Project(int id, String resource_size) {
+    public Project(int id) {
         this.id = id;
-        this.resource_size = resource_size;
-    }
-
-    //拷贝非psd项目时用到此构造函数
-    public Project(int user_id, String project_name, String last_modify_time, String project_data, String resource_size) {
-        this.user_id = user_id;
-        this.project_name = project_name;
-        this.last_modify_time = last_modify_time;
-        this.project_data = project_data;
-        this.resource_size = resource_size;
     }
 
     public Project(int id, int user_id, String project_name, String last_modify_time, String project_data, FileUpload psd_file) {
@@ -138,14 +127,6 @@ public class Project {
 
     public void setProject_data(String project_data) {
         this.project_data = project_data;
-    }
-
-    public String getResource_size() {
-        return resource_size;
-    }
-
-    public void setResource_size(String resource_size) {
-        this.resource_size = resource_size;
     }
 
     public int getIs_public() {
@@ -271,7 +252,6 @@ public class Project {
                 ", pc_version='" + pc_version + '\'' +
                 ", mo_version='" + mo_version + '\'' +
                 ", project_data='" + project_data + '\'' +
-                ", resource_size='" + resource_size + '\'' +
                 ", is_public=" + is_public +
                 ", industry_code='" + industry_code + '\'' +
                 ", industry_sub_code='" + industry_sub_code + '\'' +

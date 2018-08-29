@@ -55,9 +55,8 @@ public class Register {
 
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
-            //注册成功后操作，免费试用三天的使用套餐+提供一个example页面，放commit后操作防止多session死锁
+            //注册成功后操作，免费试用三天的使用套餐+提供一个example页面，放在commit后操作防止死锁
             afterRegisterSuccessLogic(responseData, user);
-
         }
         return responseData;
     }
@@ -102,6 +101,8 @@ public class Register {
                 user.setUser_name(user.getPhone());
                 //插入用户默认portrait，万一用户不扫码绑定则也有默认portrait
                 user.setPortrait(Common.DEFAULT_PORTRAIT);
+                //新注册用户有20M的可用空间
+                user.setResource_total(Common.SERVICE_TRY_RESOURCE);
                 //注册并把用户id set进userId中
                 int num = sqlSession.insert(Mapper.REGISTER_NEW_ACCOUNT, user);
                 Register.logger.debug("注册添加数：" + num + " ；用户id为：" + user.getId());

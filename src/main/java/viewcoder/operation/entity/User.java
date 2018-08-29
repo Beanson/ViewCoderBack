@@ -22,8 +22,8 @@ public class User implements Serializable{
     private String role;
     private String nation;
     private FileUpload portrait_file;
-    private String resource_remain;
-    private String resource_used;
+    private int resource_total;
+    private int resource_used;
     private String last_store_code;
     private String last_store_sub_code;
     private int total_usage_amount;
@@ -36,6 +36,9 @@ public class User implements Serializable{
     private String unionid; //各种微信平台唯一识别id
     private int sex; //性别
     private String session_id; //该用户的session_id
+
+    //辅助数据
+    private int newUserResSpace;
 
     public User(){}
 
@@ -50,13 +53,6 @@ public class User implements Serializable{
         this.email = email;
         this.password=password;
     }
-
-    //更新user的resource剩余空间时使用
-    public User(int id, String resource_remain) {
-        this.id = id;
-        this.resource_remain = resource_remain;
-    }
-
 
     public int getId() {
         return id;
@@ -162,12 +158,16 @@ public class User implements Serializable{
         this.portrait_file = portrait_file;
     }
 
-    public String getResource_remain() {
-        return resource_remain;
+    public int getResource_total() {
+        return resource_total;
     }
 
-    public void setResource_remain(String resource_remain) {
-        this.resource_remain = resource_remain;
+    public void setResource_total(int resource_total) {
+        this.resource_total = resource_total;
+    }
+
+    public void setResource_used(int resource_used) {
+        this.resource_used = resource_used;
     }
 
     public String getLast_store_code() {
@@ -202,12 +202,8 @@ public class User implements Serializable{
         this.total_points = total_points;
     }
 
-    public String getResource_used() {
+    public int getResource_used() {
         return resource_used;
-    }
-
-    public void setResource_used(String resource_used) {
-        this.resource_used = resource_used;
     }
 
     public int getFramework() {
@@ -274,6 +270,14 @@ public class User implements Serializable{
         this.session_id = session_id;
     }
 
+    public int getNewUserResSpace() {
+        return newUserResSpace;
+    }
+
+    public void setNewUserResSpace(int newUserResSpace) {
+        this.newUserResSpace = newUserResSpace;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -290,8 +294,8 @@ public class User implements Serializable{
                 ", role='" + role + '\'' +
                 ", nation='" + nation + '\'' +
                 ", portrait_file=" + portrait_file +
-                ", resource_remain='" + resource_remain + '\'' +
-                ", resource_used='" + resource_used + '\'' +
+                ", resource_total=" + resource_total +
+                ", resource_used=" + resource_used +
                 ", last_store_code='" + last_store_code + '\'' +
                 ", last_store_sub_code='" + last_store_sub_code + '\'' +
                 ", total_usage_amount=" + total_usage_amount +
@@ -304,6 +308,7 @@ public class User implements Serializable{
                 ", unionid='" + unionid + '\'' +
                 ", sex=" + sex +
                 ", session_id='" + session_id + '\'' +
+                ", newUserResSpace=" + newUserResSpace +
                 '}';
     }
 }

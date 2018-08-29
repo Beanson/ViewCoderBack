@@ -1,0 +1,29 @@
+1、 创建项目A                         ---ok
+
+2、 项目中上传资源, 2份                ---ok
+    a. user空间减少                  ---ok
+    b. use_upload_file表插入数据     ---ok
+    c. oss中有记录                   ---ok
+
+3、 设置图片跳转链接，子项目B
+
+4、 子项目上传资源2份,分别两级目录下      --ok
+    a. user空间减少                  --ok
+    b. user_upload_file表插入数据    --ok
+    c. oss中有记录                   --ok
+
+3、 拷贝项目A --> C                  --ok
+    project表插入两条数据 C.a, C.b    --ok
+
+4. 拷贝项目C --> D
+   project表插入两条数据 D.a, D.b
+
+5. 删除项目A
+   project表减少两条记录
+   oss对应减少两个文件，single_export和project_data文件
+
+6. 删除资源2份
+   user_resource_file表记录删除两条
+   user表空间释放
+   C和D项目均受到影响
+

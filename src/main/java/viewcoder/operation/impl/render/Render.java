@@ -1,5 +1,7 @@
 package viewcoder.operation.impl.render;
 
+import org.junit.Test;
+import sun.nio.cs.US_ASCII;
 import viewcoder.exception.render.RenderException;
 import viewcoder.tool.common.Assemble;
 import viewcoder.tool.common.Common;
@@ -165,9 +167,9 @@ public class Render {
         SqlSession sqlSession = MybatisUtils.getSession();
         try {
             UserUploadFile userUploadFile = (UserUploadFile) FormData.getParam(msg, UserUploadFile.class);
-            long newUserResSpace = checkSpace(userUploadFile);
+            User user = checkSpace(userUploadFile);
 
-            if (newUserResSpace > 0) {
+            if (user.getNewUserResSpace() > 0) {
                 Assemble.responseSuccessSetting(responseData, null);
 
             } else {
@@ -197,27 +199,26 @@ public class Render {
     public static ResponseData uploadResource(Object msg) {
         String message = "";
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        User user = new User();
         try {
             //获取用户上传资源文件信息
             UserUploadFile userUploadFile = (UserUploadFile) FormData.getParam(msg, UserUploadFile.class);
-            long newUserResSpace = 0;
 
             if (userUploadFile.getIs_folder() != 1) {
                 //查看检查是否有足够空间接收该上传文件资源
-                newUserResSpace = checkSpace(userUploadFile);
+                user = checkSpace(userUploadFile);
                 //如果接收资源后用户可用空间大于0则接收资源文件
-                if (newUserResSpace > 0) {
-                    uploadResourceOpt(userUploadFile, responseData, newUserResSpace);
+                if (user.getNewUserResSpace() > 0) {
+                    uploadResourceOpt(userUploadFile, responseData, user);
 
                 } else {
-                    message = "No enough space: " + newUserResSpace;
+                    message = "No enough space: " + user.getNewUserResSpace();
                     Render.logger.warn(message);
                     Assemble.responseErrorSetting(responseData, 403, message);
                 }
-
             } else {
                 //文件夹类型，无需检查空间直接上传
-                uploadResourceOpt(userUploadFile, responseData, newUserResSpace);
+                uploadResourceOpt(userUploadFile, responseData, user);
             }
 
         } catch (Exception e) {
@@ -232,16 +233,21 @@ public class Render {
     /**
      * 检查是否有足够空间上传
      *
-     * @param userUploadFile
+     * @param userUploadFile 将要上传的资源文件
      * @return
      */
-    private static long checkSpace(UserUploadFile userUploadFile) {
+    private static User checkSpace(UserUploadFile userUploadFile) {
         SqlSession sqlSession = MybatisUtils.getSession();
-        long newUserResSpace = 0;
+        int newUserResSpace = 0;
         String message = "";
+        User user = new User();
         try {
-            String resourceRemain = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, userUploadFile.getUser_id());
-            newUserResSpace = Integer.parseInt(resourceRemain) - userUploadFile.getFile().length();
+            user = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_INFO, userUploadFile.getUser_id());
+            int resourceRemain = user.getResource_total() - user.getResource_used();
+            int fileSize = (int) Math.round(userUploadFile.getFile_size() / Common.FILE_SIZE_TO_KB); //设置以KB为单位的资源空间
+            userUploadFile.setFile_size(fileSize);
+            newUserResSpace = resourceRemain - fileSize;
+            user.setNewUserResSpace(newUserResSpace);
 
         } catch (Exception e) {
             message = "System error";
@@ -250,21 +256,21 @@ public class Render {
         } finally {
             sqlSession.close();
         }
-        return newUserResSpace;
+        return user;
     }
+
 
     /**
      * 上传文件逻辑操作
      *
-     * @param userUploadFile  上传的文件对象信息
-     * @param responseData    返回数据组装
-     * @param newUserResSpace 预添加后的空间
+     * @param userUploadFile 上传的文件对象信息
+     * @param responseData   返回数据组装
+     * @param user           装载newResourceSpace的user对象
      * @throws Exception
      */
     private static void uploadResourceOpt(UserUploadFile userUploadFile, ResponseData responseData,
-                                          long newUserResSpace) throws Exception {
+                                          User user) throws Exception {
         String message = "";
-
         //A. 上传到oss中---------------------------------------------------------------------
         if (userUploadFile.getIs_folder() != 1) {
             OSSClient ossClient = OssOpt.initOssClient();
@@ -296,25 +302,18 @@ public class Render {
 
                 //非文件夹则更新占用空间数据
                 if (userUploadFile.getIs_folder() != 1) {
-                    //更新project的占用空间大小的数据
-                    String projectResSpace = sqlSession.selectOne(Mapper.GET_PROJECT_RESOURCE_SIZE, userUploadFile.getProject_id());
-                    long newProjectResSpace = Integer.parseInt(projectResSpace) + userUploadFile.getFile().length();
-
-                    //更新用户resource_remain大小
-                    int userUpdateNum = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN,
-                            new User(userUploadFile.getUser_id(), String.valueOf(newUserResSpace)));
-                    //跟新项目占用空间大小
-                    int projectUpdateNum = sqlSession.update(Mapper.UPDATE_PROJECT_RESOURCE_SIZE,
-                            new Project(userUploadFile.getProject_id(), String.valueOf(newProjectResSpace)));
+                    //更新用户resource_used大小
+                    int newResourceUsed = user.getResource_used() + userUploadFile.getFile_size();
+                    user.setResource_used(newResourceUsed);
+                    int userUpdateNum = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_USED, user);
 
                     //返回成功信息
-                    if (userUpdateNum > 0 && projectUpdateNum > 0) {
-                        backData.put("user_resource_remain", newUserResSpace);
-                        backData.put("project_resource_space", newProjectResSpace);
+                    if (userUpdateNum > 0) {
+                        backData.put("user_resource_remain", user.getNewUserResSpace());
                         Assemble.responseSuccessSetting(responseData, backData);
 
                     } else {
-                        message = "update resource size db error:" + userUpdateNum + "," + projectUpdateNum;
+                        message = "update resource size db error:" + userUpdateNum;
                         Render.logger.warn(message);
                         Assemble.responseErrorSetting(responseData, 432, message);
                     }
@@ -338,34 +337,7 @@ public class Render {
         } finally {
             CommonService.databaseCommitClose(sqlSession, responseData, true);
         }
-
     }
-
-
-//    /**
-//     * 保存文件到磁盘中
-//     *
-//     * @param userUploadFile 用户上传的文件信息
-//     * @return
-//     */
-//    @Deprecated
-//    private static boolean saveFileToDisk(UserUploadFile userUploadFile) {
-//        //初始化返回保存文件状态为false
-//        boolean saveFileStatus = false;
-//        try {
-//            //上传的文件保存到文件系统中, 重新命名文件的文件名
-//            String new_file_path = GlobalConfig.getSysFileUrl(Common.UPLOAD_FILES) + "/" + userUploadFile.getTime_stamp() + "." + userUploadFile.getSuffix();
-//            File file = new File(new_file_path);
-//
-//            //把上传的文件复制到新建的文件中，并返回该文件信息
-//            if (userUploadFile.getFile().renameTo(file)) {
-//                saveFileStatus = true;
-//            }
-//        } catch (Exception e) {
-//            RenderException.logger.debug("===RenderException saveFileToDisk with exception: " + e);
-//        }
-//        return saveFileStatus;
-//    }
 
 
     /**
@@ -415,45 +387,37 @@ public class Render {
     public static ResponseData deleteResource(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
-        OSSClient ossClient = OssOpt.initOssClient();
+        OSSClient ossClient = null;
         String message = "";
         try {
             //获取要删除的resource的id，project_id和user_id,后两个参数做校验
             Map<String, Object> map = FormData.getParam(msg);
             int id = Integer.parseInt(String.valueOf(map.get(Common.ID)));
-            int user_id = Integer.parseInt(String.valueOf(map.get(Common.USER_ID)));
-            int project_id = Integer.parseInt(String.valueOf(map.get(Common.PROJECT_ID)));
+            int userId = Integer.parseInt(String.valueOf(map.get(Common.USER_ID)));
 
             //记录删除资源数目条目的记录
             Map<String, Integer> record = new HashMap<>(3);
             record.put(Common.RESOURCE_DELETE_DB_NUM, 0);
             record.put(Common.RESOURCE_DELETE_SIZE, 0);
 
-            //验证删除resource要求是否合法
-            Project project = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, project_id);
-            if (project.getUser_id() == user_id) {
-                //即将删除的oss资源数据装载，一起batch删除操作
-                List<String> widgetList = new ArrayList<>();
+            //即将删除的oss资源数据装载，一起batch删除操作
+            List<String> widgetList = new ArrayList<>();
 
-                //A. 获取数据库中该资源相关信息
-                UserUploadFile userUploadFile = sqlSession.selectOne(Mapper.GET_RESOURCE_DATA, id);
-                //删除该资源在oss中的占用和数据库中信息
-                deleteResourceLogic(userUploadFile, ossClient, sqlSession, record, widgetList);
+            //A. 获取数据库中该资源相关信息
+            UserUploadFile userUploadFile = sqlSession.selectOne(Mapper.GET_RESOURCE_DATA, id);
+            //删除该资源在oss中的占用和数据库中信息
+            deleteResourceLogic(userUploadFile, sqlSession, record, widgetList);
 
-                //B. OSS删除resource文件
-                OssOpt.deleteFileInOssBatch(widgetList, ossClient);
+            //B. OSS删除resource文件
+            ossClient = OssOpt.initOssClient(); //延迟实例化
+            OssOpt.deleteFileInOssBatch(widgetList, ossClient);
 
-                //C. 更新删除资源后user表对应的空间
-                updateDelResRemain(sqlSession, userUploadFile, record);
+            //C. 更新删除资源后user表对应的空间
+            updateDelResRemain(sqlSession, userId, record);
 
-                //返回成功数据
-                Assemble.responseSuccessSetting(responseData, null);
+            //返回成功数据
+            Assemble.responseSuccessSetting(responseData, null);
 
-            } else {
-                message = "deleteResource invalid delete opt";
-                Render.logger.warn(message);
-                Assemble.responseErrorSetting(responseData, 402, message);
-            }
 
         } catch (Exception e) {
             message = "System error";
@@ -467,31 +431,25 @@ public class Render {
         return responseData;
     }
 
+
     /**
      * 删除OSS中的resource操作
      *
      * @param userUploadFile 删除的resource信息
-     * @param ossClient      oss句柄
      * @param sqlSession     sql句柄
      * @param record         记录删除资源数据
      */
-    private static void deleteResourceLogic(UserUploadFile userUploadFile, OSSClient ossClient, SqlSession sqlSession,
-                                            Map<String, Integer> record, List<String> widgetList)
-            throws RenderException {
-
+    private static void deleteResourceLogic(UserUploadFile userUploadFile, SqlSession sqlSession,
+                                            Map<String, Integer> record, List<String> widgetList) throws RenderException {
         int deleteNum = 0;
-        int deleteResourceSize = 0;
-        String message = "";
 
         //根据该文件本身是文件夹还是文件进行相应操作
         if (userUploadFile.getIs_folder() != 1) {
             //如果删除的文件资源是文件, a. 删除文件在数据库user_upload_file的; 2. 装载对应的OSS文件，后续删除
             deleteNum = sqlSession.delete(Mapper.DELETE_RESOURCE_BY_ID, userUploadFile.getId());
             OssOpt.addToOssDeleteList(userUploadFile, widgetList);
-
-            deleteResourceSize = Integer.parseInt(userUploadFile.getFile_size());
-            record.put(Common.RESOURCE_DELETE_OSS_NUM, record.get(Common.RESOURCE_DELETE_DB_NUM) + 1);
-            record.put(Common.RESOURCE_DELETE_SIZE, record.get(Common.RESOURCE_DELETE_SIZE) + deleteResourceSize);
+            //添加将要删除的资源空间大小
+            record.put(Common.RESOURCE_DELETE_SIZE, record.get(Common.RESOURCE_DELETE_SIZE) + userUploadFile.getFile_size());
 
         } else {
             //如果删除的文件资源是文件夹则进行级联删除
@@ -502,9 +460,9 @@ public class Render {
             //删除文件夹在数据库user_upload_file的条目
             deleteNum = sqlSession.delete(Mapper.DELETE_RESOURCE_BY_ID, userUploadFile.getId());
 
-            //循环监测并监测是否引用数为零并删除oss中对应文件数据
+            //循环该文件夹下所有资源文件并递归执行上述操作
             for (UserUploadFile eachUploadFile : list) {
-                deleteResourceLogic(eachUploadFile, ossClient, sqlSession, record, widgetList);
+                deleteResourceLogic(eachUploadFile, sqlSession, record, widgetList);
             }
         }
         //数据库删除记录操作数目添加
@@ -514,16 +472,16 @@ public class Render {
     /**
      * 删除资源后对User和Project的资源空间的更新
      *
-     * @param sqlSession         sql句柄
-     * @param userUploadFile     用户提交需删除的资源文件信息
-     * @param record             记录删除资源空间大小和数量等信息
+     * @param sqlSession sql句柄
+     * @param userId     用户id
+     * @param record     记录删除资源空间大小和数量等信息
      */
-    private static void updateDelResRemain(SqlSession sqlSession, UserUploadFile userUploadFile, Map<String, Integer> record) {
-        //更新User的资源剩余空间
-        String userResourceRemain = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, userUploadFile.getUser_id());
-        int newUserResourceRemain = Integer.parseInt(userResourceRemain) + record.get(Common.RESOURCE_DELETE_SIZE);
-        User user = new User(userUploadFile.getUser_id(), String.valueOf(newUserResourceRemain));
-        int userUpdateNum = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, user);
+    private static void updateDelResRemain(SqlSession sqlSession, int userId, Map<String, Integer> record) {
+        //更新User的已使用空间
+        Map<String, Integer> map = new HashMap<>(2);
+        map.put(Common.USER_ID, userId);
+        map.put(Common.RESOURCE_USED, record.get(Common.RESOURCE_DELETE_SIZE));
+        int userUpdateNum = sqlSession.update(Mapper.REDUCE_USER_RESOURCE_SPACE_USED, map);
     }
 
 

@@ -64,6 +64,7 @@ public class AliPay {
             //notify_url中回传接收数据
             Map<String, Object> map = new HashMap<>(2);
             map.put(Common.ID, orders.getId());
+            map.put(Common.USER_ID, orders.getUser_id());
             map.put(Common.SERVICE_ID, orders.getService_id());
             map.put(Common.SERVICE_NUM, orders.getService_num());
             json.put(Common.PAY_ALI_KEY_PASSBACK_PARAMS, URLEncoder.encode(JSON.toJSONString(map), Common.UTF8));
@@ -163,6 +164,7 @@ public class AliPay {
             orders.setOut_trade_no(out_trade_no);
             orders.setTrade_no(trade_no);
             Purchase.updateOrderStatus(orders);
+            Purchase.updateUserResourceSpace(orders);
             message = "verifyOrderLogic Trade success notify";
             AliPay.logger.debug(message);
         }

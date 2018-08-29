@@ -2,6 +2,7 @@ package viewcoder.operation.impl.project;
 
 import viewcoder.exception.project.PSDAnalysisException;
 import viewcoder.operation.entity.*;
+import viewcoder.operation.impl.render.Render;
 import viewcoder.tool.common.*;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.parser.form.FormData;
@@ -106,16 +107,14 @@ public class CreateProject {
             project = (Project) FormData.getParam(msg, Project.class);
 
             //查看用户可用空间是否还满足该PSD文件的解析
-            String resourceRemain = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_REMAIN, project.getUser_id());
-            long preRemainSize = Integer.parseInt(resourceRemain) - project.getPsd_file().length();
+            User user = checkSpace(project);
+
             //如果该用户有足够空间进行PSD文件解析，则创建该项目，否则不创建
-            if (preRemainSize > 0) {
-                //设置项目占用空间，
-                project.setResource_size(String.valueOf(project.getPsd_file().length()));
+            if (user.getNewUserResSpace() > 0) {
                 //根据opt值进行不同操作，若为新建psd的project项目，则数据插入数据库，从而获取project_id
                 optHandler(sqlSession, project, Mapper.CREATE_PSD_PROJECT);
                 //解析file文件数据并保存到指定位置，如果解析成功将删除该psd文件，如果解析失败将保留作为后续程序调优参考文件
-                parsePSDFileLogic(responseData, project.getPsd_file().getFile(), project, sqlSession, ossClient, preRemainSize);
+                parsePSDFileLogic(responseData, project.getPsd_file().getFile(), project, sqlSession, ossClient, user);
 
             } else {
                 message = "User resource space not enough";
@@ -141,6 +140,37 @@ public class CreateProject {
     }
 
 
+
+    /**
+     * 检查是否有足够空间上传
+     *
+     * @return
+     */
+    private static User checkSpace(Project project) {
+        SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
+        User user = new User();
+        try {
+            user = sqlSession.selectOne(Mapper.GET_USER_RESOURCE_SPACE_INFO, project.getUser_id());
+            int resourceRemain = user.getResource_total() - user.getResource_used();
+            int fileSize = (int) Math.round(project.getPsd_file().length() / Common.FILE_SIZE_TO_KB); //设置以KB为单位的资源空间
+            int newUserResSpace = resourceRemain - fileSize;
+            user.setNewUserResSpace(newUserResSpace);
+            int newResourceUsed = fileSize+user.getResource_used();
+            user.setResource_used(newResourceUsed);
+
+        } catch (Exception e) {
+            message = "System error";
+            CreateProject.logger.error(message, e);
+
+        } finally {
+            sqlSession.close();
+        }
+        return user;
+    }
+
+
+
     /**
      * 解析新建PSD项目的PSD解析处理文件逻辑
      *
@@ -151,7 +181,7 @@ public class CreateProject {
      * @throws PSDAnalysisException
      */
     private static void parsePSDFileLogic(ResponseData responseData, File file, Project project, SqlSession sqlSession,
-                                          OSSClient ossClient, long preRemainSize) throws PSDAnalysisException {
+                                          OSSClient ossClient, User user) throws PSDAnalysisException {
         try {
             //如果保存成功则进行解析PSD文件数据信息并返回内容数据
             PsdAnalysis psdAnalysis = new PsdAnalysis(project, ossClient, sqlSession);
@@ -170,7 +200,7 @@ public class CreateProject {
                 sqlSession.insert(Mapper.INSERT_BATCH_NEW_RESOURCE, psdAnalysis.getUploadFileList());
 
                 //更新用户新的可用空间，减去resource size后的大小
-                sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, new User(project.getUser_id(), String.valueOf(preRemainSize)));
+                sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_USED, user);
 
                 //插入成功，返回新生成的project_id和project_data数据，或原来的project_id新project_data
                 Map<String, Object> map = new HashMap<String, Object>();

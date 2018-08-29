@@ -8,6 +8,7 @@ import org.quartz.*;
 import viewcoder.operation.entity.Orders;
 import viewcoder.operation.entity.Project;
 import viewcoder.operation.entity.UserUploadFile;
+import viewcoder.operation.impl.purchase.Purchase;
 import viewcoder.tool.mail.MailEntity;
 import viewcoder.tool.mail.MailHelper;
 import viewcoder.tool.msg.MsgHelper;
@@ -46,9 +47,6 @@ public class MidNightJob implements Job {
             //B. orders表expire_days>=0的记录比原来减少1天
             updateOrderExpireDays();
 
-            //C. 对即将过期的用户发送短信和邮件到期提醒
-            sendMsgMailInform();
-
         } catch (Exception e) {
             MidNightJob.logger.error("MidNightJob error", e);
         }
@@ -78,7 +76,7 @@ public class MidNightJob implements Job {
             for (Orders order : ordersList) {
 
                 //根据serviceId获取相应space数据
-                int space = getToReleaseSpace(order);
+                int space = CommonObject.getServiceSpace(order.getService_id());
                 if (space <= 0) continue;
 
                 try {
@@ -99,31 +97,11 @@ public class MidNightJob implements Job {
                         //更新成功，接着获取user表的timestamp和resource_used的信息
                         User user = sqlSession.selectOne(Mapper.GET_USER_SPACE_INFO, order.getUser_id());
                         //判空操作
-                        if (CommonService.checkNotNull(user) && CommonService.checkNotNull(user.getTimestamp()) &&
-                                CommonService.checkNotNull(user.getResource_remain())) {
-
+                        if (CommonService.checkNotNull(user)) {
+                            int resourceRemain = user.getResource_total() - user.getResource_used();
                             //如果该用户可用的resource_remain空间小于0则设置该用户resource的ACL权限私有
-                            if (Integer.parseInt(user.getResource_remain()) <= 0) {
-                                //对single_export资源文件设置ACK禁用操作
-                                List<Project> projects = sqlSession.selectList(Mapper.GET_PROJECT_VERSION_DATA, order.getUser_id());
-                                if (CommonService.checkNotNull(projects)) {
-                                    String projectPrefix = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT);
-                                    for (Project project : projects) {
-                                        String pathPc = projectPrefix + project.getPc_version() + Common.PROJECT_FILE_SUFFIX;
-                                        String pathMo = projectPrefix + project.getMo_version() + Common.PROJECT_FILE_SUFFIX;
-                                        OssOpt.updateAclConfig(ossClient, pathPc, false);
-                                        OssOpt.updateAclConfig(ossClient, pathMo, false);
-                                    }
-                                }
-                                //对upload_files资源文件设置ACK禁用操作
-                                List<UserUploadFile> files = sqlSession.selectList(Mapper.GET_RESOURCE_NAME_DATA, order.getUser_id());
-                                if (CommonService.checkNotNull(files)) {
-                                    String filePrefix = GlobalConfig.getOssFileUrl(Common.UPLOAD_FILES);
-                                    for (UserUploadFile file : files) {
-                                        String pathFile = filePrefix + file.getTime_stamp() + Common.DOT_SUFFIX + file.getSuffix();
-                                        OssOpt.updateAclConfig(ossClient, pathFile, false);
-                                    }
-                                }
+                            if (resourceRemain <= 0) {
+                                CommonService.setACKOpt(sqlSession, ossClient, order.getUser_id(),false);
                             }
 
                         } else {
@@ -151,42 +129,6 @@ public class MidNightJob implements Job {
 
 
     /**
-     * 根据订单的服务id（serviceId）返回相应的资源空间space数据
-     *
-     * @param orders 订单数据
-     * @return
-     */
-    private static int getToReleaseSpace(Orders orders) {
-        int space = 0;
-        //设置订购资源空间大小
-        switch (orders.getService_id()) {
-            case 1: {
-                space = Common.SERVICE_TRY_RESOURCE;
-                break;
-            }
-            case 2: {
-                space = Common.SERVICE_MONTH_RESOURCE;
-                break;
-            }
-            case 3: {
-                space = Common.SERVICE_YEAR_RESOURCE;
-                break;
-            }
-            case 4: {
-                space = Common.SERVICE_BUSINESS_RESOURCE;
-                break;
-            }
-            default: {
-                //出错抛出不知类型的order的exception
-                String message = "Unknown order service id: " + orders.getService_id();
-                MidNightJob.logger.error(message);
-            }
-        }
-        return space;
-    }
-
-
-    /**
      * 更新orders表中每条记录的expire_days不为-1的记录的expire_days值减1
      */
     private static void updateOrderExpireDays() {
@@ -206,60 +148,6 @@ public class MidNightJob implements Job {
         }
     }
 
-
-    /**
-     * 调用发送短息和邮件的方法
-     */
-    public void sendMsgMailInform() {
-        SqlSession sqlSession = MybatisUtils.getSession();
-        String message = "";
-        try {
-            //orders表中所有expire_days为0, 1, 3, 7天且pay_way不为0的（非优惠方式）
-            List<Orders> orders = sqlSession.selectList(Mapper.GET_TO_EXPIRE_ORDER_INSTANCE);
-
-            //判空处理，若空返回
-            if (!CommonService.checkNotNull(orders)) return;
-
-            //对每条order信息进行发送信息提醒
-            Map<String, String> replaceData = new HashMap<String, String>();
-            String templateId = Common.MSG_TEMPLEATE_EXPIRE1;
-            String mailUrl = GlobalConfig.getProperties(Common.MAIL_BASE_URL) + Common.MAIL_SERVICE_EXPIRE; //本地网页数据
-
-            for (Orders order : orders) {
-                int space = getToReleaseSpace(order);
-                User user = sqlSession.selectOne(Mapper.GET_USER_MAIL_PHONE_DATA, order.getUser_id());
-                //判空返回处理
-                if (!CommonService.checkNotNull(user) && !CommonService.checkNotNull(user.getEmail()) &&
-                        !CommonService.checkNotNull(user.getPhone()) && space <= 0) continue;
-
-                //邮件服务初始化
-                MailEntity mailEntity = new MailEntity(user.getEmail(), Common.MAIL_SERVICE_EXPIRE_INFORM, Common.MAIL_HTML_TYPE);
-
-                //准备替换原文的用户数据
-                //int spaceRemain = Integer.parseInt(user.getResource_remain()) - space;
-                int expireDays = order.getExpire_days();
-                replaceData.put("name", user.getUser_name());
-                replaceData.put("service", CommonObject.getServiceName(order.getService_id()));
-                replaceData.put("time", order.getExpire_date());
-                replaceData.put("days", String.valueOf(expireDays));
-
-                //发送短信操作${name} ${service} ${time} ${days}
-                MsgHelper.sendSingleMsg(templateId, replaceData, user.getPhone(), Common.MSG_SIGNNAME_LIPHIN);
-
-                //发送邮件操作
-                String str = StrSubstitutor.replace(MailHelper.getHtmlData(mailUrl, true), replaceData);
-                mailEntity.setTextAndContent(str);
-                new MailHelper(mailEntity).send();
-            }
-
-        } catch (Exception e) {
-            message = "Send mail and text err";
-            MidNightJob.logger.error(message, e);
-
-        } finally {
-            sqlSession.close();
-        }
-    }
 }
 
 

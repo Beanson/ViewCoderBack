@@ -17,6 +17,8 @@ public class CommonObject {
     private static final Map<String, Double> extendPrice = new HashMap<String, Double>();
     private static final Map<String, String> xmlMap = new HashMap<>();
     private static final Map<Integer, String> serviceName = new HashMap<>();
+    private static final Map<Integer, String> serviceUnit = new HashMap<>();
+    private static final Map<Integer, Integer> serviceSpace = new HashMap<>();
     private static final List<ProjectProgress> progressList = new ArrayList<ProjectProgress>(); //装载后台渲染生成页面的进度
     private static final Map<Integer, String> loginVerify = new HashMap<>();//用户登录时验证的userId:sessionId等信息；
 
@@ -34,9 +36,22 @@ public class CommonObject {
         extendPrice.put("G", 10.0);
 
         //套餐名称
-        serviceName.put(1,"日套餐");
+        serviceName.put(1,"体验套餐");
         serviceName.put(2,"月套餐");
         serviceName.put(3,"年套餐");
+        serviceName.put(3,"商务套餐");
+
+        //套餐单位
+        serviceUnit.put(1,"天");
+        serviceUnit.put(2,"月");
+        serviceUnit.put(3,"年");
+        serviceUnit.put(4,"年");
+
+        //套餐使用设置
+        serviceSpace.put(1, 20480);   //2M
+        serviceSpace.put(2, 102400);  //100M
+        serviceSpace.put(3, 1048576); //1GB
+        serviceSpace.put(4, 1048576); //1GB
 
         //xml的map
         xmlMap.put("msg", "msg/msg.xml");
@@ -56,6 +71,14 @@ public class CommonObject {
 
     public static String getServiceName(int serviceId) {
         return serviceName.get(serviceId);
+    }
+
+    public static String getServiceUnit(int serviceId) {
+        return serviceUnit.get(serviceId);
+    }
+
+    public static Integer getServiceSpace(int serviceId) {
+        return serviceSpace.get(serviceId);
     }
 
     public static List<ProjectProgress> getProgressList() {

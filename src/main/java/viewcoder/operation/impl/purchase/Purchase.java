@@ -1,13 +1,17 @@
 package viewcoder.operation.impl.purchase;
 
+import com.aliyun.oss.OSSClient;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.text.StrSubstitutor;
 import org.junit.Test;
 import viewcoder.exception.purchase.PayException;
-import viewcoder.tool.common.Assemble;
-import viewcoder.tool.common.Common;
-import viewcoder.tool.common.CommonObject;
-import viewcoder.tool.common.Mapper;
+import viewcoder.tool.common.*;
+import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.encrypt.ECCUtil;
+import viewcoder.tool.job.ExpireJob;
+import viewcoder.tool.mail.MailEntity;
+import viewcoder.tool.mail.MailHelper;
+import viewcoder.tool.msg.MsgHelper;
 import viewcoder.tool.parser.form.FormData;
 import viewcoder.tool.util.MybatisUtils;
 import viewcoder.operation.entity.Orders;
@@ -354,6 +358,85 @@ public class Purchase {
 
 
     /**
+     * 更新用户资源空间数据
+     *
+     * @param orders 订单信息
+     */
+    public static void updateUserResourceSpace(Orders orders) {
+        SqlSession sqlSession = MybatisUtils.getSession();
+        OSSClient ossClient = OssOpt.initOssClient();
+        String message = "";
+        int resourceAdd = 0;
+        try {
+            //根据order获取对应的新订购
+            resourceAdd = CommonObject.getServiceSpace(orders.getService_id());
+            //更新user表的resource_total字段信息
+            Map<String, Integer> map = new HashMap<>(2);
+            map.put(Common.USER_ID, orders.getUser_id());
+            map.put(Common.RESOURCE_ADD, resourceAdd);
+
+            //数据库更新操作
+            int num = sqlSession.update(Mapper.ADD_USER_RESOURCE_SPACE_USED, map);
+            User user = sqlSession.selectOne(Mapper.GET_USER_DATA, orders.getUser_id());
+            sqlSession.commit();
+
+            //如果用户之前ACK被锁定了
+            if(){
+                CommonService.setACKOpt(sqlSession, ossClient, orders.getUser_id(),true);
+            }
+
+            //发送邮件和短信通知用户购置成功
+            notifyUserPurchaseSuccess(user, orders);
+
+        } catch (Exception e) {
+            message = "updateUserResourceSpace error";
+            Purchase.logger.error(message, e);
+
+        } finally {
+            if (sqlSession != null) {
+                sqlSession.close();
+            }
+        }
+    }
+
+
+    /**
+     * 发送邮件和短信告知用户购置服务成功
+     */
+    private static void notifyUserPurchaseSuccess(User user, Orders order) {
+
+        String message = "";
+        try {
+            //邮件服务初始化
+            MailEntity mailEntity = new MailEntity(user.getEmail(), Common.MAIL_SERVICE_EXPIRE_INFORM, Common.MAIL_HTML_TYPE);
+
+            Map<String, String> replaceData = new HashMap<String, String>();
+            String templateId = Common.MSG_TEMPLEATE_PURCHASE;
+            String mailUrl = GlobalConfig.getProperties(Common.MAIL_BASE_URL) + Common.MAIL_SERVICE_PURCHASE;
+
+            //准备替换原文的用户数据
+            replaceData.put("name", user.getUser_name());
+            replaceData.put("service", CommonObject.getServiceName(order.getService_id()));
+            replaceData.put("time", order.getExpire_date());
+            replaceData.put("service_length", order.getService_num() + " " + CommonObject.getServiceUnit(order.getService_id()));
+
+            //发送短信操作${name} ${service}
+            MsgHelper.sendSingleMsg(templateId, replaceData, user.getPhone(), Common.MSG_SIGNNAME_LIPHIN);
+
+            //发送邮件操作
+            String str = StrSubstitutor.replace(MailHelper.getHtmlData(mailUrl, true), replaceData);
+            mailEntity.setTextAndContent(str);
+            new MailHelper(mailEntity).send();
+
+        } catch (Exception e) {
+            message = "Error, send mail or msg to: " + user.getEmail() + " , "
+                    + user.getPhone() + " , " + "order id:" + order.getId();
+            Purchase.logger.error(message, e);
+        }
+    }
+
+
+    /**
      * 获取支付交易信息
      *
      * @param msg
@@ -549,24 +632,22 @@ public class Purchase {
             expireDate.set(Calendar.HOUR_OF_DAY, 0);
             expireDate.set(Calendar.MINUTE, 0);
             expireDate.set(Calendar.SECOND, 0);
-            System.out.println("expired time: " + sdf.format(expireDate.getTime()));
+            message = "expired time: " + sdf.format(expireDate.getTime());
+            Purchase.logger.debug(message);
             Orders tryOrder = new Orders(CommonService.getTimeStamp(), userId, Common.SERVICE_TRY, Common.SERVICE_TRY_NUM,
                     date, date, sdf.format(expireDate.getTime()), Common.SERVICE_TRY_NUM, 1, 0, "0");
             //三天免费试用订单插入数据库
             int numOrder = sqlSession.insert(Mapper.NEW_REGISTER_TRY_ORDER, tryOrder);
 
-            //用户资源空间数据更新
-            User user = new User(userId, String.valueOf(Common.SERVICE_TRY_RESOURCE));
-            int numUser = sqlSession.update(Mapper.UPDATE_USER_RESOURCE_SPACE_REMAIN, user);
-
             //对更新数据库结果进行考核
-            if (numOrder > 0 && numUser > 0) {
+            if (numOrder > 0) {
                 //添加免费订单和更新相应的用户数据
                 sqlSession.commit();
                 message = "newRegisterTryService success";
                 Purchase.logger.debug(message);
+
             } else {
-                message = "newRegisterTryService failure:" + numOrder + " , " + numUser;
+                message = "newRegisterTryService failure:" + numOrder;
                 Purchase.logger.debug(message);
             }
 

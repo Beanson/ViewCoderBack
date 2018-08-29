@@ -68,8 +68,11 @@ public class Simulate {
             URL simulateURL = Resources.getResource("js/pure_simulate/simulate2.js");
             String simulateScript = Resources.toString(simulateURL, Charsets.UTF_8);
             projectData = (String) js.executeScript(simulateScript);
-            //清空driver缓存
+
+            //清空driver部分本地存储
             driver.manage().deleteAllCookies();
+            js.executeScript("localStorage.clear();");
+
             //使用完driver后返回pool
             WebDriverPool.getPool().returnObject(driver);
             Simulate.logger.debug("Get project data: " + projectData);
