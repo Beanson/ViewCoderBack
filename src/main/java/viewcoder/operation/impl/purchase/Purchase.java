@@ -23,6 +23,7 @@ import viewcoder.operation.impl.purchase.wechat.WechatPay;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 
+import javax.swing.plaf.PanelUI;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -377,7 +378,6 @@ public class Purchase {
 
             //数据库更新操作
             sqlSession.update(Mapper.ADD_USER_RESOURCE_SPACE_USED, map);
-            sqlSession.commit();
 
             //若该user之前由于到期而禁用访问权限ack，购买成功过后重新设置
             User user = sqlSession.selectOne(Mapper.GET_USER_DATA, orders.getUser_id());
@@ -386,6 +386,9 @@ public class Purchase {
                     CommonService.setACKOpt(sqlSession, ossClient, orders.getUser_id(),true);
                 }
             }
+            //发送邮件之前提交和关闭sql
+            sqlSession.commit();
+            sqlSession.close();
 
             //发送邮件和短信通知用户购置成功
             notifyUserPurchaseSuccess(user, orders);
@@ -395,6 +398,7 @@ public class Purchase {
             Purchase.logger.error(message, e);
 
         } finally {
+            //最后需要关闭sql，防止进入exception没有close
             if (sqlSession != null) {
                 sqlSession.close();
             }
