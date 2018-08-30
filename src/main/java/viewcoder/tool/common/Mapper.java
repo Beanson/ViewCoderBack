@@ -13,7 +13,8 @@ public class Mapper {
     public static final String GET_ALL_RELATED_PROJECT = "getAllRelatedProject";
     public static final String GET_PROJECT_RESOURCE_SIZE = "getProjectResourceSize";
     public static final String GET_TARGET_STORE_DATA = "getTargetStoreData";
-    public static final String GET_PROJECT_BY_PCVERSION = "getProjectDataByPCVersion";
+    public static final String GET_PROJECT_BY_TIMESTAMP = "getProjectDataByTimestamp";
+    public static final String GET_PROJECT_NAME = "getProjectName";
 
     //insert
     public static final String CREATE_EMPTY_PROJECT = "createEmptyProject";

@@ -32,6 +32,31 @@ public class Render {
 
 
     /**
+     * 根据项目id获取项目名称数据，用于子项目跳转访问前使用
+     * @param msg
+     * @return
+     */
+    public static ResponseData getProjectName(Object msg){
+        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+        SqlSession sqlSession = MybatisUtils.getSession();
+        String message = "";
+        try {
+            String id = FormData.getParam(msg, Common.ID);
+            String projectName = sqlSession.selectOne(Mapper.GET_PROJECT_NAME, Integer.parseInt(id));
+            Assemble.responseSuccessSetting(responseData, projectName);
+
+        }catch (Exception e){
+            message = "System error";
+            Render.logger.error(message, e);
+            Assemble.responseErrorSetting(responseData, 500, message);
+
+        }finally {
+            CommonService.databaseCommitClose(sqlSession, responseData, false);
+        }
+        return responseData;
+    }
+
+    /**
      * ****************************************************************************
      * 根据项目id获取该项目渲染数据的信息
      *

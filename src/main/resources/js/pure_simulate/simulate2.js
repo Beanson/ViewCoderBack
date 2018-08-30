@@ -34,7 +34,7 @@ var data = {
     'overall': {
         'width': windowsWidth, //会依据屏幕宽度而重新赋值该width，
         'height': document.body.scrollHeight,
-        'is_mobile': false, //标识是否是mobile网页，默认是PC网页
+        'is_mobile': ${is_mobile}, //标识是否是mobile网页，默认是PC网页
         'scale': false,
         'bg-color': 'rgba(255,255,255,1)',
         'max_id': 1,
@@ -77,7 +77,7 @@ function getSimulateData() {
                 var objBg = {};
                 generalProperty(divs[i], objBg, 1, "Common_Background");
                 getBgProperty(divs[i], objBg);
-                responsiveSetting(objImg);
+                responsiveSetting(objBg);
                 data['all_tools']['Common_Background'][objBg['layer_id']] = objBg; //装载background类型数据
             }
 
@@ -87,6 +87,8 @@ function getSimulateData() {
                 var objText = {};
                 generalProperty(divs[i], objText, 3, "Common_Text");
                 getTextProperty(divs[i], objText, text);
+                getBgProperty(spans[i], objText);
+                getPaddingProperty(spans[i], objText);
                 objText['text-editable'] = false;
                 data['all_tools']['Common_Text'][objText['layer_id']] = objText; //装载text类型数据
             }
@@ -133,6 +135,7 @@ function getSimulateData() {
         }
     }
 
+
     //span元素生成
     for (var i = 0; i < spans.length; i++) {
         if (checkEleVisible(spans[i])) {
@@ -141,6 +144,8 @@ function getSimulateData() {
                 var objText = {};
                 generalProperty(spans[i], objText, 3, "Common_Text");
                 getTextProperty(spans[i], objText, text);
+                getBgProperty(spans[i], objText);
+                getPaddingProperty(spans[i], objText);
                 objText['text-editable'] = false;
                 //文字的width和height不可小于21，不然边框将无法拖动
                 objText['width'] = objText['width'] < 21 ? 21 : objText['width'];
@@ -149,6 +154,7 @@ function getSimulateData() {
             }
         }
     }
+
 
     //button元素，分为submit和普通button两种
     for (var i = 0; i < buttons.length; i++) {
@@ -434,8 +440,17 @@ function getText(ele) {
     } else {
         text = ele.textContent.trim();
     }
-    return text;
+    return replaceSpecialCharacters(text); //替换特殊字符
 }
+
+/**
+ * 替换特殊字符
+ */
+function replaceSpecialCharacters(text) {
+    text = text.replace(/</g, '&lt;');
+    text = text.replace(/>/g, '&gt;');
+    return text;
+};
 
 
 //返回渲染数据

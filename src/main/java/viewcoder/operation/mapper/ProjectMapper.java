@@ -29,9 +29,13 @@ public interface ProjectMapper {
     @Select("select * from project where id=#{id}")
     public Project getProjectData(int id);
 
-    //根据项目pcVersion获取该项目数据信息, 需要返回所有，后node服务端生成HTML页面
-    @Select("select * from project where pc_version=#{pcVersion}")
-    public Project getProjectDataByPCVersion(String pcVersion);
+    //根据项目id获取该项目名称
+    @Select("select project_name from project where id=#{id}")
+    public String getProjectName(int id);
+
+    //根据项目timestamp获取该项目数据信息, 需要返回所有，后node服务端生成HTML页面
+    @Select("select * from project where timestamp=#{timestamp}")
+    public Project getProjectDataByTimestamp(String timestamp);
 
     //根据项目id获取对应project的所有数据信息
     @Select("select * from project where is_public=1 and industry_code=#{industry_code} and industry_sub_code=#{industry_sub_code}")
@@ -40,27 +44,27 @@ public interface ProjectMapper {
 
     /********************以下是创建项目操作***********************/
     //创建新建project
-    @Insert("insert into project(user_id,project_name,last_modify_time,pc_version,mo_version,parent) " +
-            "values(#{user_id},#{project_name},#{last_modify_time},#{pc_version},#{mo_version},#{parent})")
+    @Insert("insert into project(user_id,timestamp,project_name,last_modify_time,pc_version,mo_version,parent) " +
+            "values(#{user_id},#{timestamp},#{project_name},#{last_modify_time},#{pc_version},#{mo_version},#{parent})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createEmptyProject(Project project);
 
     //创建新建PSD的project
     //不需insert psd_file_name这条记录，因为psd文件只在内存中解析，如果解析出错保存psd文件到OSS中的error_psd_file中
-    @Insert("insert into project(user_id,project_name,pc_version,mo_version,last_modify_time,parent) " +
-            "values(#{user_id},#{project_name},#{pc_version},#{mo_version},#{last_modify_time},#{parent})")
+    @Insert("insert into project(user_id,timestamp,project_name,pc_version,mo_version,last_modify_time,parent) " +
+            "values(#{user_id},#{timestamp},#{project_name},#{pc_version},#{mo_version},#{last_modify_time},#{parent})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createPSDProject(Project project);
 
     //拷贝后，创建新的project项目
-    @Insert("insert into project(user_id,project_name,last_modify_time,pc_version,mo_version,ref_id,parent,child) " +
-            "values(#{user_id},#{project_name},#{last_modify_time},#{pc_version},#{mo_version},#{ref_id},#{parent},#{child})")
+    @Insert("insert into project(user_id,timestamp,project_name,last_modify_time,pc_version,mo_version,ref_id,parent,child) " +
+            "values(#{user_id},#{timestamp},#{project_name},#{last_modify_time},#{pc_version},#{mo_version},#{ref_id},#{parent},#{child})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createCopyProject(Project project);
 
     //通过URL，创建一个和source URL类似的Simulate project
-    @Insert("insert into project(user_id,parent,project_name,last_modify_time,pc_version,mo_version) " +
-            "values(#{user_id},#{parent},#{project_name},#{last_modify_time},#{pc_version},#{mo_version})")
+    @Insert("insert into project(user_id,timestamp,parent,project_name,last_modify_time,pc_version,mo_version) " +
+            "values(#{user_id},#{timestamp},#{parent},#{project_name},#{last_modify_time},#{pc_version},#{mo_version})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     public int createSimulateProject(Project project);
 

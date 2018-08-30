@@ -325,14 +325,14 @@ public class ProjectList {
         /*拷贝pc版本项目project data数据*/
         ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.PROJECT_DATA),
                 Common.PROJECT_DATA_SUFFIX, pcVersion, project.getPc_version());
-                    /*拷贝项目导出project file单文件数据*/
+        /*拷贝项目导出project file单文件数据*/
         ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT),
                 Common.PROJECT_FILE_SUFFIX, pcVersion, project.getPc_version());
 
-                    /*拷贝mobile版本项目project data数据*/
+        /*拷贝mobile版本项目project data数据*/
         ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.PROJECT_DATA),
                 Common.PROJECT_DATA_SUFFIX, moVersion, project.getMo_version());
-                     /*拷贝项目导出project file单文件数据*/
+        /*拷贝项目导出project file单文件数据*/
         ossProjectHtmlCopy(ossClient, GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT),
                 Common.PROJECT_FILE_SUFFIX, moVersion, project.getMo_version());
     }

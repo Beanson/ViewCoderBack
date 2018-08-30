@@ -2,12 +2,17 @@ package viewcoder.url;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import org.apache.commons.text.StrSubstitutor;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
 import viewcoder.operation.entity.ProjectProgress;
+import viewcoder.tool.common.Common;
 import viewcoder.tool.pool.WebDriverPool;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -16,11 +21,11 @@ import java.net.URL;
  */
 public class Simulate {
     private static Logger logger = Logger.getLogger(Simulate.class);
-    private static final String TEST_URL = "http://www.hao365.org.cn/";
+    private static final String TEST_URL = "http://www.baidu.com";
     private static final int TOTAL_HEIGHT = 700;
 
     public static void main(String[] args) throws Exception {
-        createProject(Simulate.TEST_URL, new ProjectProgress(), 1300);
+        createProject(Simulate.TEST_URL, new ProjectProgress(), 400, "mo");
     }
 
     /**
@@ -29,10 +34,11 @@ public class Simulate {
      * @param webUrl          目标网站网站
      * @param projectProgress 项目进度记录
      * @param totalWidth      网站整体宽度
+     * @param version         网站版本，手机版还是电脑版
      * @return
      * @throws Exception
      */
-    public static String createProject(String webUrl, ProjectProgress projectProgress, int totalWidth)
+    public static String createProject(String webUrl, ProjectProgress projectProgress, int totalWidth, String version)
             throws Exception {
 
         WebDriver driver = null;
@@ -57,6 +63,8 @@ public class Simulate {
             js.executeScript(jqueryText);
             int contentHeight = ((Number) js.executeScript("return $(document).height()")).intValue();
             Simulate.logger.debug("get page height: " + contentHeight);
+            int contentWidth = ((Number) js.executeScript("return $(document).width()")).intValue();
+            Simulate.logger.debug("get page width: " + contentWidth);
 
             //慢加载操作，后期前端设置允许用户调节每次滚动的等待时间
             for (int i = Simulate.TOTAL_HEIGHT; i < contentHeight; i += Simulate.TOTAL_HEIGHT) {
@@ -65,9 +73,16 @@ public class Simulate {
                 Thread.sleep(500);
             }
 
+            //解析页面元素JavaScript
             URL simulateURL = Resources.getResource("js/pure_simulate/simulate2.js");
             String simulateScript = Resources.toString(simulateURL, Charsets.UTF_8);
-            projectData = (String) js.executeScript(simulateScript);
+            //替换数据准备
+            String isMobile = Objects.equals(version, Common.MOBILE_V) ? Common.TRUE_RESULT : Common.FALSE_RESULT;
+            Map<String, String> replaceData = new HashMap<>(1);
+            replaceData.put("is_mobile", isMobile);
+            String executeScript = StrSubstitutor.replace(simulateScript, replaceData);
+            //执行解析页面元素的JavaScript
+            projectData = (String) js.executeScript(executeScript);
 
             //清空driver部分本地存储
             driver.manage().deleteAllCookies();
@@ -124,6 +139,7 @@ public class Simulate {
             driver.manage().window().setSize(dimension);
             //打开指定网址
             driver.get(webUrl);
+            Simulate.logger.debug("create url project: " + dimension.getWidth());
 
         } catch (Exception e) {
             //打开网页错误或超时，结束加载网页, 继续后续js操作

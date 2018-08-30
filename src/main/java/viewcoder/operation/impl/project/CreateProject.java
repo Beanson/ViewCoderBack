@@ -2,7 +2,6 @@ package viewcoder.operation.impl.project;
 
 import viewcoder.exception.project.PSDAnalysisException;
 import viewcoder.operation.entity.*;
-import viewcoder.operation.impl.render.Render;
 import viewcoder.tool.common.*;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.parser.form.FormData;
@@ -20,8 +19,6 @@ import viewcoder.url.Simulate;
 
 import java.io.File;
 import java.util.*;
-
-import static org.apache.ibatis.javassist.CtClass.version;
 
 /**
  * Created by Administrator on 2018/2/4.
@@ -140,7 +137,6 @@ public class CreateProject {
     }
 
 
-
     /**
      * 检查是否有足够空间上传
      *
@@ -156,7 +152,7 @@ public class CreateProject {
             int fileSize = (int) Math.round(project.getPsd_file().length() / Common.FILE_SIZE_TO_KB); //设置以KB为单位的资源空间
             int newUserResSpace = resourceRemain - fileSize;
             user.setNewUserResSpace(newUserResSpace);
-            int newResourceUsed = fileSize+user.getResource_used();
+            int newResourceUsed = fileSize + user.getResource_used();
             user.setResource_used(newResourceUsed);
 
         } catch (Exception e) {
@@ -168,7 +164,6 @@ public class CreateProject {
         }
         return user;
     }
-
 
 
     /**
@@ -257,7 +252,7 @@ public class CreateProject {
 
             //初始化项目创建的进度
             ProjectProgress projectProgress = new ProjectProgress(project.getUser_id(), Common.PROJECT_SIMULATE,
-                    project.getProject_name(), project.getPc_version(), 0);
+                    project.getProject_name(), project.getTimestamp(), 0);
             CommonObject.getProgressList().add(projectProgress);
 
             //异步解析URL网站元素操作
@@ -289,7 +284,8 @@ public class CreateProject {
                 String message = "";
                 try {
                     //获取URL资源项目元数据
-                    String projectData = Simulate.createProject(project.getWeb_url(), projectProgress, project.getTarget_width());
+                    String projectData = Simulate.createProject(project.getWeb_url(), projectProgress,
+                            project.getTarget_width(), project.getVersion());
 
                     //如果获取解析后项目数据不为空则进行插入数据库等操作，否则全局变量中记录错误消息
                     if (projectData != null) {
@@ -358,7 +354,7 @@ public class CreateProject {
         try {
             //获取解析的项目标识参数
             Map<String, Object> map = FormData.getParam(msg);
-            String pcVersion = (String) map.get(Common.PC_VERSION);
+            String timestamp = (String) map.get(Common.TIMESTAMP);
 
             //遍历所有正在创建的PSD或URL项目，根据pcVersion获取其对应进度
             List<ProjectProgress> list = CommonObject.getProgressList();
@@ -367,7 +363,7 @@ public class CreateProject {
                 ProjectProgress progress = iterator.next();
 
                 //找到条目，则返回进度信息
-                if (progress.getPc_version() != null && progress.getPc_version().equals(pcVersion)) {
+                if (progress.getTimestamp() != null && progress.getTimestamp().equals(timestamp)) {
                     Assemble.responseSuccessSetting(responseData, progress.getProgress());
 
                     //如果解析URL的元素比例已经到达100，则把该缓存参数去掉
@@ -409,7 +405,7 @@ public class CreateProject {
      * @param msg http请求数据
      * @return
      */
-    public static ResponseData getProjectByPCVersion(Object msg) {
+    public static ResponseData getProjectByTimestamp(Object msg) {
         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
@@ -417,14 +413,22 @@ public class CreateProject {
         try {
             //获取解析的项目标识参数
             Map<String, Object> map = FormData.getParam(msg);
-            String pcVersion = (String) map.get(Common.PC_VERSION);
-            Project project = sqlSession.selectOne(Mapper.GET_PROJECT_BY_PCVERSION, pcVersion);
+            String timestamp = (String) map.get(Common.TIMESTAMP);
+            String version = (String) map.get(Common.VERSION);
+            Project project = sqlSession.selectOne(Mapper.GET_PROJECT_BY_TIMESTAMP, timestamp);
 
             //如果项目数据不为空则返回该数据
             if (project != null) {
-                //从OSS中获取pc version版本的project data
-                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) +
-                        pcVersion + Common.PROJECT_DATA_SUFFIX;
+
+                //设置从oss中获取文件地址
+                String projectDataFile = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA);
+                if (Objects.equals(version, Common.MOBILE_V)) {
+                    projectDataFile += (project.getMo_version() + Common.PROJECT_DATA_SUFFIX);
+                } else {
+                    projectDataFile += (project.getPc_version() + Common.PROJECT_DATA_SUFFIX);
+                }
+
+                //从OSS中获取数据
                 String projectData = OssOpt.getOssFile(ossClient, projectDataFile);
 
                 //检测OSS中读取的数据是否有效
@@ -459,16 +463,35 @@ public class CreateProject {
      */
     public static void insertNewProjectToOss(Project project, OSSClient ossClient) {
         //OSS创建空项目的project的数据文件
-        String pcVersionData = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getPc_version() + Common.PROJECT_DATA_SUFFIX;
-        String moVersionData = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getMo_version() + Common.PROJECT_DATA_SUFFIX;
+        String pcVersionProject = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getPc_version() + Common.PROJECT_DATA_SUFFIX;
+        String moVersionProject = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + project.getMo_version() + Common.PROJECT_DATA_SUFFIX;
 
-        //如果选择版本是创建手机版则电脑版的project data为空，否则手机版的project data为空
+        //OSS创建空项目single_export数据文件
+        String pcVersionExport = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + project.getPc_version()+ Common.PROJECT_FILE_SUFFIX;
+        String moVersionExport = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + project.getMo_version()+ Common.PROJECT_FILE_SUFFIX;
+
+        //根据项目电脑版还是手机版本相应设置对应版本数据
         if (Objects.equals(project.getVersion(), Common.MOBILE_V)) {
-            OssOpt.uploadFileToOss(pcVersionData, new byte[0], ossClient);
-            OssOpt.uploadFileToOss(moVersionData, project.getProject_data().getBytes(), ossClient);
+            //手机版 mobile project_data上传数据
+            OssOpt.uploadFileToOss(moVersionProject, project.getProject_data().getBytes(), ossClient);
+
+            //pc project_data拷贝空项目数据
+            String emptyPCProjectUrl = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + Common.PC_EMPTY_PROJECT_DATA;
+            OssOpt.copyObjectOss(ossClient, emptyPCProjectUrl, pcVersionProject);
+            //pc single_export拷贝空项目数据
+            String emptyPCExportUrl = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + Common.PC_EMPTY_SINGLE_EXPORT;
+            OssOpt.copyObjectOss(ossClient, emptyPCExportUrl, pcVersionExport);
+
         } else {
-            OssOpt.uploadFileToOss(pcVersionData, project.getProject_data().getBytes(), ossClient);
-            OssOpt.uploadFileToOss(moVersionData, new byte[0], ossClient);
+            //电脑版 pc project_data上传数据
+            OssOpt.uploadFileToOss(pcVersionProject, project.getProject_data().getBytes(), ossClient);
+
+            //mo project_data拷贝空项目数据
+            String emptyMOProjectUrl = GlobalConfig.getOssFileUrl(Common.PROJECT_DATA) + Common.MO_EMPTY_PROJECT_DATA;
+            OssOpt.copyObjectOss(ossClient, emptyMOProjectUrl, moVersionProject);
+            //mo single_export拷贝空项目数据
+            String emptyMOExportUrl = GlobalConfig.getOssFileUrl(Common.SINGLE_EXPORT) + Common.MO_EMPTY_SINGLE_EXPORT;
+            OssOpt.copyObjectOss(ossClient, emptyMOExportUrl, moVersionExport);
         }
     }
 

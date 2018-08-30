@@ -9,6 +9,7 @@ public class Project {
 
     private int id;
     private int user_id;
+    private String timestamp;
     private int parent;
     private String project_name;
     private String last_modify_time;
@@ -71,6 +72,14 @@ public class Project {
 
     public void setUser_id(int user_id) {
         this.user_id = user_id;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getVersion() {
@@ -246,6 +255,7 @@ public class Project {
         return "Project{" +
                 "id=" + id +
                 ", user_id=" + user_id +
+                ", timestamp='" + timestamp + '\'' +
                 ", parent=" + parent +
                 ", project_name='" + project_name + '\'' +
                 ", last_modify_time='" + last_modify_time + '\'' +
@@ -266,7 +276,7 @@ public class Project {
                 ", psd_file=" + psd_file +
                 ", new_parent=" + new_parent +
                 ", opt_type='" + opt_type + '\'' +
-                ", current_id='" + current_id + '\'' +
+                ", current_id=" + current_id +
                 '}';
     }
 }

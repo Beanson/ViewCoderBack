@@ -126,7 +126,7 @@ public class Common {
 
     //mail发送的HTML
     public static final String MAIL_SERVICE_EXPIRE = "service_expire.html"; //套餐服务过期HTML
-    public static final String MAIL_SERVICE_PURCHASE= "service_purchase.html"; //套餐服务购置成功HTML
+    public static final String MAIL_SERVICE_PURCHASE = "service_purchase.html"; //套餐服务购置成功HTML
 
 
     //Test配置信息
@@ -202,7 +202,7 @@ public class Common {
     public static final String SESSION_ID = "session_id";
     public static final String FILE_TYPE = "file_type";
     public static final String NEW_FILE_NAME = "new_file_name";
-    public static final String TIME_STAMP = "timestamp";
+    public static final String TIMESTAMP = "timestamp";
     public static final String VERSION = "version";
     public static final String PC_VERSION = "pc_version";
     public static final String MO_VERSION = "mo_version";
@@ -263,6 +263,14 @@ public class Common {
     public static final String GBK = "GBK";
     public static final String UTF8 = "UTF-8";
 
+
+    //创建项目时空白项目数据
+    public static final String MO_EMPTY_PROJECT_DATA = "mo_empty_project_data.txt";
+    public static final String PC_EMPTY_PROJECT_DATA = "pc_empty_project_data.txt";
+    public static final String MO_EMPTY_SINGLE_EXPORT = "mo_empty_single_export.html";
+    public static final String PC_EMPTY_SINGLE_EXPORT = "pc_empty_single_export.html";
+
+
     //其他配置信息
     public static final String IMG_PNG = ".png";
     public static final String IMG_PSG = ".psd";
@@ -275,6 +283,10 @@ public class Common {
     public static final String EXAMPLE_CASE_1 = "样例1";
     public static final String DEFAULT_PORTRAIT = "default_portrait.png";
     public static final double FILE_SIZE_TO_KB = 1024;
+
+    //true false字符串
+    public static final String TRUE_RESULT = "true";
+    public static final String FALSE_RESULT = "false";
 
 
     //mail的其他配置

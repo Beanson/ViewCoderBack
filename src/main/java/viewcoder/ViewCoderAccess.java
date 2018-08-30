@@ -282,13 +282,18 @@ public class ViewCoderAccess {
             httpResponse(ctx, msg, responseData); //成功接收到请求，正常返回
         }
         //通过timestamp获取project数据，用在PSD和URL项目中
-        else if (uri.equals("/getProjectByPCVersion")) {
-            ResponseData responseData = CreateProject.getProjectByPCVersion(msg);
+        else if (uri.equals("/getProjectByTimestamp")) {
+            ResponseData responseData = CreateProject.getProjectByTimestamp(msg);
             httpResponse(ctx, msg, responseData); //成功接收到请求，正常返回
         }
 
         /* **************************************************************/
         /*Render专区*/
+        //根据项目id获取项目名称数据，用于子项目跳转访问前使用
+        else if (uri.equals("/getProjectName")) {
+            ResponseData response = Render.getProjectName(msg);
+            httpResponse(ctx, msg, response);
+        }
         //根据project的id获取该project的渲染信息
         else if (uri.equals("/getProjectRenderData")) {
             ResponseData response = Render.getProjectRenderData(msg);
