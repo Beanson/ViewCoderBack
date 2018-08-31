@@ -75,19 +75,25 @@ public class Render {
             String userId = (String) data.get(Common.USER_ID);
             String version = (String) data.get(Common.VERSION);
 
+            //初始化子项目数据
+            List<Project> projectChildren = null;
             //从数据库中根据项目Id获取项目渲染数据
             Project project = sqlSession.selectOne(Mapper.GET_PROJECT_DATA, Integer.parseInt(projectId));
 
             if (project != null && project.getUser_id() == Integer.parseInt(userId)) {
-                //获取的结果数据记录初始化
-                Map<String, Object> map = new HashMap<>(2);
-                map.put(Common.VERSION, Common.PC_V);
-                String projectData = getProjectRenderDataHandler(map, project, ossClient, version);
+                //获取目标project渲染数据
+                String projectData = getProjectRenderDataHandler(project, ossClient, version);
+                if(project.getChild()>0){
+                    //获取以该projectId为parent的所有project的id和refId数据数据
+                    projectChildren = sqlSession.selectList(Mapper.GET_PROJECT_CHILDREN_LIST, Integer.parseInt(projectId));
+                }
 
                 //检测OSS中读取的数据是否有效
                 if (CommonService.checkNotNull(projectData)) {
                     project.setProject_data(projectData);
+                    Map<String, Object> map = new HashMap<>(2);
                     map.put(Common.PROJECT, project);
+                    map.put(Common.CHILDREN, projectChildren);
                     Assemble.responseSuccessSetting(responseData, map);
 
                 } else {
@@ -117,13 +123,12 @@ public class Render {
     /**
      * 根据传入的手机版或电脑版，获取该project的渲染数据
      *
-     * @param map       返回数据map
      * @param project   获取该页面的项目数据
      * @param ossClient oss句柄
      * @param version   记录手机版还是电脑版
      * @return
      */
-    private static String getProjectRenderDataHandler(Map<String, Object> map, Project project, OSSClient ossClient,
+    private static String getProjectRenderDataHandler(Project project, OSSClient ossClient,
                                                       String version) {
         //项目数据信息获取
         String projectData = null;
@@ -137,12 +142,7 @@ public class Render {
         //根据version值对应获取电脑版或手机版
         if (Objects.equals(version, Common.MOBILE_V)) {
             projectData = OssOpt.getOssFile(ossClient, projectMODataFile);
-            //如果手机版为空则从新获取电脑版数据
-            if (!CommonService.checkNotNull(projectData)) {
-                projectData = OssOpt.getOssFile(ossClient, projectPCDataFile);
-            } else {
-                map.put(Common.VERSION, Common.MOBILE_V);
-            }
+
         } else {
             projectData = OssOpt.getOssFile(ossClient, projectPCDataFile);
         }

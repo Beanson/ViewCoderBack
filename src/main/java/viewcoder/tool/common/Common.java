@@ -195,6 +195,7 @@ public class Common {
     //一些数据库定义的字段
     public static final String ID = "id";
     public static final String PROJECT = "project";
+    public static final String CHILDREN = "children";
     public static final String PROJECT_ID = "project_id";
     public static final String USER_ID = "user_id";
     public static final String RESOURCE_TOTAL = "resource_total";
@@ -302,4 +303,5 @@ public class Common {
     public static String PROJECT_DATA_SUFFIX = ".txt"; //项目数据文件的后缀名
     public static String TEXT_FILE_SUFFIX = ".txt"; //txt文件的后缀名
     public static String DOT_SUFFIX = "."; //中间分隔符
+    public static String COPY_SUFFIX = "_copy"; //拷贝后缀
 }

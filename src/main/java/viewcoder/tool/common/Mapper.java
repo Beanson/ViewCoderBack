@@ -9,6 +9,7 @@ public class Mapper {
     //select
     public static final String GET_PROJECT_LIST_DATA = "getProjectListData";
     public static final String GET_PROJECT_DATA = "getProjectData";
+    public static final String GET_PROJECT_CHILDREN_LIST = "getProjectChildrenList";
     public static final String GET_PROJECT_VERSION_DATA = "getProjectVersionData";
     public static final String GET_ALL_RELATED_PROJECT = "getAllRelatedProject";
     public static final String GET_PROJECT_RESOURCE_SIZE = "getProjectResourceSize";

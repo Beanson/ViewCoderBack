@@ -25,6 +25,10 @@ public interface ProjectMapper {
     @Select("select pc_version, mo_version from project where user_id=#{user_id}")
     public List<Project> getProjectVersionData(int user_id);
 
+    //根据project_id获取所有以该project_id为parent的其他project的id和ref_id信息
+    @Select("select id, pc_version, mo_version, ref_id from project where parent=#{id}")
+    public List<Project> getProjectChildrenList(int id);
+
     //根据项目id获取该项目数据信息
     @Select("select * from project where id=#{id}")
     public Project getProjectData(int id);
