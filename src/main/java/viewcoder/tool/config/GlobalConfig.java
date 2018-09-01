@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -21,13 +22,14 @@ public class GlobalConfig {
     private final static String TARGET_ENV = "TARGET_ENV";
     private static Properties props = new Properties();
     private static int cores = Runtime.getRuntime().availableProcessors();
+    private static String targetEnvironment;
 
     //加载properties文件信息
     static {
         InputStream inputStream = null;
         try {
             //从Jenkins中获取设置的目标environment
-            String targetEnvironment = System.getenv(TARGET_ENV);
+            targetEnvironment = System.getenv(TARGET_ENV);
             if (!CommonService.checkNotNull(targetEnvironment)) {
                 targetEnvironment = Common.DEV_ENVIRONMENT;
             }
@@ -131,5 +133,13 @@ public class GlobalConfig {
 
     public static int getCores() {
         return cores;
+    }
+
+    /**
+     * 是否为生产环境的设置
+     * @return
+     */
+    public static boolean isProdEnv(){
+        return Objects.equals(targetEnvironment, Common.PROD_ENVIRONMENT);
     }
 }

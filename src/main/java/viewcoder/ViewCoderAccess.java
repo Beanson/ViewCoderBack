@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSON;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpMessage;
-import io.netty.handler.codec.http.HttpUtil;
+import io.netty.handler.codec.http.*;
 import org.apache.log4j.Logger;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.company.CompanyOpt;
@@ -46,11 +43,13 @@ public class ViewCoderAccess {
     /**
      * 无需获取登录状态才能访问的链接请求
      *
-     * @param uri uri请求地址
+     * @param request request请求对象
      * @param msg request请求护具
      * @param ctx 返回通道
      */
-    public static boolean nonLoginAccess(String uri, Object msg, ChannelHandlerContext ctx) {
+    public static boolean nonLoginAccess(HttpRequest request, Object msg, ChannelHandlerContext ctx) {
+        //获取uri数据
+        String uri = request.uri();
 
         //记录并返回消息体是否被消费了
         boolean messagePurchase = true;
@@ -113,11 +112,14 @@ public class ViewCoderAccess {
     /**
      * 需要用户已登录状态才可访问的请求
      *
-     * @param uri uri请求地址
+     * @param request uri请求地址
      * @param msg request请求护具
      * @param ctx 返回通道
      */
-    public static void loginAccess(String uri, Object msg, ChannelHandlerContext ctx) {
+    public static void loginAccess(HttpRequest request, Object msg, ChannelHandlerContext ctx) {
+        //获取uri数据
+        String uri = request.uri();
+
         /* **************************************************************/
         /* Overall专区*/
         //根据用户id号来获取个人信息

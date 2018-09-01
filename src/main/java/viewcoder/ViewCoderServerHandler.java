@@ -14,6 +14,11 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import org.apache.log4j.Logger;
 
+import java.util.Iterator;
+import java.util.Map;
+
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.l;
+
 
 public class ViewCoderServerHandler extends SimpleChannelInboundHandler<Object> {
     private static Logger logger = Logger.getLogger(ViewCoderServerHandler.class);
@@ -32,7 +37,6 @@ public class ViewCoderServerHandler extends SimpleChannelInboundHandler<Object> 
         if (msg != null) {
             if (msg instanceof HttpRequest) {
                 HttpRequest request = (HttpRequest) msg;
-                String uri = request.uri();
 
                 //OPTIONS类型的方法，直接返回
                 if (request.method() == HttpMethod.OPTIONS) {
@@ -41,9 +45,15 @@ public class ViewCoderServerHandler extends SimpleChannelInboundHandler<Object> 
                     return;
                 }
 
-                //无需获取登录状态才能访问的链接请求
-                if (!ViewCoderAccess.nonLoginAccess(uri, msg, ctx)) {
+                //异源请求filter监听
+                if(!QuickLoginVerify.validateCrossReq(request)){
+                    ViewCoderServerHandler.logger.debug("Come from invalid cross origin");
+                    ViewCoderAccess.httpResponse(ctx, msg, new ResponseData(StatusCode.ERROR.getValue()));
+                    return;
+                }
 
+                //无需获取登录状态才能访问的链接请求
+                if (!ViewCoderAccess.nonLoginAccess(request, msg, ctx)) {
                     //需要获取登录状态才能访问的链接请求，防止重复登录可操作的请求
                     if (QuickLoginVerify.checkLoginSession(request) == Common.RELOGIN_ALERT) {
                         ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
@@ -52,8 +62,8 @@ public class ViewCoderServerHandler extends SimpleChannelInboundHandler<Object> 
 
                     } else {
                         //登录状态才能访问的链接请求
-                        CommonService.printHttpInvokeFunction(uri);
-                        ViewCoderAccess.loginAccess(uri, msg, ctx);
+                        CommonService.printHttpInvokeFunction(request.uri());
+                        ViewCoderAccess.loginAccess(request, msg, ctx);
                     }
                 }
             }

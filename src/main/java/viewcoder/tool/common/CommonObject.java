@@ -21,6 +21,7 @@ public class CommonObject {
     private static final Map<Integer, Integer> serviceSpace = new HashMap<>();
     private static final List<ProjectProgress> progressList = new ArrayList<ProjectProgress>(); //装载后台渲染生成页面的进度
     private static final Map<Integer, String> loginVerify = new HashMap<>();//用户登录时验证的userId:sessionId等信息；
+    private static final List<String> validCross = new ArrayList<>(); //http请求时的合法请求域
 
     static {
         //初始化积分兑换套餐的数据
@@ -55,6 +56,13 @@ public class CommonObject {
 
         //xml的map
         xmlMap.put("msg", "msg/msg.xml");
+
+        //添加http请求时合法的请求域
+        validCross.add("http://beansonbar.com");
+        validCross.add("http://www.beansonbar.com");
+        validCross.add("http://liphin.com");
+        validCross.add("http://www.liphin.com");
+        validCross.add("http://119.23.40.181");
     }
 
     public static Map<Integer, Integer> getServiceToPoints() {
@@ -89,4 +97,7 @@ public class CommonObject {
         return loginVerify;
     }
 
+    public static List<String> getValidCross() {
+        return validCross;
+    }
 }

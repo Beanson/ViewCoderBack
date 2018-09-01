@@ -77,27 +77,6 @@ public class ViewCoderServer {
         ViewCoderServer.logger.debug("idle: " + WebDriverPool.getPool().getNumIdle() +
                         " num total:" + WebDriverPool.getPool().getNumActive() +
                         " waiter:" + WebDriverPool.getPool().getNumWaiters());
-
-        //test();
     }
 
-
-    /**
-     * 临时测试方法
-     */
-    public static void test(){
-        SqlSession sqlSession = MybatisUtils.getSession();
-        try{
-            List<Project> projects = sqlSession.selectList("getAllRelatedProject", 140);
-            System.out.println(projects);
-            System.out.println(CommonService.checkNotNull(projects));
-
-        }catch (Exception e){
-            logger.error(e);
-
-        }finally {
-            System.out.println("-----------------------------------come to close");
-            sqlSession.close();
-        }
-    }
 }
