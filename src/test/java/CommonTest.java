@@ -201,6 +201,10 @@ public class CommonTest {
         byte[] decode = Hex.decodeHex(str.toCharArray());
         System.out.println(new String(decode, "UTF-8"));
     }
+
+
+
+
 }
 
 

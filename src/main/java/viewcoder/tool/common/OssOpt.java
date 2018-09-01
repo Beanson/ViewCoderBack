@@ -196,11 +196,11 @@ public class OssOpt {
      *
      * @param ossClient
      * @param file
-     * @param openness
+     * @param ack
      */
-    public static void updateAclConfig(OSSClient ossClient, String file, boolean openness) {
+    public static void updateAclConfig(OSSClient ossClient, String file, boolean ack) {
         //根据是否公开设置其访问权限
-        if (openness) {
+        if (ack) {
             ossClient.setObjectAcl(VIEWCODER_BUCKET, file, CannedAccessControlList.PublicRead);
         } else {
             ossClient.setObjectAcl(VIEWCODER_BUCKET, file, CannedAccessControlList.Private);

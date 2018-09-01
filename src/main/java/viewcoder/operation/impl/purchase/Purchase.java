@@ -409,12 +409,12 @@ public class Purchase {
     /**
      * 发送邮件和短信告知用户购置服务成功
      */
-    private static void notifyUserPurchaseSuccess(User user, Orders order) {
+    public static void notifyUserPurchaseSuccess(User user, Orders order) {
 
         String message = "";
         try {
             //邮件服务初始化
-            MailEntity mailEntity = new MailEntity(user.getEmail(), Common.MAIL_SERVICE_EXPIRE_INFORM, Common.MAIL_HTML_TYPE);
+            MailEntity mailEntity = new MailEntity(user.getEmail(), Common.MAIL_SERVICE_PURCHASE_INFORM, Common.MAIL_HTML_TYPE);
 
             Map<String, String> replaceData = new HashMap<String, String>();
             String templateId = Common.MSG_TEMPLEATE_PURCHASE;
@@ -440,6 +440,7 @@ public class Purchase {
             Purchase.logger.error(message, e);
         }
     }
+
 
 
     /**

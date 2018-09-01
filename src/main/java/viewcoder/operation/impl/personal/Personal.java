@@ -1,9 +1,6 @@
 package viewcoder.operation.impl.personal;
 
-import viewcoder.tool.common.Assemble;
-import viewcoder.tool.common.Common;
-import viewcoder.tool.common.Mapper;
-import viewcoder.tool.common.OssOpt;
+import viewcoder.tool.common.*;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.parser.form.FormData;
 import viewcoder.tool.util.MybatisUtils;
@@ -39,24 +36,24 @@ public class Personal {
         try {
             //获取用户新数据信息
             User user = (User) FormData.getParam(msg, User.class);
-            //获取用户旧数据
-            User userOrigin = sqlSession.selectOne(Mapper.GET_USER_DATA, user.getId());
-            int num = sqlSession.update(Mapper.UPDATE_USER_INFO, user);
-            //如果更改条目大于0则继续进行
-            if (num > 0) {
-                //如果上传有新的portrait文件则进行更新到OSS操作
-                if (user.getPortrait_file() != null) {
-                    //若非默认portrait则删除旧portrait
-                    if(!userOrigin.getPortrait().equals(Common.DEFAULT_PORTRAIT)){
-                        String oldPortraitToOss = GlobalConfig.getOssFileUrl(Common.PORTRAIT_IMG) + userOrigin.getPortrait();
-                        OssOpt.deleteFileInOss(oldPortraitToOss, ossClient);
-                    }
-                    //创建新的portrait
-                    String newPortraitToOss = GlobalConfig.getOssFileUrl(Common.PORTRAIT_IMG) + user.getPortrait();
-                    OssOpt.uploadFileToOss(newPortraitToOss, user.getPortrait_file().get(), ossClient);
+            //新的头像数据不为空则插入oss
+            if(CommonService.checkNotNull(user.getPortrait_file())){
+                //若旧的头像数据是默认头像则设置新的头像数据，否则直接覆盖旧头像数据
+                if(user.getPortrait().equals(Common.DEFAULT_PORTRAIT)){
+                    user.setPortrait(CommonService.getTimeStamp()+Common.IMG_PNG);
                 }
-                //返回封装数据到前端
-                Assemble.responseSuccessSetting(responseData, null);
+                //创建新的portrait
+                String newPortraitToOss = GlobalConfig.getOssFileUrl(Common.PORTRAIT_IMG) + user.getPortrait();
+                OssOpt.uploadFileToOss(newPortraitToOss, user.getPortrait_file().get(), ossClient);
+            }
+
+            //更新数据库操作
+            int num = sqlSession.update(Mapper.UPDATE_USER_INFO, user);
+            if (num > 0) {
+                //返回最新user数据
+                User userNew = sqlSession.selectOne(Mapper.GET_USER_DATA, user.getId());
+                userNew.setSession_id(CommonObject.getLoginVerify().get(user.getId()));
+                Assemble.responseSuccessSetting(responseData, userNew);
 
             } else {
                 message = "Personal updateUserInfo num: " + num;

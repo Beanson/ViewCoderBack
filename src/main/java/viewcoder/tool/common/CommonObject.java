@@ -39,7 +39,7 @@ public class CommonObject {
         serviceName.put(1,"体验套餐");
         serviceName.put(2,"月套餐");
         serviceName.put(3,"年套餐");
-        serviceName.put(3,"商务套餐");
+        serviceName.put(4,"商务套餐");
 
         //套餐单位
         serviceUnit.put(1,"天");

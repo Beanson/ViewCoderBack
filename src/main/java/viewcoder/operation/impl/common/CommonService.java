@@ -208,6 +208,8 @@ public class CommonService {
         int targetACK = ACK ? 1 : 0;
         User user = new User(userId, targetACK);
         sqlSession.update(Mapper.UPDATE_USER_ACK, user);
+        //自发commit
+        sqlSession.commit();
     }
 
 }

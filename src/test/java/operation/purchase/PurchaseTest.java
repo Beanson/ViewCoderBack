@@ -2,13 +2,23 @@ package operation.purchase;
 
 import com.alipay.api.internal.util.StringUtils;
 import com.alipay.api.internal.util.codec.Base64;
+import com.aliyun.oss.OSSClient;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.ibatis.session.SqlSession;
 import viewcoder.operation.entity.Orders;
+import viewcoder.operation.entity.User;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.operation.impl.purchase.AliPay;
 import org.apache.log4j.Logger;
 import org.junit.Test;
+import viewcoder.operation.impl.purchase.Purchase;
+import viewcoder.tool.common.Common;
+import viewcoder.tool.common.CommonObject;
+import viewcoder.tool.common.OssOpt;
+import viewcoder.tool.config.GlobalConfig;
+import viewcoder.tool.msg.MsgHelper;
+import viewcoder.tool.util.MybatisUtils;
 
 import java.io.ByteArrayInputStream;
 import java.security.KeyFactory;
@@ -127,7 +137,59 @@ public class PurchaseTest {
         String content = "hello world";
         byte[]a = content.getBytes();
         System.out.println(new String(a));
-        //System.out.println(Base64.decodeBase64());
+    }
+
+    @Test
+    public void sendMailMsgToNewPurchase(){
+        User user = new User();
+        user.setUser_name("beanson");
+        user.setEmail("2920248385@qq.com");
+        user.setPhone("18316433415");
+        Orders order = new Orders();
+        order.setService_id(3);
+        order.setService_num(2);
+        order.setExpire_date("2018-09-02 00:00:00");
+        Purchase.notifyUserPurchaseSuccess(user, order);
+    }
+
+    @Test
+    public void sendMsg(){
+        Map<String, String> replaceData = new HashMap<String, String>();
+        String templateId = Common.MSG_TEMPLEATE_PURCHASE;
+
+        User user = new User();
+        user.setUser_name("beanson");
+        user.setEmail("2920248385@qq.com");
+        user.setPhone("18316433415");
+        Orders order = new Orders();
+        order.setService_id(3);
+        order.setService_num(2);
+        order.setExpire_date("2018-09-02 00:00:00");
+
+        //准备替换原文的用户数据
+        replaceData.put("name", user.getUser_name());
+        replaceData.put("service", CommonObject.getServiceName(order.getService_id()));
+        replaceData.put("time", order.getExpire_date());
+        replaceData.put("service_length", order.getService_num() + " " + CommonObject.getServiceUnit(order.getService_id()));
+
+        //发送短信操作${name} ${service}
+        MsgHelper.sendSingleMsg(templateId, replaceData, user.getPhone(), Common.MSG_SIGNNAME_LIPHIN);
+    }
+
+    @Test
+    public void setACK(){
+        SqlSession sqlSession = MybatisUtils.getSession();
+        OSSClient ossClient = OssOpt.initOssClient();
+        try {
+            CommonService.setACKOpt(sqlSession, ossClient, 30,true);
+
+        }catch (Exception e){
+            logger.error(e);
+
+        }finally {
+            sqlSession.close();
+            OssOpt.shutDownOssClient(ossClient);
+        }
     }
 
 }

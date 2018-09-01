@@ -108,7 +108,8 @@ public class Common {
     public static String MAIL_PORT = "com.viewcoder.mail.port";
     public static String MAIL_AUTH = "com.viewcoder.mail.auth";
     public static String MAIL_TIMEOUT = "com.viewcoder.mail.timeout";
-    public static String MAIL_SERVICE_EXPIRE_INFORM = "ViewCoder实例即将到期提醒";
+    public static String MAIL_SERVICE_EXPIRE_INFORM = "ViewCoder套餐即将到期提醒";
+    public static String MAIL_SERVICE_PURCHASE_INFORM = "ViewCoder套餐购置成功提醒";
 
     //阿里云短信服务配置
     public static final String MSG_PRODUCT = "com.viewcoder.msg.product";
