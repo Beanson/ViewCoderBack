@@ -398,6 +398,7 @@ public class Purchase {
             Purchase.logger.error(message, e);
 
         } finally {
+            OssOpt.shutDownOssClient(ossClient);
             //最后需要关闭sql，防止进入exception没有close
             if (sqlSession != null) {
                 sqlSession.close();
