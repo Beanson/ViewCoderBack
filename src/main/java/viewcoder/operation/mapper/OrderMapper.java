@@ -41,12 +41,15 @@ public interface OrderMapper {
 
     //获取已过期的实例订单，在每天update -1之前
     @Select("select * from orders where expire_days=0")
-    public List<Orders> getExpiredOrderInstance(int user_id);
+    List<Orders> getExpiredOrderInstance(int user_id);
 
     //选择即将过期和已经过期的订单实例
     @Select("select * from orders where expire_days in (0, 1, 3, 7)")
-    public List<Orders> getToExpireOrderInstance();
+    List<Orders> getToExpireOrderInstance();
 
+    //根据订单id获取该订单的支付状态信息
+    @Select("select pay_status from orders where id=#{id}")
+    Orders getPayStatusById(int id);
 
 
     /**************************以下是insert操作**********************************/

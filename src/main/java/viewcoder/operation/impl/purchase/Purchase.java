@@ -282,6 +282,38 @@ public class Purchase {
 
 
     /**
+     * 获取支付状态信息
+     *
+     * @param orders 订单数据
+     * @return
+     */
+    public static boolean getPayStatus(Orders orders) {
+        SqlSession sqlSession = MybatisUtils.getSession();
+        boolean payStatusMark = false;
+        String message = "";
+        try {
+            Orders orderTarget = sqlSession.selectOne(Mapper.GET_PAY_STATUS_BY_ID, orders.getId());
+            if(CommonService.checkNotNull(orderTarget)){
+                //支付状态为0则需进行支付更新
+                if (orderTarget.getPay_status() == 0) {
+                    payStatusMark = true;
+                }
+                message = "get payStatus info " + orderTarget.getPay_status();
+                Purchase.logger.debug(message);
+            }
+
+        } catch (Exception e) {
+            message = "sys error";
+            Purchase.logger.error(message, e);
+
+        } finally {
+            sqlSession.close();
+        }
+        return payStatusMark;
+    }
+
+
+    /**
      * 设置订单服务的下单支付时间和过期时间
      *
      * @param orders 订单服务
@@ -381,9 +413,9 @@ public class Purchase {
 
             //若该user之前由于到期而禁用访问权限ack，购买成功过后重新设置
             User user = sqlSession.selectOne(Mapper.GET_USER_DATA, orders.getUser_id());
-            if(user.getAck()==0){
-                if(user.getResource_total()-user.getResource_used()>0){
-                    CommonService.setACKOpt(sqlSession, ossClient, orders.getUser_id(),true);
+            if (user.getAck() == 0) {
+                if (user.getResource_total() - user.getResource_used() > 0) {
+                    CommonService.setACKOpt(sqlSession, ossClient, orders.getUser_id(), true);
                 }
             }
             //发送邮件之前提交和关闭sql
@@ -441,7 +473,6 @@ public class Purchase {
             Purchase.logger.error(message, e);
         }
     }
-
 
 
     /**
@@ -637,7 +668,7 @@ public class Purchase {
             //设置一直到最后一天的凌晨12点整
             Calendar expireDate = Calendar.getInstance();
             expireDate.add(Calendar.DATE, Common.SERVICE_TRY_NUM);
-            expireDate.add(Calendar.DATE,1);
+            expireDate.add(Calendar.DATE, 1);
             expireDate.set(Calendar.HOUR_OF_DAY, 0);
             expireDate.set(Calendar.MINUTE, 0);
             expireDate.set(Calendar.SECOND, 0);

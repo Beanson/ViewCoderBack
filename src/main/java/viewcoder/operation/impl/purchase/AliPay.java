@@ -158,15 +158,19 @@ public class AliPay {
             //从交易记录解析出该订单信息
             Orders orders = JSON.parseObject(URLDecoder.decode(
                     params.get(Common.PAY_ALI_KEY_PASSBACK_PARAMS), Common.UTF8), Orders.class);
-            //设置订单的购买时间和到期时间
-            Purchase.updateOrderTime(orders);
-            //设置外部订单号和支付宝交易号
-            orders.setOut_trade_no(out_trade_no);
-            orders.setTrade_no(trade_no);
-            Purchase.updateOrderStatus(orders);
-            Purchase.updateUserResourceSpace(orders);
-            message = "verifyOrderLogic Trade success notify";
-            AliPay.logger.debug(message);
+
+            //获取订单信息状态，若尚未更新则返回false，继续下面更新订单操作；否则返回true不继续操作
+            if (Purchase.getPayStatus(orders)){
+                //设置订单的购买时间和到期时间
+                Purchase.updateOrderTime(orders);
+                //设置外部订单号和支付宝交易号
+                orders.setOut_trade_no(out_trade_no);
+                orders.setTrade_no(trade_no);
+                Purchase.updateOrderStatus(orders);
+                Purchase.updateUserResourceSpace(orders);
+                message = "verifyOrderLogic Trade success notify";
+                AliPay.logger.debug(message);
+            }
         }
     }
 }

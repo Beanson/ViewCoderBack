@@ -130,16 +130,20 @@ public class WechatPay {
                     //获取回传的附加数据，并更新数据库
                     Orders orders = JSON.parseObject(URLDecoder.decode(
                             packageParams.get(Common.PAY_WECHAT_KEY_ATTACH), Common.UTF8), Orders.class);
-                    //设置订单的购买时间和到期时间
-                    Purchase.updateOrderTime(orders);
-                    //设置外部订单号和支付宝交易号
-                    orders.setOut_trade_no(packageParams.get(Common.PAY_WECHAT_KEY_OUT_TRADE_NO));
-                    orders.setTrade_no(packageParams.get(Common.PAY_WECHAT_TRANSACTION_ID));
-                    Purchase.updateOrderStatus(orders);
-                    Purchase.updateUserResourceSpace(orders);
 
-                    message = "Get wechatPay notify success";
-                    WechatPay.logger.debug(message);
+                    //获取订单信息状态，若尚未更新则返回false，继续下面更新订单操作；否则返回true则不继续执行操作
+                    if (Purchase.getPayStatus(orders)){
+                        //设置订单的购买时间和到期时间
+                        Purchase.updateOrderTime(orders);
+                        //设置外部订单号和支付宝交易号
+                        orders.setOut_trade_no(packageParams.get(Common.PAY_WECHAT_KEY_OUT_TRADE_NO));
+                        orders.setTrade_no(packageParams.get(Common.PAY_WECHAT_TRANSACTION_ID));
+                        Purchase.updateOrderStatus(orders);
+                        Purchase.updateUserResourceSpace(orders);
+
+                        message = "Get wechatPay notify success";
+                        WechatPay.logger.debug(message);
+                    }
 
                 } else {
                     message = "wechatPay failure";

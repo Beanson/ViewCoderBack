@@ -106,6 +106,7 @@ public class Mapper {
     public static final String GET_ORDER_INSTANCE_BY_USER_ID = "getOrderInstanceByUserId";
     public static final String GET_EXPIRED_ORDER_INSTANCE = "getExpiredOrderInstance";
     public static final String GET_TO_EXPIRE_ORDER_INSTANCE = "getToExpireOrderInstance";
+    public static final String GET_PAY_STATUS_BY_ID = "getPayStatusById";
 
     //insert
     public static final String INSERT_NEW_ORDER_ITEM = "insertNewOrderItem";

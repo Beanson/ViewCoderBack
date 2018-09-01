@@ -37,6 +37,7 @@ public class ViewCoderServerHandler extends SimpleChannelInboundHandler<Object> 
         if (msg != null) {
             if (msg instanceof HttpRequest) {
                 HttpRequest request = (HttpRequest) msg;
+                CommonService.printHttpInvokeFunction(request.uri());
 
                 //OPTIONS类型的方法，直接返回
                 if (request.method() == HttpMethod.OPTIONS) {
@@ -64,7 +65,6 @@ public class ViewCoderServerHandler extends SimpleChannelInboundHandler<Object> 
 
                         } else {
                             //登录状态才能访问的链接请求
-                            CommonService.printHttpInvokeFunction(request.uri());
                             ViewCoderAccess.loginAccess(request, msg, ctx);
                         }
                     }

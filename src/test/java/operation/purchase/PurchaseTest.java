@@ -192,4 +192,12 @@ public class PurchaseTest {
         }
     }
 
+    @Test
+    public void test(){
+        Orders orders = new Orders();
+        orders.setId(2);
+        System.out.println(Purchase.getPayStatus(orders));
+    }
+
+
 }

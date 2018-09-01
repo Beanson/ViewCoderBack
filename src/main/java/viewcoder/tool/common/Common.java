@@ -28,8 +28,8 @@ public class Common {
     //后台返回status_code
     public final static int STATUS_CODE_OK = 200;
     public final static String STATUS_OK = "OK";
-    public final static String SUCCESS = "SUCCESS";
-    public final static String FAIL = "FAIL";
+    public final static String SUCCESS = "success";
+    public final static String FAIL = "fail";
 
     //PSD文件解析出来后的组件类型
     public final static String COMMON_IMAGE = "Common_Image";
