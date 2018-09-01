@@ -35,8 +35,7 @@ public interface OrderMapper {
     @Select("select * from orders where company_credit=#{companyCredit}")
     List<Orders> getCompanyDiscountOrder(String companyCredit);
 
-    @Select("select out_trade_no, service_id, service_num, pay_date, expire_date, expire_days from " +
-            "orders where user_id=#{user_id} and expire_days>=0 ")
+    @Select("select * from orders where user_id=#{user_id} and expire_days>=0 ")
     List<Orders> getOrderInstanceByUserId(int userId);
 
     //获取已过期的实例订单，在每天update -1之前

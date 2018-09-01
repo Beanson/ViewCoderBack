@@ -66,9 +66,6 @@ public class ViewCoderAccess {
             String response = WechatPay.weChatPayNotify(msg);
             httpResponsePureHtml(ctx, msg, response);
         }
-        else if(uri.equals("/testPure")){
-            httpResponsePureHtml(ctx, msg, "123");
-        }
         //若尚未消费该事件，则返回false
         else {
             messagePurchase = false;
