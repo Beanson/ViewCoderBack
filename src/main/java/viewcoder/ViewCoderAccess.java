@@ -41,6 +41,41 @@ public class ViewCoderAccess {
     private static Logger logger = Logger.getLogger(ViewCoderAccess.class);
 
     /**
+     * 暴露第三方回调的url链接无需cross域验证
+     * @param request request请求对象
+     * @param msg request请求护具
+     * @param ctx 返回通道
+     * @return
+     */
+    public static boolean nonCrossVerify(HttpRequest request, Object msg, ChannelHandlerContext ctx) {
+        //获取uri数据
+        String uri = request.uri();
+
+        //记录并返回消息体是否被消费了
+        boolean messagePurchase = true;
+
+        /* **************************************************************/
+        /*Purchase专区*/
+        //更新order信息到数据库
+        if (uri.equals("/aliPayNotify")) {
+            String response = AliPay.aliPayNotify(msg);
+            httpResponsePureHtml(ctx, msg, response);
+        }
+        //更新order信息到数据库
+        else if (uri.equals("/wechatPayNotify")) {
+            String response = WechatPay.weChatPayNotify(msg);
+            httpResponsePureHtml(ctx, msg, response);
+        }
+
+        //若尚未消费该事件，则返回false
+        else {
+            messagePurchase = false;
+        }
+        return messagePurchase;
+    }
+
+
+    /**
      * 无需获取登录状态才能访问的链接请求
      *
      * @param request request请求对象
@@ -101,6 +136,7 @@ public class ViewCoderAccess {
             ResponseData response = Overall.sendSuggestion(msg);
             httpResponse(ctx, msg, response);
         }
+
         //若尚未消费该事件，则返回false
         else {
             messagePurchase = false;
@@ -184,16 +220,7 @@ public class ViewCoderAccess {
                 httpResponse(ctx, msg, response);
             }
         }
-        //更新order信息到数据库
-        else if (uri.equals("/aliPayNotify")) {
-            String response = AliPay.aliPayNotify(msg);
-            httpResponsePureHtml(ctx, msg, response);
-        }
-        //更新order信息到数据库
-        else if (uri.equals("/wechatPayNotify")) {
-            String response = WechatPay.weChatPayNotify(msg);
-            httpResponsePureHtml(ctx, msg, response);
-        }
+
         //下载支付哈希凭证信息
         //Deprecated
         else if (uri.equals("/getPayInfo")) {

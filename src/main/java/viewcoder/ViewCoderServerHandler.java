@@ -45,25 +45,28 @@ public class ViewCoderServerHandler extends SimpleChannelInboundHandler<Object> 
                     return;
                 }
 
-                //异源请求filter监听
-                if(!QuickLoginVerify.validateCrossReq(request)){
-                    ViewCoderServerHandler.logger.debug("Come from invalid cross origin");
-                    ViewCoderAccess.httpResponse(ctx, msg, new ResponseData(StatusCode.ERROR.getValue()));
-                    return;
-                }
+                //暴露第三方回调的url链接无需cross域验证
+                if(!ViewCoderAccess.nonCrossVerify(request, msg, ctx)){
+                    //异源请求filter验证
+                    if(!QuickLoginVerify.validateCrossReq(request)){
+                        ViewCoderServerHandler.logger.debug("Come from invalid cross origin");
+                        ViewCoderAccess.httpResponse(ctx, msg, new ResponseData(StatusCode.ERROR.getValue()));
+                        return;
+                    }
 
-                //无需获取登录状态才能访问的链接请求
-                if (!ViewCoderAccess.nonLoginAccess(request, msg, ctx)) {
-                    //需要获取登录状态才能访问的链接请求，防止重复登录可操作的请求
-                    if (QuickLoginVerify.checkLoginSession(request) == Common.RELOGIN_ALERT) {
-                        ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
-                        responseData.setVerify_code(StatusCode.RELOGIN_ALERT.getValue());
-                        ViewCoderAccess.httpResponse(ctx, msg, responseData);
+                    //无需获取登录状态才能访问的链接请求
+                    if (!ViewCoderAccess.nonLoginAccess(request, msg, ctx)) {
+                        //需要获取登录状态才能访问的链接请求，防止重复登录可操作的请求
+                        if (QuickLoginVerify.checkLoginSession(request) == Common.RELOGIN_ALERT) {
+                            ResponseData responseData = new ResponseData(StatusCode.ERROR.getValue());
+                            responseData.setVerify_code(StatusCode.RELOGIN_ALERT.getValue());
+                            ViewCoderAccess.httpResponse(ctx, msg, responseData);
 
-                    } else {
-                        //登录状态才能访问的链接请求
-                        CommonService.printHttpInvokeFunction(request.uri());
-                        ViewCoderAccess.loginAccess(request, msg, ctx);
+                        } else {
+                            //登录状态才能访问的链接请求
+                            CommonService.printHttpInvokeFunction(request.uri());
+                            ViewCoderAccess.loginAccess(request, msg, ctx);
+                        }
                     }
                 }
             }

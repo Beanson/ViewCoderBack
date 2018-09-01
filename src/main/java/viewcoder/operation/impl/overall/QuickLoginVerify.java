@@ -26,6 +26,7 @@ public class QuickLoginVerify {
     public static boolean validateCrossReq(HttpRequest request) {
         //若不为生产环境则直接返回true，否则进行验证操作
         if(!GlobalConfig.isProdEnv()) return true;
+        String message = "";
 
         String origin = request.headers().get("origin");
         String referer = request.headers().get("referer");
@@ -39,6 +40,8 @@ public class QuickLoginVerify {
 
         } else {
             //若origin和referer均为空则该请求非法
+            message = "Invalid cross origin is null";
+            QuickLoginVerify.logger.warn(message);
             return false;
         }
 
@@ -53,7 +56,8 @@ public class QuickLoginVerify {
 
         //打印非法域信息
         if (!checkStatus) {
-            QuickLoginVerify.logger.warn("Invalid cross: " + validateStr);
+            message = "Invalid cross: " + validateStr;
+            QuickLoginVerify.logger.warn(message);
         }
 
         return checkStatus;
