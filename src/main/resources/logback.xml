@@ -17,7 +17,7 @@
     <!--设定普通所有日志打印-->
     <appender name="DEBUG_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!--保持最新的日志打印记录，达到指定size后自动写到debug里面-->
-        <file>/root/viewcoder/back/run/log/viewcoder.log</file>
+        <!--<file>/root/viewcoder/back/run/log/viewcoder.log</file>-->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- 每天打印日志 , .%i自动扩展0,1,2,3 ... -->
             <fileNamePattern>/root/viewcoder/back/run/log/debug/%d{yyyy-MM-dd}/viewcoder_debug_%d{yyyy-MM-dd}_%i.log</fileNamePattern>

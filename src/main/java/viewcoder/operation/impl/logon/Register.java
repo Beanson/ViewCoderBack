@@ -114,10 +114,12 @@ public class Register {
                     user.setPassword(null);
                     //赋予该用户session_id
                     user.setSession_id(CommonService.getTimeStamp());
-                    //正确返回操作
-                    Assemble.responseSuccessSetting(responseData, user);
+                    //赋予该用户ack权限为1，返回验证时需要该ack字段
+                    user.setAck(1);
                     //插入userId : sessionId 的map数据到object中
                     CommonObject.getLoginVerify().put(user.getId(), user.getSession_id());
+                    //正确返回操作
+                    Assemble.responseSuccessSetting(responseData, user);
 
                 } else {
                     //添加记录数目等于0，则添加失败

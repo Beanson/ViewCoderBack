@@ -69,7 +69,6 @@ public class ViewCoderServer {
         ViewCoderServer.logger.debug("idle: " + WebDriverPool.getPool().getNumIdle() +
                         " num total:" + WebDriverPool.getPool().getNumActive() +
                         " waiter:" + WebDriverPool.getPool().getNumWaiters());
-        ViewCoderServer.logger.error("makeer", "error");
     }
 
 }
