@@ -37,7 +37,7 @@ public class JobImpl {
             Trigger trigger = TriggerBuilder
                     .newTrigger()
                     .withIdentity("ThreeAMTrigger", "version1")
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 3 * * ?")) //每日凌晨3点去跑资源空间释放的job   0 0 3 * * ?
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0 10 19 * * ?")) //每日凌晨3点去跑资源空间释放的job   0 0 3 * * ?
                     .build();
 
             //schedule it
@@ -65,7 +65,7 @@ public class JobImpl {
             Trigger trigger = TriggerBuilder
                     .newTrigger()
                     .withIdentity("HalfPassThreePMTrigger", "version1")
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0 36 18 * * ?")) //每天下午3点半跑提醒过期客户的job
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 19 * * ?")) //每天下午10点跑提醒过期客户的job   0 0 10 * * ?
                     .build();
 
             //schedule it
