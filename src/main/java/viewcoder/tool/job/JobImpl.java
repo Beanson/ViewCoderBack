@@ -13,12 +13,14 @@ public class JobImpl {
 
     private static Logger logger = LoggerFactory.getLogger(JobImpl.class);
 
-    static {
+    //实例化后即刻run task
+    public JobImpl() {
+
         //A. 每天午夜task去update用户的信息数据
-        //midNightTask();
+        midNightTask();
 
         //B. 每天提醒即将过期客户信息job
-        //expireTask();
+        expireTask();
     }
 
 
@@ -35,13 +37,14 @@ public class JobImpl {
             Trigger trigger = TriggerBuilder
                     .newTrigger()
                     .withIdentity("ThreeAMTrigger", "version1")
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 3 * * ?")) //每日凌晨3点去跑job
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 3 * * ?")) //每日凌晨3点去跑资源空间释放的job   0 0 3 * * ?
                     .build();
 
             //schedule it
             Scheduler scheduler = new StdSchedulerFactory().getScheduler();
             scheduler.start();
             scheduler.scheduleJob(job, trigger); //开始触发run task
+            JobImpl.logger.debug("Run midNightTask");
 
         } catch (Exception e) {
             JobImpl.logger.warn("midNightTask failure", e);
@@ -62,13 +65,14 @@ public class JobImpl {
             Trigger trigger = TriggerBuilder
                     .newTrigger()
                     .withIdentity("HalfPassThreePMTrigger", "version1")
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0 30 15 * * ?")) //每日凌晨3点去跑job
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0 36 18 * * ?")) //每天下午3点半跑提醒过期客户的job
                     .build();
 
             //schedule it
             Scheduler scheduler = new StdSchedulerFactory().getScheduler();
             scheduler.start();
             scheduler.scheduleJob(job, trigger); //开始触发run task
+            JobImpl.logger.debug("Run expireTask");
 
         } catch (Exception e) {
             JobImpl.logger.warn("expireTask failure", e);

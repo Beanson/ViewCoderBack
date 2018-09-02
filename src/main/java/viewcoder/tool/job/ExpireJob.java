@@ -60,7 +60,7 @@ public class ExpireJob implements Job {
             //orders表中所有expire_days为0, 1, 3, 7天且pay_way不为0的（非优惠方式）
             List<Orders> orders = sqlSession.selectList(Mapper.GET_TO_EXPIRE_ORDER_INSTANCE);
 
-            //判空处理，若空返回
+            //判空处理，若空则返回
             if (!CommonService.checkNotNull(orders)) return;
 
             //对每条order信息进行发送信息提醒
@@ -71,9 +71,9 @@ public class ExpireJob implements Job {
             for (Orders order : orders) {
                 int space = CommonObject.getServiceSpace(order.getService_id());
                 User user = sqlSession.selectOne(Mapper.GET_USER_MAIL_PHONE_DATA, order.getUser_id());
-                //判空返回处理
-                if (!CommonService.checkNotNull(user) && !CommonService.checkNotNull(user.getEmail()) &&
-                        !CommonService.checkNotNull(user.getPhone()) && space <= 0) continue;
+                //判空继续下一条记录
+                if (!CommonService.checkNotNull(user) || !CommonService.checkNotNull(user.getEmail()) ||
+                        !CommonService.checkNotNull(user.getPhone()) || space <= 0) continue;
 
                 //邮件服务初始化
                 MailEntity mailEntity = new MailEntity(user.getEmail(), Common.MAIL_SERVICE_EXPIRE_INFORM, Common.MAIL_HTML_TYPE);
@@ -83,7 +83,7 @@ public class ExpireJob implements Job {
                 replaceData.put("name", user.getUser_name());
                 replaceData.put("service", CommonObject.getServiceName(order.getService_id()));
                 replaceData.put("time", order.getExpire_date());
-                replaceData.put("days", String.valueOf(expireDays));
+                replaceData.put("day", String.valueOf(expireDays));
 
                 //发送短信操作${name} ${service} ${time} ${days}
                 MsgHelper.sendSingleMsg(templateId, replaceData, user.getPhone(), Common.MSG_SIGNNAME_LIPHIN);

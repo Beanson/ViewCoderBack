@@ -69,7 +69,6 @@ public class Mapper {
     public static final String LOGON_VALIDATION = "loginValidation";
     public static final String SIGN_ACCOUNT_CHECK = "signAccountCheck";
     public static final String REGISTER_ACCOUNT_CHECK = "registerAccountCheck";
-    public static final String GET_ORIGIN_PORTRAIT_NAME = "getOriginPortraitName";
     public static final String GET_USER_RESOURCE_SPACE_INFO = "getUserResourceSpaceInfo";
     public static final String GET_TOTAL_POINTS = "getTotalPoints";
     public static final String GET_USER_SPACE_INFO = "getUserSpaceInfo";

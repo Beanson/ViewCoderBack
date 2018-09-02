@@ -18,6 +18,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import viewcoder.tool.job.JobImpl;
 import viewcoder.tool.pool.WebDriverPool;
 /**
  * An HTTP server that sends back the content of the received HTTP request
@@ -69,6 +70,8 @@ public class ViewCoderServer {
         ViewCoderServer.logger.debug("idle: " + WebDriverPool.getPool().getNumIdle() +
                         " num total:" + WebDriverPool.getPool().getNumActive() +
                         " waiter:" + WebDriverPool.getPool().getNumWaiters());
+        //batch job运行
+        new JobImpl();
     }
 
 }

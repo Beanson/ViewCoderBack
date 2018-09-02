@@ -37,10 +37,6 @@ public interface UserMapper {
     @Select("select email, phone from user where email=#{email} or phone=#{phone}")
     public User registerAccountCheck(User user);
 
-    //获取用户原portrait数据信息
-    @Select("select portrait from user where id=#{id}")
-    public String getOriginPortraitName(String user_id);
-
     //根据user_id获取用户剩余使用空间
     @Select("select id, resource_total, resource_used from user where id=#{userId}")
     public User getUserResourceSpaceInfo(int userId);
@@ -59,7 +55,7 @@ public interface UserMapper {
 
     //根据openid获取用户的数据
     @Select("select id, user_name, email, phone from user where id=#{userId}")
-    public User getUserMailPhoneData(String userId);
+    public User getUserMailPhoneData(int userId);
 
 
 

@@ -367,6 +367,7 @@ function getImgProperty(ele, obj, src) {
     obj['bg-position-top'] = parseInt(css(ele, 'background-position-y'));
     obj['bg-repeat'] = css(ele, 'background-repeat');
     obj['bg-size'] = 101;
+    obj['bg-size-res'] = 'cover';
 }
 
 function getBgProperty(ele, obj) {

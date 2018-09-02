@@ -63,16 +63,13 @@ public class MidNightJob implements Job {
         OSSClient ossClient = OssOpt.initOssClient();
         Map<String, Object> map = new HashMap<>(2);
         String message = "";
-
         try {
             //获取过期订单信息
             List<Orders> ordersList = sqlSession.selectList(Mapper.GET_EXPIRED_ORDER_INSTANCE);
-
             //判空返回处理
             if (!CommonService.checkNotNull(ordersList)) {
                 return;
             }
-
             //循环更新user表resource_remain减去需要释放的表空间
             for (Orders order : ordersList) {
 
