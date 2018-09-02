@@ -37,7 +37,7 @@ public class JobImpl {
             Trigger trigger = TriggerBuilder
                     .newTrigger()
                     .withIdentity("ThreeAMTrigger", "version1")
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0 20 19 * * ?")) //每日凌晨3点去跑资源空间释放的job   0 0 3 * * ?
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0 36 20 * * ?")) //每日凌晨3点去跑资源空间释放的job   0 0 3 * * ?
                     .build();
 
             //schedule it
