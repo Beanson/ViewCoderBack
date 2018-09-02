@@ -5,11 +5,12 @@ import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.config.GlobalConfig;
 
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class WebDriverPool extends BasePooledObjectFactory<WebDriver> {
 
-    private static Logger logger = Logger.getLogger(WebDriverPool.class);
+    private static Logger logger = LoggerFactory.getLogger(WebDriverPool.class);
     private static GenericObjectPool<WebDriver> pool;
     private static String ACCEPT_SSL_CERTS = "acceptSslCerts";
 

@@ -1,9 +1,10 @@
 package operation.logon;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.util.MybatisUtils;
 import viewcoder.operation.impl.common.CommonService;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -14,7 +15,7 @@ import java.util.Map;
  */
 public class LogonTest {
 
-    private static Logger logger = Logger.getLogger(LogonTest.class);
+    private static Logger logger = LoggerFactory.getLogger(LogonTest.class);
 
     /**
      * 登录测试

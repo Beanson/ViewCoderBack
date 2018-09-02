@@ -1,8 +1,7 @@
 package viewcoder.tool.redis;
 
-import viewcoder.tool.config.GlobalConfig;
-import viewcoder.tool.encrypt.AESEncryptor;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 
 
@@ -11,7 +10,7 @@ import redis.clients.jedis.Jedis;
  */
 public class RedisJava {
 
-    private static Logger logger = Logger.getLogger(RedisJava.class);
+    private static Logger logger = LoggerFactory.getLogger(RedisJava.class);
 
     private final static String REDIS_HOST = "=com.viewcoder.redis.host";
     private final static String REDIS_PORT = "com.viewcoder.redis.port";

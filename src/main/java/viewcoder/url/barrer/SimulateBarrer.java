@@ -1,13 +1,14 @@
 package viewcoder.url.barrer;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.ProjectProgress;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.psd.entity.PsdInfo;
@@ -25,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Deprecated
 public class SimulateBarrer {
-    private static Logger logger = Logger.getLogger(SimulateBarrer.class);
+    private static Logger logger = LoggerFactory.getLogger(SimulateBarrer.class);
 
 //    public static void main(String[] args) throws Exception{
 //        //createProject("https://baidu.com", new ProjectProgress(), 1300, 700);

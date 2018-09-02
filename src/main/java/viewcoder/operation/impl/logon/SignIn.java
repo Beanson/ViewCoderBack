@@ -1,7 +1,8 @@
 package viewcoder.operation.impl.logon;
 
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.User;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.common.CommonService;
@@ -22,7 +23,7 @@ import java.util.Objects;
  */
 public class SignIn {
 
-    private static Logger logger = Logger.getLogger(SignIn.class);
+    private static Logger logger = LoggerFactory.getLogger(SignIn.class);
 
     /**
      * *******************************************************************************************************************

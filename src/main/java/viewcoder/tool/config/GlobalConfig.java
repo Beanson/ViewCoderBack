@@ -1,9 +1,10 @@
 package viewcoder.tool.config;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.common.Common;
-import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -17,7 +18,7 @@ import java.util.Properties;
  */
 public class GlobalConfig {
 
-    private static Logger logger = Logger.getLogger(GlobalConfig.class);
+    private static Logger logger = LoggerFactory.getLogger(GlobalConfig.class);
     private final static String GENERAL_CONFIG = "/config/general.properties";
     private final static String TARGET_ENV = "TARGET_ENV";
     private static Properties props = new Properties();

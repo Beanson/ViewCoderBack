@@ -4,6 +4,8 @@ import com.aliyun.oss.OSSClient;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.text.StrSubstitutor;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.exception.purchase.PayException;
 import viewcoder.tool.common.*;
 import viewcoder.tool.config.GlobalConfig;
@@ -21,7 +23,6 @@ import viewcoder.operation.entity.response.StatusCode;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.operation.impl.purchase.wechat.WechatPay;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 
 import javax.swing.plaf.PanelUI;
 import java.text.SimpleDateFormat;
@@ -32,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  * Created by Administrator on 2018/3/11.
  */
 public class Purchase {
-    private static Logger logger = Logger.getLogger(Purchase.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(Purchase.class.getName());
 
     /**
      * 刷新获取该实例方法的信息

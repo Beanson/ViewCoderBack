@@ -1,5 +1,7 @@
 package viewcoder.operation.impl.project;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.exception.project.PSDAnalysisException;
 import viewcoder.operation.entity.*;
 import viewcoder.tool.common.*;
@@ -14,7 +16,6 @@ import viewcoder.psd.entity.PsdInfo;
 import com.alibaba.fastjson.JSON;
 import com.aliyun.oss.OSSClient;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 import viewcoder.url.Simulate;
 
 import java.io.File;
@@ -25,7 +26,7 @@ import java.util.*;
  */
 public class CreateProject {
 
-    private static Logger logger = Logger.getLogger(CreateProject.class);
+    private static Logger logger = LoggerFactory.getLogger(CreateProject.class);
 
     private final static String PSD_FILE = "com.viewcoder.file.psd_parse_error";
 

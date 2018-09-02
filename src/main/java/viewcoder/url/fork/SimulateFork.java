@@ -1,12 +1,13 @@
 package viewcoder.url.fork;
 
-import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.url.SimulateTime;
 
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Deprecated
 public class SimulateFork  {
-    private static Logger logger = Logger.getLogger(SimulateFork.class);
+    private static Logger logger = LoggerFactory.getLogger(SimulateFork.class);
     private static int cores = Runtime.getRuntime().availableProcessors(); //获取CPU的核数
 
     public static void main(String[] args) {

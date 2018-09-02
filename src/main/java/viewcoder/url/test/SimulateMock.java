@@ -2,10 +2,11 @@ package viewcoder.url.test;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import org.apache.log4j.Logger;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.ProjectProgress;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.url.SimulateTime;
@@ -18,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * Created by Administrator on 2018/5/8.
  */
 public class SimulateMock {
-    private static Logger logger = Logger.getLogger(SimulateMock.class);
+    private static Logger logger = LoggerFactory.getLogger(SimulateMock.class);
 
     public static void main(String[] args) throws Exception {
         createProject("http://www.hao365.org.cn/",

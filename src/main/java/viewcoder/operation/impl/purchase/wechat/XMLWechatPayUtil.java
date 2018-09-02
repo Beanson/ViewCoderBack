@@ -1,10 +1,11 @@
 package viewcoder.operation.impl.purchase.wechat;
 
-import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -27,7 +28,7 @@ import java.util.*;
  */
 public class XMLWechatPayUtil {
 
-    private static final Logger logger = Logger.getLogger(XMLWechatPayUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(XMLWechatPayUtil.class);
 
     /**
      * 解析xml,返回第一级元素键值对。如果第一级元素有子节点，则此节点的值是子节点的xml数据。

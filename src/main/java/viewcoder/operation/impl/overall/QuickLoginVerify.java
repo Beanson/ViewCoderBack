@@ -1,7 +1,8 @@
 package viewcoder.operation.impl.overall;
 
 import io.netty.handler.codec.http.HttpRequest;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.common.CommonObject;
 import viewcoder.tool.config.GlobalConfig;
@@ -15,7 +16,7 @@ import java.util.Objects;
  */
 public class QuickLoginVerify {
 
-    private static Logger logger = Logger.getLogger(QuickLoginVerify.class);
+    private static Logger logger = LoggerFactory.getLogger(QuickLoginVerify.class);
 
     /**
      * 请求域的检测

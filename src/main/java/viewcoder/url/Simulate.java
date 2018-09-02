@@ -3,8 +3,9 @@ package viewcoder.url;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.apache.commons.text.StrSubstitutor;
-import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.ProjectProgress;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.pool.WebDriverPool;
@@ -20,7 +21,7 @@ import java.util.Objects;
  * 创建URL项目的操作核心类
  */
 public class Simulate {
-    private static Logger logger = Logger.getLogger(Simulate.class);
+    private static Logger logger = LoggerFactory.getLogger(Simulate.class);
     private static final String TEST_URL = "http://www.baidu.com";
     private static final int TOTAL_HEIGHT = 700;
 

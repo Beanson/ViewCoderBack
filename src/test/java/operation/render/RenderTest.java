@@ -1,5 +1,7 @@
 package operation.render;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.common.Mapper;
 import viewcoder.tool.config.GlobalConfig;
@@ -11,7 +13,6 @@ import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.common.CommonService;
 import com.alibaba.fastjson.JSON;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
@@ -24,7 +25,7 @@ import java.util.Map;
  */
 public class RenderTest {
 
-    private static Logger logger = Logger.getLogger(RenderTest.class);
+    private static Logger logger = LoggerFactory.getLogger(RenderTest.class);
     private boolean TEST_INTEGRATION = GlobalConfig.getBooleanProperties(Common.PROJECT_TEST_INTEGRATION);
 
     @Test

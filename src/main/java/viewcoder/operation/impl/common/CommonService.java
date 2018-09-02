@@ -1,5 +1,7 @@
 package viewcoder.operation.impl.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.Project;
 import viewcoder.operation.entity.User;
 import viewcoder.tool.common.Common;
@@ -14,7 +16,6 @@ import viewcoder.operation.entity.response.StatusCode;
 import com.alibaba.fastjson.JSON;
 import com.aliyun.oss.OSSClient;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import viewcoder.tool.util.MybatisUtils;
 
@@ -26,7 +27,7 @@ import java.util.*;
  */
 public class CommonService {
 
-    private static Logger logger = Logger.getLogger(CommonService.class);
+    private static Logger logger = LoggerFactory.getLogger(CommonService.class);
 
     /**
      * 获取唯一序列号字符串

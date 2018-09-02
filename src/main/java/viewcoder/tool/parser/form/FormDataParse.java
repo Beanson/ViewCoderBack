@@ -4,7 +4,8 @@ import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.multipart.*;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -17,7 +18,7 @@ import java.util.HashMap;
  */
 public class FormDataParse {
 
-    private static Logger logger= Logger.getLogger(FormData.class);
+    private static Logger logger= LoggerFactory.getLogger(FormData.class);
     protected static final HttpDataFactory factory =new DefaultHttpDataFactory(true); // always save to disk
     protected HttpPostRequestDecoder decoder;
     protected HttpRequest request;

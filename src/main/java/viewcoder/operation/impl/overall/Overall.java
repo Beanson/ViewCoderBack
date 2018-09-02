@@ -1,6 +1,8 @@
 package viewcoder.operation.impl.overall;
 
 import com.aliyun.oss.OSSClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.ViewCoderServer;
 import viewcoder.operation.entity.Feedback;
 import viewcoder.operation.entity.response.StatusCode;
@@ -12,7 +14,6 @@ import viewcoder.operation.entity.User;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.common.CommonService;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 
 import java.util.Map;
 import java.util.Objects;
@@ -22,7 +23,7 @@ import java.util.Objects;
  */
 public class Overall {
 
-    private static Logger logger = Logger.getLogger(Overall.class);
+    private static Logger logger = LoggerFactory.getLogger(Overall.class);
 
 
     /**

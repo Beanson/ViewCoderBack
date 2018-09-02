@@ -1,12 +1,13 @@
 package operation.project;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.test.TestResponseOpt;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.common.CommonService;
 import com.alibaba.fastjson.JSON;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
@@ -20,7 +21,7 @@ import static viewcoder.operation.impl.common.CommonService.junitReqRespVerify;
  */
 public class ProjectTest {
 
-    private static Logger logger = Logger.getLogger(ProjectTest.class);
+    private static Logger logger = LoggerFactory.getLogger(ProjectTest.class);
     private boolean TEST_INTEGRATION = GlobalConfig.getBooleanProperties(Common.PROJECT_TEST_INTEGRATION);
 
 

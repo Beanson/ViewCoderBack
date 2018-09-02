@@ -16,24 +16,16 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
-import viewcoder.operation.entity.Project;
-import viewcoder.operation.impl.common.CommonService;
-import viewcoder.tool.common.Mapper;
-import viewcoder.tool.common.OssOpt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.pool.WebDriverPool;
-import viewcoder.tool.util.MybatisUtils;
-
-import java.util.List;
-
 /**
  * An HTTP server that sends back the content of the received HTTP request
  * in a pretty plaintext form.
  */
 
 public class ViewCoderServer {
-    static final Logger logger = Logger.getLogger(ViewCoderServer.class);
+    static final Logger logger = LoggerFactory.getLogger(ViewCoderServer.class);
     static final boolean SSL = System.getProperty("ssl") != null;
     static final int PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
 
@@ -77,6 +69,7 @@ public class ViewCoderServer {
         ViewCoderServer.logger.debug("idle: " + WebDriverPool.getPool().getNumIdle() +
                         " num total:" + WebDriverPool.getPool().getNumActive() +
                         " waiter:" + WebDriverPool.getPool().getNumWaiters());
+        ViewCoderServer.logger.error("makeer", "error");
     }
 
 }

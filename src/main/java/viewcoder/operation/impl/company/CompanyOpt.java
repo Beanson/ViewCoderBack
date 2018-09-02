@@ -1,7 +1,8 @@
 package viewcoder.operation.impl.company;
 
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.Orders;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.entity.response.StatusCode;
@@ -19,7 +20,7 @@ import java.util.List;
  */
 public class CompanyOpt {
 
-    private static Logger logger = Logger.getLogger(CompanyOpt.class);
+    private static Logger logger = LoggerFactory.getLogger(CompanyOpt.class);
 
     /**
      * 企业级获取折扣订单数据操作

@@ -1,8 +1,9 @@
 package operation.job;
 
 import org.apache.commons.text.StrSubstitutor;
-import org.apache.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.mail.MailEntity;
 import viewcoder.tool.mail.MailHelper;
 import viewcoder.tool.common.Common;
@@ -17,7 +18,7 @@ import java.util.Map;
  */
 public class NightJobTest {
 
-    private static Logger logger = Logger.getLogger(NightJobTest.class);
+    private static Logger logger = LoggerFactory.getLogger(NightJobTest.class);
 
     @Test
     public void testMail(){

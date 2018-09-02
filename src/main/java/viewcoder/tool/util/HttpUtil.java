@@ -9,7 +9,8 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -20,7 +21,7 @@ import java.util.Map;
  */
 public class HttpUtil {
 
-    private static Logger logger = Logger.getLogger(HttpUtil.class);
+    private static Logger logger = LoggerFactory.getLogger(HttpUtil.class);
 
     /**
      * Http Post的请求数据公用方法

@@ -1,7 +1,8 @@
 package operation.personal;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.impl.common.CommonService;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
@@ -13,7 +14,7 @@ import java.util.Map;
  */
 public class PersonalTest {
 
-    private static Logger logger = Logger.getLogger(PersonalTest.class);
+    private static Logger logger = LoggerFactory.getLogger(PersonalTest.class);
 
     @Test
     public void testChangeUserInfo(){

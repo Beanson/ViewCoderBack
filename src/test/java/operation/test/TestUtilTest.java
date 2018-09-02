@@ -2,10 +2,11 @@ package operation.test;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.util.HttpUtil;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 import viewcoder.tool.util.MybatisUtils;
 
@@ -21,7 +22,7 @@ import java.util.*;
  */
 public class TestUtilTest {
 
-    private static Logger logger = Logger.getLogger(TestUtilTest.class);
+    private static Logger logger = LoggerFactory.getLogger(TestUtilTest.class);
 
     @Test
     public void testEntityTest(){

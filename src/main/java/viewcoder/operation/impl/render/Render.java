@@ -1,6 +1,8 @@
 package viewcoder.operation.impl.render;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sun.nio.cs.US_ASCII;
 import viewcoder.exception.render.RenderException;
 import viewcoder.tool.common.Assemble;
@@ -19,7 +21,6 @@ import viewcoder.operation.impl.common.CommonService;
 import com.aliyun.oss.OSSClient;
 import io.netty.handler.codec.http.multipart.FileUpload;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 
 import java.util.*;
 
@@ -28,7 +29,7 @@ import java.util.*;
  */
 public class Render {
 
-    private static Logger logger = Logger.getLogger(Render.class);
+    private static Logger logger = LoggerFactory.getLogger(Render.class);
 
 
     /**

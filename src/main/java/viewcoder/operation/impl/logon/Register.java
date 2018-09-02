@@ -2,8 +2,9 @@ package viewcoder.operation.impl.logon;
 
 import com.aliyun.oss.OSSClient;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.Project;
 import viewcoder.operation.entity.User;
 import viewcoder.operation.entity.WeChatInfo;
@@ -26,7 +27,7 @@ import java.util.Objects;
  */
 public class Register {
 
-    private static Logger logger = Logger.getLogger(Register.class);
+    private static Logger logger = LoggerFactory.getLogger(Register.class);
 
     /**
      * *********************************************************************************

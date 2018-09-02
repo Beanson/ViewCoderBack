@@ -1,5 +1,7 @@
 package viewcoder.operation.impl.personal;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.common.*;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.parser.form.FormData;
@@ -10,14 +12,13 @@ import viewcoder.operation.entity.response.StatusCode;
 import viewcoder.operation.impl.common.CommonService;
 import com.aliyun.oss.OSSClient;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 
 /**
  * Created by Administrator on 2018/2/15.
  */
 public class Personal {
 
-    private static Logger logger = Logger.getLogger(Personal.class);
+    private static Logger logger = LoggerFactory.getLogger(Personal.class);
 
 
     /**

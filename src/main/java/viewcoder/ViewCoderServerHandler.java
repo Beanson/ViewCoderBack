@@ -4,6 +4,8 @@ package viewcoder;
  * Created by Administrator on 2017/2/8.
  */
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.response.StatusCode;
 import viewcoder.operation.impl.overall.QuickLoginVerify;
 import viewcoder.tool.common.Common;
@@ -12,7 +14,6 @@ import viewcoder.operation.impl.common.CommonService;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import org.apache.log4j.Logger;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -21,7 +22,7 @@ import static org.bouncycastle.asn1.x500.style.RFC4519Style.l;
 
 
 public class ViewCoderServerHandler extends SimpleChannelInboundHandler<Object> {
-    private static Logger logger = Logger.getLogger(ViewCoderServerHandler.class);
+    private static Logger logger = LoggerFactory.getLogger(ViewCoderServerHandler.class);
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {

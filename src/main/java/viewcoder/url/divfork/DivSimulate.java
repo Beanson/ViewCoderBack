@@ -1,13 +1,15 @@
 package viewcoder.url.divfork;
 
 import com.alipay.api.domain.CommentReplyOpenModel;
-import org.apache.log4j.Logger;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.url.SimulateTime;
 import viewcoder.url.fork.SimulateFork;
@@ -27,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Deprecated
 public class DivSimulate {
-    private static Logger logger = Logger.getLogger(DivSimulate.class);
+    private static Logger logger = LoggerFactory.getLogger(DivSimulate.class);
 
     public static void main(String[] args){
         // "http://baidu.com"

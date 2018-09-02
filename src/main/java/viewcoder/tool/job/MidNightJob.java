@@ -3,8 +3,9 @@ package viewcoder.tool.job;
 import com.aliyun.oss.OSSClient;
 import org.apache.commons.text.StrSubstitutor;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 import org.quartz.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.Orders;
 import viewcoder.operation.entity.Project;
 import viewcoder.operation.entity.UserUploadFile;
@@ -30,7 +31,7 @@ import java.util.Map;
  */
 public class MidNightJob implements Job {
 
-    private static Logger logger = Logger.getLogger(MidNightJob.class);
+    private static Logger logger = LoggerFactory.getLogger(MidNightJob.class);
 
     /**
      * 午夜task运行部分

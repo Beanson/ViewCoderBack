@@ -22,10 +22,11 @@ import com.alibaba.fastjson.JSON;
 import io.netty.handler.codec.http.multipart.FileUpload;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.Orders;
 import viewcoder.operation.entity.Verify;
 import viewcoder.operation.entity.response.ResponseData;
@@ -43,7 +44,7 @@ import viewcoder.tool.util.MybatisUtils;
  * ECC 椭圆曲线加解密和签名解签
  */
 public class ECCUtil {
-    private static Logger logger = Logger.getLogger(ECCUtil.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(ECCUtil.class.getName());
 
     static {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());

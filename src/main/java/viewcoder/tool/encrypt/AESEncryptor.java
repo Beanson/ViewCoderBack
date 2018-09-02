@@ -1,6 +1,8 @@
 package viewcoder.tool.encrypt;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
@@ -11,7 +13,7 @@ import java.util.Base64;
  */
 public class AESEncryptor {
 
-    private static Logger logger = Logger.getLogger(AESEncryptor.class);
+    private static Logger logger = LoggerFactory.getLogger(AESEncryptor.class);
 
     /**
      * 加密

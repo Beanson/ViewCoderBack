@@ -1,6 +1,7 @@
 package viewcoder.tool.xml;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.common.CommonObject;
 import viewcoder.tool.xml.msg.Msg;
@@ -21,7 +22,7 @@ import java.util.Map;
 public class XmlUtil {
 
     private static Map<String, Object> xmlMap = new HashMap<String, Object>();
-    private static Logger logger= Logger.getLogger(XmlUtil.class);
+    private static Logger logger= LoggerFactory.getLogger(XmlUtil.class);
 
     /**
      * 从配置文件中读取xml文件数据

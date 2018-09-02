@@ -5,6 +5,8 @@ import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectListing;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.common.Assemble;
 import viewcoder.tool.common.OssOpt;
 import viewcoder.tool.parser.form.FormData;
@@ -13,7 +15,6 @@ import viewcoder.operation.entity.User;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.common.CommonService;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.List;
  */
 public class TestUtil {
 
-    private static Logger logger = Logger.getLogger(TestUtil.class);
+    private static Logger logger = LoggerFactory.getLogger(TestUtil.class);
 
     public static ResponseData getAllOss() {
         ResponseData responseData = new ResponseData();

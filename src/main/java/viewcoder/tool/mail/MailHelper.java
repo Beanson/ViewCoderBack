@@ -1,8 +1,9 @@
 package viewcoder.tool.mail;
 
 import com.sun.mail.util.MailSSLSocketFactory;
-import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.encrypt.AESEncryptor;
@@ -22,7 +23,7 @@ import java.util.Properties;
  */
 public class MailHelper {
 
-    private static Logger logger = Logger.getLogger(MailHelper.class);
+    private static Logger logger = LoggerFactory.getLogger(MailHelper.class);
     private MailEntity mailEntity;
 
     public MailHelper() {

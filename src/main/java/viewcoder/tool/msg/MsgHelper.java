@@ -10,7 +10,8 @@ import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.config.GlobalConfig;
@@ -26,7 +27,7 @@ import java.util.Map;
  */
 public class MsgHelper {
 
-    private static Logger logger = Logger.getLogger(MsgHelper.class);
+    private static Logger logger = LoggerFactory.getLogger(MsgHelper.class);
     private static final String product = GlobalConfig.getProperties(Common.MSG_PRODUCT);//短信API产品名称（短信产品名固定，无需修改）
     private static final String domain = GlobalConfig.getProperties(Common.MSG_DOMAIN);//短信API产品域名（接口地址固定，无需修改）
     private static final String endPointName = GlobalConfig.getProperties(Common.MSG_ENDPOINT);

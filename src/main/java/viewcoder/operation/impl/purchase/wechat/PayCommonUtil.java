@@ -1,6 +1,7 @@
 package viewcoder.operation.impl.purchase.wechat;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -10,7 +11,7 @@ import java.util.*;
  */
 public class PayCommonUtil {
 
-    private static Logger logger = Logger.getLogger(PayCommonUtil.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(PayCommonUtil.class.getName());
 
     /**
      * 是否签名正确,规则是:按参数名称a-z排序,遇到空值的参数不参加签名。

@@ -2,6 +2,8 @@ package viewcoder.operation.impl.purchase;
 
 import com.sun.org.apache.xpath.internal.operations.Or;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.common.Mapper;
@@ -16,7 +18,6 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradePagePayRequest;
-import org.apache.log4j.Logger;
 import viewcoder.tool.util.MybatisUtils;
 
 import java.net.URLDecoder;
@@ -33,7 +34,7 @@ import static org.bouncycastle.asn1.ua.DSTU4145NamedCurves.params;
  */
 public class AliPay {
 
-    private static Logger logger = Logger.getLogger(AliPay.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(AliPay.class.getName());
 
     /**
      * 支付宝网上支付接口调用

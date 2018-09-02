@@ -2,10 +2,11 @@ package viewcoder.tool.job;
 
 import org.apache.commons.text.StrSubstitutor;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.Orders;
 import viewcoder.operation.entity.User;
 import viewcoder.operation.impl.common.CommonService;
@@ -28,7 +29,7 @@ import java.util.Map;
  */
 public class ExpireJob implements Job {
 
-    private static Logger logger = Logger.getLogger(ExpireJob.class);
+    private static Logger logger = LoggerFactory.getLogger(ExpireJob.class);
 
 
     /**

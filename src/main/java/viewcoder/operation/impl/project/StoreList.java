@@ -1,5 +1,7 @@
 package viewcoder.operation.impl.project;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.common.Assemble;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.common.Mapper;
@@ -10,7 +12,6 @@ import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.entity.response.StatusCode;
 import viewcoder.operation.impl.common.CommonService;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ import java.util.Map;
  */
 public class StoreList {
 
-    private static Logger logger = Logger.getLogger(StoreList.class);
+    private static Logger logger = LoggerFactory.getLogger(StoreList.class);
 
     /**
      * ****************************************************************************

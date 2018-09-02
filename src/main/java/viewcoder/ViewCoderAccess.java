@@ -5,7 +5,8 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.response.ResponseData;
 import viewcoder.operation.impl.company.CompanyOpt;
 import viewcoder.operation.impl.logon.Register;
@@ -38,7 +39,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class ViewCoderAccess {
 
-    private static Logger logger = Logger.getLogger(ViewCoderAccess.class);
+    private static Logger logger = LoggerFactory.getLogger(ViewCoderAccess.class);
 
     /**
      * 暴露第三方回调的url链接无需cross域验证

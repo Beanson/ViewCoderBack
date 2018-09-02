@@ -1,7 +1,8 @@
 package viewcoder.url.divfork;
 
-import org.apache.log4j.Logger;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.cache.GlobalCache;
 import viewcoder.tool.common.Common;
 
@@ -18,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Deprecated
 public class DivForkTask extends RecursiveTask<List<Map<String, Object>>> {
 
-    private static Logger logger = Logger.getLogger(DivForkTask.class);
+    private static Logger logger = LoggerFactory.getLogger(DivForkTask.class);
     private AtomicInteger atomicInteger = new AtomicInteger(0);
     private List<WebElement> elements;
     private String projectMark;

@@ -2,11 +2,12 @@ package viewcoder.url.platformjs;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import org.apache.log4j.Logger;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.ProjectProgress;
 
 import java.net.URL;
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * Created by Administrator on 2018/5/8.
  */
 public class SimulateMockPlatformJS {
-    private static Logger logger = Logger.getLogger(SimulateMockPlatformJS.class);
+    private static Logger logger = LoggerFactory.getLogger(SimulateMockPlatformJS.class);
 
     public static void main(String[] args) throws Exception {
         //  http://www.hao365.org.cn/

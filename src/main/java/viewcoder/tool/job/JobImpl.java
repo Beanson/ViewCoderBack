@@ -1,8 +1,9 @@
 package viewcoder.tool.job;
 
-import org.apache.log4j.Logger;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -10,7 +11,7 @@ import org.quartz.impl.StdSchedulerFactory;
  */
 public class JobImpl {
 
-    private static Logger logger = Logger.getLogger(JobImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(JobImpl.class);
 
     static {
         //A. 每天午夜task去update用户的信息数据

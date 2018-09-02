@@ -1,0 +1,80 @@
+<configuration>
+
+    <!--控制台日志级别设置-->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+
+        <!--设定打印级别-->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+    </appender>
+
+
+    <!--设定普通所有日志打印-->
+    <appender name="DEBUG_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--保持最新的日志打印记录，达到指定size后自动写到debug里面-->
+        <file>/root/viewcoder/back/run/log/viewcoder.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 每天打印日志 , .%i自动扩展0,1,2,3 ... -->
+            <fileNamePattern>/root/viewcoder/back/run/log/debug/%d{yyyy-MM-dd}/viewcoder_debug_%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <!-- 每天打印单文件日志最大10MB, 保持60天历史记录,但最大20GB -->
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+    </appender>
+
+
+    <!--设定错误日志-->
+    <appender name="ERROR_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>/root/viewcoder/back/run/log/warn/%d{yyyy-MM-dd}/viewcoder_warn_%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+
+        <!--warn级别以上才打印-->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+
+    <!--Mybatis日志打印设置-->
+    <logger name="com.ibatis" level="DEBUG" />
+    <logger name="com.ibatis.common.jdbc.SimpleDataSource" level="DEBUG" />
+    <logger name="com.ibatis.common.jdbc.ScriptRunner" level="DEBUG" />
+    <logger name="com.ibatis.sqlmap.engine.impl.SqlMapClientDelegate" level="DEBUG" />
+    <logger name="org.apache" level="DEBUG" />
+    <logger name="org.mybatis" level="DEBUG" />
+    <logger name="java.sql.Connection" level="DEBUG" />
+    <logger name="java.sql.Statement" level="DEBUG" />
+    <logger name="java.sql.PreparedStatement" level="DEBUG" />
+    <logger name="java.sql.ResultSet" level="DEBUG" />
+
+
+    <!--设定全局打印级别，只有引用到这里才打印出来-->
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="DEBUG_LOG" />
+        <appender-ref ref="ERROR_LOG" />
+    </root>
+
+</configuration>

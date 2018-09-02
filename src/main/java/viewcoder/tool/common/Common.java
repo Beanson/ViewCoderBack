@@ -1,6 +1,7 @@
 package viewcoder.tool.common;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.encrypt.AESEncryptor;
 
@@ -9,7 +10,7 @@ import viewcoder.tool.encrypt.AESEncryptor;
  */
 public class Common {
 
-    private static Logger logger = Logger.getLogger(Common.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(Common.class.getName());
 
     //Genreal信息
     public static String EMPTY = "";

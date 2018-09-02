@@ -3,12 +3,13 @@ package viewcoder.tool.common;
 import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.*;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.UserUploadFile;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.config.GlobalConfig;
 import viewcoder.tool.encrypt.AESEncryptor;
 import com.aliyun.oss.OSSClient;
-import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.Objects;
  */
 public class OssOpt {
 
-    private static Logger logger = Logger.getLogger(OssOpt.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(OssOpt.class.getName());
 
     //TODO 上ECS后把 END_POINT 设置为ECS处的连接
     // 云账号AccessKey有所有API访问权限，建议遵循阿里云安全最佳实践，

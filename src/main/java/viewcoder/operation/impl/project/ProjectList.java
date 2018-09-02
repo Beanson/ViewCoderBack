@@ -3,6 +3,8 @@ package viewcoder.operation.impl.project;
 import com.alibaba.fastjson.JSON;
 import io.netty.handler.codec.http.HttpRequest;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.exception.project.ProjectListException;
 import viewcoder.operation.entity.*;
 import viewcoder.tool.common.*;
@@ -14,7 +16,6 @@ import viewcoder.operation.entity.response.StatusCode;
 import viewcoder.operation.impl.common.CommonService;
 import com.aliyun.oss.OSSClient;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ProjectList {
 
-    private static Logger logger = Logger.getLogger(ProjectList.class);
+    private static Logger logger = LoggerFactory.getLogger(ProjectList.class);
 
     /**
      * ****************************************************************************

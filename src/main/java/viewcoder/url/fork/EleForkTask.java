@@ -1,7 +1,8 @@
 package viewcoder.url.fork;
 
-import org.apache.log4j.Logger;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.RecursiveTask;
@@ -13,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Deprecated
 public class EleForkTask  extends RecursiveTask<List<Map<String, Object>>> {
 
-    private static Logger logger = Logger.getLogger(EleForkTask.class);
+    private static Logger logger = LoggerFactory.getLogger(EleForkTask.class);
     AtomicInteger progress = new AtomicInteger(0);
     static final int THRESHOLD = 10;
     List<WebElement> elements;

@@ -1,5 +1,7 @@
 package viewcoder.operation.impl.purchase.wechat;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.config.GlobalConfig;
@@ -7,7 +9,6 @@ import viewcoder.tool.parser.text.TextData;
 import viewcoder.operation.entity.Orders;
 import viewcoder.operation.impl.purchase.Purchase;
 import com.alibaba.fastjson.JSON;
-import org.apache.log4j.Logger;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -22,7 +23,7 @@ import java.util.TreeMap;
  */
 public class WechatPay {
 
-    private static Logger logger = Logger.getLogger(WechatPay.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(WechatPay.class.getName());
     private static final String TRADE_TYPE = "NATIVE";
 
     public static String invokePayment(Orders orders) {

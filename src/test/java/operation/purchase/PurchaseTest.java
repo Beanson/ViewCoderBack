@@ -6,11 +6,12 @@ import com.aliyun.oss.OSSClient;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.entity.Orders;
 import viewcoder.operation.entity.User;
 import viewcoder.operation.impl.common.CommonService;
 import viewcoder.operation.impl.purchase.AliPay;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 import viewcoder.operation.impl.purchase.Purchase;
 import viewcoder.tool.common.Common;
@@ -37,7 +38,7 @@ import static com.alipay.api.internal.util.AlipaySignature.getPublicKeyFromX509;
  */
 public class PurchaseTest {
 
-    private static Logger logger = Logger.getLogger(PurchaseTest.class);
+    private static Logger logger = LoggerFactory.getLogger(PurchaseTest.class);
 
     @Test
     public void testGetOrderList(){
@@ -80,7 +81,7 @@ public class PurchaseTest {
         orders.setService_num(10);
         try {
             AliPay.invokePayment(orders);
-            PurchaseTest.logger.debug(orders);
+            PurchaseTest.logger.debug(orders.toString());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -184,7 +185,7 @@ public class PurchaseTest {
             CommonService.setACKOpt(sqlSession, ossClient, 30,true);
 
         }catch (Exception e){
-            logger.error(e);
+            logger.error("dala",e);
 
         }finally {
             sqlSession.close();

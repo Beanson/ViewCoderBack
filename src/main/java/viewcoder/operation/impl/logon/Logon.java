@@ -1,10 +1,11 @@
 package viewcoder.operation.impl.logon;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.tool.cache.GlobalCache;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.msg.MsgHelper;
 import viewcoder.operation.impl.common.CommonService;
-import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.Map;
  */
 public class Logon {
 
-    private static Logger logger = Logger.getLogger(Logon.class);
+    private static Logger logger = LoggerFactory.getLogger(Logon.class);
 
     /**
      * 生成验证码并发送到手机

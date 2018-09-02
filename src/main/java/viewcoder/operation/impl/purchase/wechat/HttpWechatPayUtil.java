@@ -1,6 +1,7 @@
 package viewcoder.operation.impl.purchase.wechat;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.net.URLConnection;
  */
 public class HttpWechatPayUtil {
 
-    private static Logger logger = Logger.getLogger(HttpWechatPayUtil.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(HttpWechatPayUtil.class.getName());
     private final static int CONNECT_TIMEOUT = 5000; // in milliseconds
     private final static String DEFAULT_ENCODING = "UTF-8";
 

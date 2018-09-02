@@ -1,7 +1,8 @@
 package operation.project;
 
-import org.apache.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +14,7 @@ import static viewcoder.operation.impl.common.CommonService.junitReqRespVerify;
  */
 public class ProjectStoreTest {
 
-    private static Logger logger = Logger.getLogger(ProjectStoreTest.class);
+    private static Logger logger = LoggerFactory.getLogger(ProjectStoreTest.class);
 
     /**
      * 更新project的开放程度的测试
