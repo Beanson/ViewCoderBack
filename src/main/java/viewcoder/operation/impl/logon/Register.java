@@ -150,7 +150,7 @@ public class Register {
             //给刚注册成功的用户提供example页面case
             Project project = new Project();
             project.setUser_id(user.getId());
-            project.setRef_id(Common.EXAMPLE_REF_ID);
+            project.setId(Common.EXAMPLE_REF_ID);
             project.setOpt_type(Common.STORE_TYPE);
             project.setProject_name(Common.EXAMPLE_CASE_1);
             project.setNew_parent(0);
