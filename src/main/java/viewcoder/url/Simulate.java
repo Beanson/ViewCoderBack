@@ -150,6 +150,9 @@ public class Simulate {
                 long sleepTime = MID_LOAD_TIME - compare;
                 Simulate.logger.debug("force sleep time: " + sleepTime);
                 Thread.sleep(sleepTime);
+
+            }else {
+                Simulate.logger.debug("compare: "+ compare + " minLoadTime: "+ MID_LOAD_TIME);
             }
 
             Simulate.logger.debug("create url project: " + dimension.getWidth());
