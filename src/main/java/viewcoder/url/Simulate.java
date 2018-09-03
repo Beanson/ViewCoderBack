@@ -25,7 +25,7 @@ public class Simulate {
     private static Logger logger = LoggerFactory.getLogger(Simulate.class);
     private static final String TEST_URL = "http://www.baidu.com";
     private static final int TOTAL_HEIGHT = 700;
-    private static final int MID_LOAD_TIME = 7000;
+    private static final int MID_LOAD_TIME = 10000;
 
     public static void main(String[] args) throws Exception {
         createProject(Simulate.TEST_URL, new ProjectProgress(), 400, "mo");
