@@ -92,7 +92,6 @@ public class WebDriverPool extends BasePooledObjectFactory<WebDriver> {
         WebDriver driver = new PhantomJSDriver(dcaps);
         driver.manage().timeouts().pageLoadTimeout(
                 GlobalConfig.getIntProperties(Common.PAGELOAD_TIMEOUT), TimeUnit.SECONDS);
-        driver.manage().deleteAllCookies();
         return driver;
     }
 

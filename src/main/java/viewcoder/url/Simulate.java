@@ -11,6 +11,7 @@ import viewcoder.tool.common.Common;
 import viewcoder.tool.pool.WebDriverPool;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +25,7 @@ public class Simulate {
     private static Logger logger = LoggerFactory.getLogger(Simulate.class);
     private static final String TEST_URL = "http://www.baidu.com";
     private static final int TOTAL_HEIGHT = 700;
+    private static final int MID_LOAD_TIME = 7000;
 
     public static void main(String[] args) throws Exception {
         createProject(Simulate.TEST_URL, new ProjectProgress(), 400, "mo");
@@ -138,8 +140,18 @@ public class Simulate {
             Dimension dimension = new Dimension(totalWidth, Simulate.TOTAL_HEIGHT);
             //设置屏幕宽高
             driver.manage().window().setSize(dimension);
-            //打开指定网址
+
+            //打开指定网址，且loading时间不少于7秒
+            long beginLoad = new Date().getTime();
             driver.get(webUrl);
+            long endLoad = new Date().getTime();
+            long compare = endLoad - beginLoad;
+            if (compare < MID_LOAD_TIME) {
+                long sleepTime = MID_LOAD_TIME - compare;
+                Simulate.logger.debug("force sleep time: " + sleepTime);
+                Thread.sleep(sleepTime);
+            }
+
             Simulate.logger.debug("create url project: " + dimension.getWidth());
 
         } catch (Exception e) {
