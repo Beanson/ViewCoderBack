@@ -142,18 +142,19 @@ public class Simulate {
             driver.manage().window().setSize(dimension);
 
             //打开指定网址，且loading时间不少于7秒
-            long beginLoad = new Date().getTime();
+//            long beginLoad = new Date().getTime();
+//            driver.get(webUrl);
+//            long endLoad = new Date().getTime();
+//            long compare = endLoad - beginLoad;
+//            if (compare < MID_LOAD_TIME) {
+//                long sleepTime = MID_LOAD_TIME - compare;
+//                Simulate.logger.debug("force sleep time: " + sleepTime);
+//                Thread.sleep(sleepTime);
+//
+//            }else {
+//                Simulate.logger.debug("compare: "+ compare + " minLoadTime: "+ MID_LOAD_TIME);
+//            }
             driver.get(webUrl);
-            long endLoad = new Date().getTime();
-            long compare = endLoad - beginLoad;
-            if (compare < MID_LOAD_TIME) {
-                long sleepTime = MID_LOAD_TIME - compare;
-                Simulate.logger.debug("force sleep time: " + sleepTime);
-                Thread.sleep(sleepTime);
-
-            }else {
-                Simulate.logger.debug("compare: "+ compare + " minLoadTime: "+ MID_LOAD_TIME);
-            }
 
             Simulate.logger.debug("create url project: " + dimension.getWidth());
 
