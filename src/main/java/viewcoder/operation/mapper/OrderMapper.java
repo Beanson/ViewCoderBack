@@ -39,7 +39,7 @@ public interface OrderMapper {
     List<Orders> getOrderInstanceByUserId(int userId);
 
     //获取已过期的实例订单，在每天update -1之前
-    @Select("select * from orders where expire_days=0")
+    @Select("select * from orders where expire_days=0 and pay_status=1")
     List<Orders> getExpiredOrderInstance(int user_id);
 
     //选择即将过期和已经过期的订单实例
