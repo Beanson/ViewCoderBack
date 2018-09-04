@@ -1,5 +1,6 @@
 //装载数据的容器
 var windowsWidth = document.body.scrollWidth;
+var windowHeight = document.body.scrollHeight;
 var data = {
     /*空项目需用到的数据*/
     'all_tools': {
@@ -33,7 +34,7 @@ var data = {
     /*空项目和PSD项目会用到的数据*/
     'overall': {
         'width': windowsWidth, //会依据屏幕宽度而重新赋值该width，
-        'height': document.body.scrollHeight,
+        'height': windowHeight,
         'is_mobile': ${is_mobile}, //标识是否是mobile网页，默认是PC网页
         'scale': false,
         'bg-color': 'rgba(255,255,255,1)',
@@ -44,6 +45,90 @@ var data = {
         'usage_amount': 0  //使用次数
     }
 };
+//数据简化版保存
+var mapLToS = {
+    'layer_rate': 'lr',
+    'layer_id': 'li',
+    'data_url': 'du',
+    'font-head-size': 'fhs',
+    'font-head-height': 'fhh',
+    'font-th-size': 'fts',
+    'row_height': 'rh',
+
+    'column_resize_key': 'crk',
+    'new_column_type': 'nct',
+    'row_num': 'rn',
+
+    'margin-left': 'ml',
+    'margin-right': 'mr',
+    'margin-top': 'mt',
+    'margin-bottom': 'mb',
+    'grid_height': 'gh',
+    'grid_width': 'gw',
+    'column_num': 'cn',
+
+    'grid_array': 'ga',
+    'page_div_width': 'pdw',
+    'new_grid_type': 'ngt',
+
+    'widget_hover': 'wh',
+    'widget_click': 'wc',
+    'border_click': 'boc',
+    'widget_selected': 'ws',
+    'image_reposition': 'ir',
+
+    'bg-position-left': 'bpl',
+    'bg-position-top': 'bpt',
+    'bg-repeat': 'br',
+    'bg-size': 'bs',
+    'bg-color': 'bc',
+    'bg-size-res': 'bsr',
+
+    'sub_id': 'si',
+    'jump_url': 'ju',
+    'link_type': 'lt',
+
+    'border-top-width': 'btw',
+    'border-right-width': 'brw',
+    'border-bottom-width': 'bbw',
+    'border-left-width': 'blw',
+    'border-color': 'brc',
+
+    'border-top-left-radius': 'btlr',
+    'border-top-right-radius': 'btrr',
+    'border-bottom-left-radius': 'bblr',
+    'border-bottom-right-radius': 'bbrr',
+
+    'text_editable': 'te',
+    'temp_text': 'tt',
+    'font-size': 'fsi',
+    'font-weight': 'fw',
+    'line-height': 'lh',
+    'text-align': 'ta',
+    'font-family': 'ff',
+    'font-style': 'fsy',
+    'text-decoration': 'td',
+    'font-color': 'fc',
+    'text_show': 'ts',
+
+    'padding-left': 'pf',
+    'padding-top': 'pt',
+    'padding-right': 'pr',
+    'padding-bottom': 'pb',
+
+    'opt_max_val_id': 'pmvi',
+    'date-time': 'dt',
+    'auto_play': 'ap',
+
+    'item-padding-left': 'ipl',
+    'item-padding-top': 'ipt',
+    'item-padding-right': 'ipr',
+    'item-padding-bottom': 'ipb',
+
+    'normal_status': 'ns',
+    'hover_status': 'hs'
+};
+
 var num = 0, retrieveAllText = true;
 
 
@@ -261,7 +346,7 @@ function getSimulateData() {
     //设置overall的max_id和max_rate --------------------------------------------------------------------------
     data['overall']['max_id'] = num;
     data['overall']['max_rate'] = 3;
-
+    miniData(data);//数据保存最小化优化
 
     //executeScript方式
     return JSON.stringify(data);
@@ -451,7 +536,30 @@ function replaceSpecialCharacters(text) {
     text = text.replace(/</g, '&lt;');
     text = text.replace(/>/g, '&gt;');
     return text;
-};
+}
+
+/**
+ * 数据简化版
+ */
+function miniData(data) {
+    for (var i in data['all_tools']) {
+        for (var j in data['all_tools'][i]) {
+            //保证渲染数据在页面高度之内，超出的删除
+            if (data['all_tools'][i][j]['top'] >= windowHeight) {
+                delete data['all_tools'][i][j];
+                continue
+            }
+            //遍历每个组件样式
+            for (var k in data['all_tools'][i][j]) {
+                //替换数据简化版键值
+                if (checkStrNotNull(mapLToS[k])) {
+                    data['all_tools'][i][j][mapLToS[k]] = data['all_tools'][i][j][k];
+                    delete data['all_tools'][i][j][k]; //删除原来的键值对
+                }
+            }
+        }
+    }
+}
 
 
 //返回渲染数据

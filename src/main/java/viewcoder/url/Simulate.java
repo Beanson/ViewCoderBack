@@ -69,7 +69,7 @@ public class Simulate {
             int contentWidth = ((Number) js.executeScript("return $(document).width()")).intValue();
             Simulate.logger.debug("get page width: " + contentWidth);
 
-            //慢加载操作，后期前端设置允许用户调节每次滚动的等待时间
+            //慢加载操作，后期前端设置允许用户调节每次滚动的等待时间，此步骤还可获取页面高度
             for (int i = Simulate.TOTAL_HEIGHT; i < contentHeight; i += Simulate.TOTAL_HEIGHT) {
                 //两个参数分别文档向右移动和向下移动位置
                 js.executeScript("window.scrollBy(0, " + i + ")");

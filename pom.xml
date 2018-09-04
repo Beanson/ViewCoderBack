@@ -12,9 +12,22 @@
         <kotlin.version>1.0.7</kotlin.version>
     </properties>
 
+    <!--设置用阿里maven仓库去download代码maven包-->
+    <repositories>
+        <repository>
+            <id>alimaven</id>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <build>
         <defaultGoal>package</defaultGoal>
-
         <plugins>
             <!--由于用到bouncycastle，会在meta-inf中引入.sf/.dsa/.rsa等文件，导致运行报错，因此需在打包时exclude这些文件-->
             <plugin>

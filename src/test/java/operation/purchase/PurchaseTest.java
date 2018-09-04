@@ -182,7 +182,7 @@ public class PurchaseTest {
         SqlSession sqlSession = MybatisUtils.getSession();
         OSSClient ossClient = OssOpt.initOssClient();
         try {
-            CommonService.setACKOpt(sqlSession, ossClient, 30,true);
+            CommonService.setACKOpt(sqlSession, ossClient, 73,true);
 
         }catch (Exception e){
             logger.error("dala",e);
