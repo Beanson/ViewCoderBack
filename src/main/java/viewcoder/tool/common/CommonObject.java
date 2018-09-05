@@ -62,6 +62,7 @@ public class CommonObject {
         validCross.add("http://www.beansonbar.com");
         validCross.add("http://liphin.com");
         validCross.add("http://www.liphin.com");
+        validCross.add("http://viewcoder.liphin.com");
         validCross.add("http://119.23.40.181");
     }
 
