@@ -70,6 +70,10 @@
     <logger name="java.sql.ResultSet" level="DEBUG" />
 
 
+    <!--设置任务batch job的打印日志级别，不然会一直打印batch acquisition of 0 triggers-->
+    <logger name="org.quartz" level="WARN"/>
+
+
     <!--设定全局打印级别，只有引用到这里才打印出来-->
     <root level="DEBUG">
         <appender-ref ref="STDOUT" />
