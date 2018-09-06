@@ -5,6 +5,7 @@ import com.alipay.api.internal.util.codec.Base64;
 import com.aliyun.oss.OSSClient;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.text.StrSubstitutor;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,9 @@ import viewcoder.tool.common.Common;
 import viewcoder.tool.common.CommonObject;
 import viewcoder.tool.common.OssOpt;
 import viewcoder.tool.config.GlobalConfig;
+import viewcoder.tool.encrypt.AESEncryptor;
+import viewcoder.tool.mail.MailEntity;
+import viewcoder.tool.mail.MailHelper;
 import viewcoder.tool.msg.MsgHelper;
 import viewcoder.tool.util.MybatisUtils;
 
@@ -157,6 +161,7 @@ public class PurchaseTest {
     public void sendMsg(){
         Map<String, String> replaceData = new HashMap<String, String>();
         String templateId = Common.MSG_TEMPLEATE_PURCHASE;
+        String mailUrl = GlobalConfig.getProperties(Common.MAIL_BASE_URL) + Common.MAIL_SERVICE_PURCHASE;
 
         User user = new User();
         user.setUser_name("beanson");
@@ -174,8 +179,16 @@ public class PurchaseTest {
         replaceData.put("service_length", order.getService_num() + " " + CommonObject.getServiceUnit(order.getService_id()));
 
         //发送短信操作${name} ${service}
-        MsgHelper.sendSingleMsg(templateId, replaceData, user.getPhone(), Common.MSG_SIGNNAME_LIPHIN);
+        //MsgHelper.sendSingleMsg(templateId, replaceData, user.getPhone(), Common.MSG_SIGNNAME_LIPHIN);
+
+        //发送邮件操作
+        //邮件服务初始化
+        MailEntity mailEntity = new MailEntity(user.getEmail(), Common.MAIL_SERVICE_PURCHASE_INFORM, Common.MAIL_HTML_TYPE);
+        String str = StrSubstitutor.replace(MailHelper.getHtmlData(mailUrl, true), replaceData);
+        mailEntity.setTextAndContent(str);
+        new MailHelper(mailEntity).send();
     }
+
 
     @Test
     public void setACK(){
@@ -195,9 +208,7 @@ public class PurchaseTest {
 
     @Test
     public void test(){
-        Orders orders = new Orders();
-        orders.setId(2);
-        System.out.println(Purchase.getPayStatus(orders));
+        System.out.println(AESEncryptor.AESDncode(Common.AES_KEY,"bGFpZmVuXzEzNzVfU2VydmljZQ=="));
     }
 
 
