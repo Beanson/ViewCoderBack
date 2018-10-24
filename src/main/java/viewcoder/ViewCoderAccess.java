@@ -43,9 +43,10 @@ public class ViewCoderAccess {
 
     /**
      * 暴露第三方回调的url链接无需cross域验证
+     *
      * @param request request请求对象
-     * @param msg request请求护具
-     * @param ctx 返回通道
+     * @param msg     request请求护具
+     * @param ctx     返回通道
      * @return
      */
     public static boolean nonCrossVerify(HttpRequest request, Object msg, ChannelHandlerContext ctx) {
@@ -79,8 +80,8 @@ public class ViewCoderAccess {
      * 无需获取登录状态才能访问的链接请求
      *
      * @param request request请求对象
-     * @param msg request请求护具
-     * @param ctx 返回通道
+     * @param msg     request请求护具
+     * @param ctx     返回通道
      */
     public static boolean nonLoginAccess(HttpRequest request, Object msg, ChannelHandlerContext ctx) {
         //获取uri数据
@@ -149,8 +150,8 @@ public class ViewCoderAccess {
      * 需要用户已登录状态才可访问的请求
      *
      * @param request uri请求地址
-     * @param msg request请求护具
-     * @param ctx 返回通道
+     * @param msg     request请求护具
+     * @param ctx     返回通道
      */
     public static void loginAccess(HttpRequest request, Object msg, ChannelHandlerContext ctx) {
         //获取uri数据
@@ -417,7 +418,7 @@ public class ViewCoderAccess {
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(htmlData.getBytes()));
         response.headers().set(CONTENT_TYPE, Common.RETURN_TEXT_HTML);
         commonResponse(ctx, msg, response);
-        ViewCoderAccess.logger.debug("Return html pure data response");
+        ViewCoderAccess.logger.debug("Return html pure data response\n"+ htmlData);
     }
 
 

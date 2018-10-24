@@ -203,6 +203,11 @@ public class CommonTest {
     }
 
 
+    @Test
+    public void test(){
+        System.out.println(UUID.randomUUID().toString());
+    }
+
 
 
 }

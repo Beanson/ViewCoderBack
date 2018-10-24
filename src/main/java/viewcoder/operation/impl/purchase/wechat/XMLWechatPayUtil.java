@@ -43,6 +43,7 @@ public class XMLWechatPayUtil {
         try {
             Map<String, String> data = new HashMap<String, String>();
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setExpandEntityReferences(false);
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             InputStream stream = new ByteArrayInputStream(strxml.getBytes("UTF-8"));
             org.w3c.dom.Document doc = documentBuilder.parse(stream);
