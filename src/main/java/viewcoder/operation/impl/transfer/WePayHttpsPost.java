@@ -43,11 +43,12 @@ public class WePayHttpsPost {
     public static String postOpt(String urlStr, String message) {
         try {
             URL url = new URL(urlStr); // here is your URL path
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            if (connection instanceof HttpsURLConnection) {
-                ((HttpsURLConnection) connection).setSSLSocketFactory(sc.getSocketFactory());
-            }
+            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            connection.setSSLSocketFactory(sc.getSocketFactory());
+//            if (connection instanceof HttpsURLConnection) {
+//                ((HttpsURLConnection) connection).setSSLSocketFactory(sc.getSocketFactory());
+//            }
 
             conn.setReadTimeout(15000 /* milliseconds */);
             conn.setConnectTimeout(15000 /* milliseconds */);
