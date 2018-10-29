@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import viewcoder.operation.impl.common.CommonService;
 import viewcoder.operation.impl.purchase.wechat.HttpWechatPayUtil;
 import viewcoder.operation.impl.purchase.wechat.WechatPay;
 import viewcoder.tool.common.Common;
@@ -52,7 +53,7 @@ public class WePayWithdraw {
             //等待确认转账金额,ip,openid的来源
             Integer amount = Integer.valueOf(money);
             String spbill_create_ip = ip;
-            String partner_trade_no = "10000098201411111234567890";
+            String partner_trade_no = CommonService.getUnionId();
             //描述
             String desc = "红包金额"+amount/100+"元";
             // 参数：开始生成第一次签名
