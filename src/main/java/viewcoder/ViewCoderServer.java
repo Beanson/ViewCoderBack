@@ -74,7 +74,7 @@ public class ViewCoderServer {
         //batch job运行
         new JobImpl();
         //运行测试微信发放红包程序
-        WePayWithdraw.weixinWithdraw();
+        //WePayWithdraw.weixinWithdraw();
     }
 
 }
