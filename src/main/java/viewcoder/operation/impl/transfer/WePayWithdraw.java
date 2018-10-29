@@ -3,6 +3,8 @@ package viewcoder.operation.impl.transfer;
 import com.thoughtworks.xstream.XStream;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import viewcoder.operation.impl.purchase.wechat.HttpWechatPayUtil;
 import viewcoder.operation.impl.purchase.wechat.WechatPay;
 import viewcoder.tool.common.Common;
@@ -18,6 +20,8 @@ import static jdk.nashorn.internal.runtime.regexp.joni.Config.log;
  */
 public class WePayWithdraw {
 
+    private static Logger logger = LoggerFactory.getLogger(WePayWithdraw.class.getName());
+
     // 微信的参数
     private WeixinConfigUtils config = new WeixinConfigUtils();
 
@@ -25,19 +29,19 @@ public class WePayWithdraw {
      * 微信提现（企业付款）
      */
     public static String weixinWithdraw(){
-        System.out.println("come to 1");
+        logger.debug("come to 1");
 
         // 构造签名的map
         SortedMap<Object, Object> parameters = new TreeMap<Object, Object>();
         Transfers transfers = new Transfers();
 
-        System.out.println("come to 2");
+        logger.debug("come to 2");
         XStream xStream = new XStream();
         String openId = "oaCnbs6EiIYbXgc8aYlRRSlJvqGk";
         String ip = "119.23.40.181";
         String money = "10";
         if (StringUtils.isNotBlank(money) && StringUtils.isNotBlank(ip) && StringUtils.isNotBlank(openId)) {
-            System.out.println("come to 3");
+            logger.debug("come to 3");
 
             // 参数组
             String appid = "wx16c7efa55a7f976b";
@@ -77,10 +81,10 @@ public class WePayWithdraw {
             xStream.alias("xml", Transfers.class);
             String xmlInfo = xStream.toXML(transfers);
 
-            System.out.println("prepare to send red package");
+            logger.debug("prepare to send red package");
             try {
                 String resXml = HttpWechatPayUtil.postData("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", xmlInfo);
-                System.out.println("Response XML Data: " + resXml);
+                logger.debug("Response XML Data: " + resXml);
 
 //                CloseableHttpResponse response =  HttpUtil.Post(weixinConstant.WITHDRAW_URL, xmlInfo, true);
 //                String transfersXml = EntityUtils.toString(response.getEntity(), "utf-8");
@@ -93,12 +97,12 @@ public class WePayWithdraw {
 //                }
 //                System.out.println("成功");
             } catch (Exception e) {
-                System.out.println("system error: "+ e);
+                logger.debug("system error: "+ e);
                 //log.error(e.getMessage());
                 //throw new Exception(this, "企业付款异常" + e.getMessage());
             }
         }else {
-            System.out.println("失败");
+            logger.debug("失败");
         }
         return "";
     }
