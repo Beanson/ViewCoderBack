@@ -75,12 +75,13 @@ public class WePayHttpsPost {
                 }
                 in.close();
                 return sb.toString();
-            }
-            else {
+
+            } else {
                 return new String("false : "+responseCode);
             }
         }
         catch(Exception e){
+            logger.error("http post error", e);
             return new String("Exception: " + e.getMessage());
         }
     }
