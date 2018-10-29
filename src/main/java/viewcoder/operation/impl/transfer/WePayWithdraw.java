@@ -42,7 +42,7 @@ public class WePayWithdraw {
         XStream xStream = new XStream(new DomDriver("UTF-8", new XmlFriendlyNameCoder("_-", "_")));
         String openId = "oaCnbs6EiIYbXgc8aYlRRSlJvqGk";
         String ip = "119.23.40.181";
-        String money = "10";
+        String money = "100";
         if (StringUtils.isNotBlank(money) && StringUtils.isNotBlank(ip) && StringUtils.isNotBlank(openId)) {
             // 参数组
             String appid = "wx16c7efa55a7f976b";
@@ -55,7 +55,7 @@ public class WePayWithdraw {
             String spbill_create_ip = ip;
             String partner_trade_no = CommonService.getUnionId();
             //描述
-            String desc = "红包金额"+amount/100+"元";
+            String desc = "红包金额"+(amount/100)+"元";
             // 参数：开始生成第一次签名
             parameters.put("mch_appid", appid);
             parameters.put("mchid", mch_id);
