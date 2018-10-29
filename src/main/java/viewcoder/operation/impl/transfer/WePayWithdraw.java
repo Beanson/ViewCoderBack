@@ -85,13 +85,13 @@ public class WePayWithdraw {
 
             logger.debug("prepare to send red package: "+ xmlInfo );
             try {
+
 //                String resXml = WePayHttpsPost.postOpt("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", xmlInfo);
 //                logger.debug("Response XML Data: " + resXml);
 
                 CloseableHttpResponse response =  WePayHttpsPost.postOpt("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", xmlInfo);
                 String transfersXml = EntityUtils.toString(response.getEntity(), "utf-8");
                 logger.debug("get data back: " + transfersXml);
-
 
 //                Map<String, String> transferMap = HttpXmlUtils.parseRefundXml(transfersXml);
 //                if (transferMap.size()>0) {
