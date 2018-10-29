@@ -1,6 +1,8 @@
 package viewcoder.operation.impl.transfer;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
+import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -34,7 +36,7 @@ public class WePayWithdraw {
         SortedMap<Object, Object> parameters = new TreeMap<Object, Object>();
         Transfers transfers = new Transfers();
 
-        XStream xStream = new XStream();
+        XStream xStream = new XStream(new DomDriver("UTF-8", new XmlFriendlyNameCoder("_-", "_")));
         String openId = "oaCnbs6EiIYbXgc8aYlRRSlJvqGk";
         String ip = "119.23.40.181";
         String money = "10";
@@ -52,35 +54,36 @@ public class WePayWithdraw {
             //描述
             String desc = "红包金额"+amount/100+"元";
             // 参数：开始生成第一次签名
-            parameters.put("appid", appid);
-            parameters.put("mch_id", mch_id);
-            parameters.put("partner_trade_no", partner_trade_no);
+            parameters.put("mch_appid", appid);
+            parameters.put("mchid", mch_id);
             parameters.put("nonce_str", nonce_str);
-            parameters.put("openId", openId);
-            parameters.put("checkName", checkName);
+            parameters.put("partner_trade_no", partner_trade_no);
+            parameters.put("openid", openId);
+            parameters.put("check_name", checkName);
             parameters.put("amount", amount);
-            parameters.put("spbill_create_ip", spbill_create_ip);
             parameters.put("desc", desc);
+            parameters.put("spbill_create_ip", spbill_create_ip);
             String sign = WXSignUtils.createSign("UTF-8", parameters);
-            transfers.setAmount(amount);
-            transfers.setCheck_name(checkName);
-            transfers.setDesc(desc);
+
             transfers.setMch_appid(appid);
             transfers.setMchid(mch_id);
             transfers.setNonce_str(nonce_str);
-            transfers.setOpenid(openId);
             transfers.setPartner_trade_no(partner_trade_no);
-            transfers.setSign(sign);
+            transfers.setOpenid(openId);
+            transfers.setCheck_name(checkName);
+            transfers.setAmount(amount);
+            transfers.setDesc(desc);
             transfers.setSpbill_create_ip(spbill_create_ip);
+            transfers.setSign(sign);
 
-            xStream.autodetectAnnotations(true);
+            //xStream.autodetectAnnotations(true);
             xStream.alias("xml", Transfers.class);
             String xmlInfo = xStream.toXML(transfers);
 
             logger.debug("prepare to send red package: "+ xmlInfo );
             try {
-                String resXml = HttpWechatPayUtil.postData("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", xmlInfo);
-                logger.debug("Response XML Data: " + resXml);
+                //String resXml = HttpWechatPayUtil.postData("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", xmlInfo);
+                //logger.debug("Response XML Data: " + resXml);
 
 //                CloseableHttpResponse response =  HttpUtil.Post(weixinConstant.WITHDRAW_URL, xmlInfo, true);
 //                String transfersXml = EntityUtils.toString(response.getEntity(), "utf-8");
