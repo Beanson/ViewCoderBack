@@ -82,8 +82,8 @@ public class WePayWithdraw {
 
             logger.debug("prepare to send red package: "+ xmlInfo );
             try {
-                //String resXml = HttpWechatPayUtil.postData("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", xmlInfo);
-                //logger.debug("Response XML Data: " + resXml);
+                String resXml = HttpWechatPayUtil.postData("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", xmlInfo);
+                logger.debug("Response XML Data: " + resXml);
 
 //                CloseableHttpResponse response =  HttpUtil.Post(weixinConstant.WITHDRAW_URL, xmlInfo, true);
 //                String transfersXml = EntityUtils.toString(response.getEntity(), "utf-8");
