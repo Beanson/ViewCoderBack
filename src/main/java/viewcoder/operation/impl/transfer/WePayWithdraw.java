@@ -4,6 +4,8 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import viewcoder.operation.impl.purchase.wechat.WechatPay;
 import viewcoder.tool.common.Common;
 import viewcoder.tool.config.GlobalConfig;
 
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -82,18 +85,21 @@ public class WePayWithdraw {
 
             logger.debug("prepare to send red package: "+ xmlInfo );
             try {
-                String resXml = WePayHttpsPost.postOpt("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", xmlInfo);
-                logger.debug("Response XML Data: " + resXml);
+//                String resXml = WePayHttpsPost.postOpt("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", xmlInfo);
+//                logger.debug("Response XML Data: " + resXml);
 
-//                CloseableHttpResponse response =  HttpUtil.Post(weixinConstant.WITHDRAW_URL, xmlInfo, true);
-//                String transfersXml = EntityUtils.toString(response.getEntity(), "utf-8");
+                CloseableHttpResponse response =  WePayHttpsPost.postOpt("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", xmlInfo);
+                String transfersXml = EntityUtils.toString(response.getEntity(), "utf-8");
+                logger.debug("get data back: " + transfersXml);
+
+
 //                Map<String, String> transferMap = HttpXmlUtils.parseRefundXml(transfersXml);
 //                if (transferMap.size()>0) {
 //                    if (transferMap.get("result_code").equals("SUCCESS") && transferMap.get("return_code").equals("SUCCESS")) {
 //                        //成功需要进行的逻辑操作，
-//
 //                    }
 //                }
+
 //                System.out.println("成功");
             } catch (Exception e) {
                 logger.debug("system error: "+ e);
