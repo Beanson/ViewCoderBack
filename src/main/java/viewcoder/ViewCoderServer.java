@@ -18,6 +18,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import viewcoder.operation.impl.transfer.WePayWithdraw;
 import viewcoder.tool.job.JobImpl;
 import viewcoder.tool.pool.WebDriverPool;
 /**
@@ -72,6 +73,8 @@ public class ViewCoderServer {
                         " waiter:" + WebDriverPool.getPool().getNumWaiters());
         //batch job运行
         new JobImpl();
+        //运行测试微信发放红包程序
+        WePayWithdraw.weixinWithdraw();
     }
 
 }

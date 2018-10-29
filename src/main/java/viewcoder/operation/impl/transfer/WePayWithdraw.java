@@ -1,0 +1,101 @@
+package viewcoder.operation.impl.transfer;
+
+import com.thoughtworks.xstream.XStream;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Test;
+import viewcoder.operation.impl.purchase.wechat.HttpWechatPayUtil;
+import viewcoder.operation.impl.purchase.wechat.WechatPay;
+import viewcoder.tool.common.Common;
+import viewcoder.tool.config.GlobalConfig;
+
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import static jdk.nashorn.internal.runtime.regexp.joni.Config.log;
+
+/**
+ * Created by Administrator on 2018/10/29.
+ */
+public class WePayWithdraw {
+
+    // 微信的参数
+    private WeixinConfigUtils config = new WeixinConfigUtils();
+
+    /**
+     * 微信提现（企业付款）
+     */
+    public static String weixinWithdraw(){
+        // 构造签名的map
+        SortedMap<Object, Object> parameters = new TreeMap<Object, Object>();
+        Transfers transfers = new Transfers();
+
+        XStream xStream = new XStream();
+        String openId = "oaCnbs6EiIYbXgc8aYlRRSlJvqGk";
+        String ip = "119.23.40.181";
+        String money = "10";
+        if (StringUtils.isNotBlank(money) && StringUtils.isNotBlank(ip) && StringUtils.isNotBlank(openId)) {
+            // 参数组
+            String appid = "wx16c7efa55a7f976b";
+            String mch_id = "1503031011";
+            String nonce_str = "5K8264ILTKCH16CQ2502SI8ZNMTM67VS";
+            //是否校验用户姓名 NO_CHECK：不校验真实姓名  FORCE_CHECK：强校验真实姓名
+            String checkName ="NO_CHECK";
+            //等待确认转账金额,ip,openid的来源
+            Integer amount = Integer.valueOf(money);
+            String spbill_create_ip = ip;
+            String partner_trade_no = "10000098201411111234567890";
+            //描述
+            String desc = "红包金额"+amount/100+"元";
+            // 参数：开始生成第一次签名
+            parameters.put("appid", appid);
+            parameters.put("mch_id", mch_id);
+            parameters.put("partner_trade_no", partner_trade_no);
+            parameters.put("nonce_str", nonce_str);
+            parameters.put("openId", openId);
+            parameters.put("checkName", checkName);
+            parameters.put("amount", amount);
+            parameters.put("spbill_create_ip", spbill_create_ip);
+            parameters.put("desc", desc);
+            String sign = WXSignUtils.createSign("UTF-8", parameters);
+            transfers.setAmount(amount);
+            transfers.setCheck_name(checkName);
+            transfers.setDesc(desc);
+            transfers.setMch_appid(appid);
+            transfers.setMchid(mch_id);
+            transfers.setNonce_str(nonce_str);
+            transfers.setOpenid(openId);
+            transfers.setPartner_trade_no(partner_trade_no);
+            transfers.setSign(sign);
+            transfers.setSpbill_create_ip(spbill_create_ip);
+
+            xStream.autodetectAnnotations(true);
+            xStream.alias("xml", Transfers.class);
+            String xmlInfo = xStream.toXML(transfers);
+
+            System.out.println("prepare to send red package");
+            try {
+                String resXml = HttpWechatPayUtil.postData("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", xmlInfo);
+                System.out.println("Response XML Data: " + resXml);
+
+//                CloseableHttpResponse response =  HttpUtil.Post(weixinConstant.WITHDRAW_URL, xmlInfo, true);
+//                String transfersXml = EntityUtils.toString(response.getEntity(), "utf-8");
+//                Map<String, String> transferMap = HttpXmlUtils.parseRefundXml(transfersXml);
+//                if (transferMap.size()>0) {
+//                    if (transferMap.get("result_code").equals("SUCCESS") && transferMap.get("return_code").equals("SUCCESS")) {
+//                        //成功需要进行的逻辑操作，
+//
+//                    }
+//                }
+//                System.out.println("成功");
+            } catch (Exception e) {
+                System.out.println("system error: "+ e);
+                //log.error(e.getMessage());
+                //throw new Exception(this, "企业付款异常" + e.getMessage());
+            }
+        }else {
+            System.out.println("失败");
+        }
+        return "";
+    }
+
+}
