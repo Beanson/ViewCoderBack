@@ -25,15 +25,20 @@ public class WePayWithdraw {
      * 微信提现（企业付款）
      */
     public static String weixinWithdraw(){
+        System.out.println("come to 1");
+
         // 构造签名的map
         SortedMap<Object, Object> parameters = new TreeMap<Object, Object>();
         Transfers transfers = new Transfers();
 
+        System.out.println("come to 2");
         XStream xStream = new XStream();
         String openId = "oaCnbs6EiIYbXgc8aYlRRSlJvqGk";
         String ip = "119.23.40.181";
         String money = "10";
         if (StringUtils.isNotBlank(money) && StringUtils.isNotBlank(ip) && StringUtils.isNotBlank(openId)) {
+            System.out.println("come to 3");
+
             // 参数组
             String appid = "wx16c7efa55a7f976b";
             String mch_id = "1503031011";
