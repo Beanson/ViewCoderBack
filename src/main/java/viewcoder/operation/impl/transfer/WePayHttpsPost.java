@@ -30,12 +30,12 @@ public class WePayHttpsPost {
             ks.load(fis, "1503031011".toCharArray());
             KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
             kmf.init(ks, "1503031011".toCharArray());
-            SSLContext sc = SSLContext.getInstance("TLS");;
+            sc = SSLContext.getInstance("TLS");
             sc.init(kmf.getKeyManagers(), null, null);
-            logger.error("--------load p12 cert file success");
+            logger.error("--------load p12 cert file success: ");
 
         }catch (Exception e){
-            logger.error("--------init p12 cert file error", e);
+            logger.error("--------init p12 cert file error: ", e);
         }
     }
 
@@ -77,7 +77,7 @@ public class WePayHttpsPost {
                 return sb.toString();
 
             } else {
-                return new String("false : "+responseCode);
+                return new String("false : " + responseCode);
             }
         }
         catch(Exception e){
