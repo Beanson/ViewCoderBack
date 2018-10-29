@@ -30,20 +30,15 @@ public class WePayWithdraw {
      * 微信提现（企业付款）
      */
     public static String weixinWithdraw(){
-        logger.debug("come to 1");
-
         // 构造签名的map
         SortedMap<Object, Object> parameters = new TreeMap<Object, Object>();
         Transfers transfers = new Transfers();
 
-        logger.debug("come to 2");
         XStream xStream = new XStream();
         String openId = "oaCnbs6EiIYbXgc8aYlRRSlJvqGk";
         String ip = "119.23.40.181";
         String money = "10";
         if (StringUtils.isNotBlank(money) && StringUtils.isNotBlank(ip) && StringUtils.isNotBlank(openId)) {
-            logger.debug("come to 3");
-
             // 参数组
             String appid = "wx16c7efa55a7f976b";
             String mch_id = "1503031011";
@@ -82,7 +77,7 @@ public class WePayWithdraw {
             xStream.alias("xml", Transfers.class);
             String xmlInfo = xStream.toXML(transfers);
 
-            logger.debug("prepare to send red package");
+            logger.debug("prepare to send red package: "+ xmlInfo );
             try {
                 String resXml = HttpWechatPayUtil.postData("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", xmlInfo);
                 logger.debug("Response XML Data: " + resXml);
