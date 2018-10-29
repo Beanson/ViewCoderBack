@@ -34,7 +34,7 @@ public class WePayHttpsPost {
             sc.init(kmf.getKeyManagers(), null, null);
             logger.error("--------load p12 cert file success: ");
 
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("--------init p12 cert file error: ", e);
         }
     }
@@ -46,7 +46,7 @@ public class WePayHttpsPost {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             if (connection instanceof HttpsURLConnection) {
-                ((HttpsURLConnection)connection).setSSLSocketFactory(sc.getSocketFactory());
+                ((HttpsURLConnection) connection).setSSLSocketFactory(sc.getSocketFactory());
             }
 
             conn.setReadTimeout(15000 /* milliseconds */);
@@ -63,24 +63,28 @@ public class WePayHttpsPost {
             writer.close();
             os.close();
 
-            int responseCode=conn.getResponseCode();
+            int responseCode = conn.getResponseCode();
             if (responseCode == HttpsURLConnection.HTTP_OK) {
-                BufferedReader in=new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 StringBuffer sb = new StringBuffer("");
-                String line="";
+                String line = "";
 
-                while((line = in.readLine()) != null) {
-                    sb.append(line);
-                    break;
+                while (true) {
+                    if ((line = in.readLine()) != null) {
+                        sb.append(line);
+
+                    } else {
+                        break;
+                    }
                 }
+
                 in.close();
                 return sb.toString();
 
             } else {
                 return new String("false : " + responseCode);
             }
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             logger.error("http post error", e);
             return new String("Exception: " + e.getMessage());
         }
