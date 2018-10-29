@@ -27,9 +27,9 @@ public class WePayHttpsPost {
         try {
             KeyStore ks = KeyStore.getInstance("PKCS12");
             FileInputStream fis = new FileInputStream("/root/ca/apiclient_cert.p12");
-            ks.load(fis, "1510943091".toCharArray());
+            ks.load(fis, "1503031011".toCharArray());
             KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-            kmf.init(ks, "1510943091".toCharArray());
+            kmf.init(ks, "1503031011".toCharArray());
             SSLContext sc = SSLContext.getInstance("TLS");;
             sc.init(kmf.getKeyManagers(), null, null);
             logger.error("--------load p12 cert file success");
