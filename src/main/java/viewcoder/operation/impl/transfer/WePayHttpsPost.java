@@ -52,7 +52,7 @@ public class WePayHttpsPost {
 
             FileInputStream instream = null;
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            instream = new FileInputStream(new File("/root/ca/apiclient_cert.p12"));
+            instream = new FileInputStream(new File("/root/ca/redmoney/apiclient_cert.p12"));
             keyStore.load(instream, "1503031011".toCharArray());
 
             if (null != instream) {
