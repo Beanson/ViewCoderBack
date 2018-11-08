@@ -62,6 +62,7 @@ public class CommonObject {
         validCross.add("http://www.beansonbar.com:3030");
         validCross.add("http://liphin.com:3030");
         validCross.add("http://www.liphin.com:3030");
+        validCross.add("http://viewcoder.liphin.com");
         validCross.add("http://viewcoder.liphin.com:3030");
         validCross.add("http://viewcoder.liphin.com:3030/");
         validCross.add("http://119.23.40.181:3030");
