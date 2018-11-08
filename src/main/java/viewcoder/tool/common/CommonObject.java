@@ -58,12 +58,13 @@ public class CommonObject {
         xmlMap.put("msg", "msg/msg.xml");
 
         //添加http请求时合法的请求域
-        validCross.add("http://beansonbar.com");
-        validCross.add("http://www.beansonbar.com");
-        validCross.add("http://liphin.com");
-        validCross.add("http://www.liphin.com");
-        validCross.add("http://viewcoder.liphin.com");
-        validCross.add("http://119.23.40.181");
+        validCross.add("http://beansonbar.com:3030");
+        validCross.add("http://www.beansonbar.com:3030");
+        validCross.add("http://liphin.com:3030");
+        validCross.add("http://www.liphin.com:3030");
+        validCross.add("http://viewcoder.liphin.com:3030");
+        validCross.add("http://viewcoder.liphin.com:3030/");
+        validCross.add("http://119.23.40.181:3030");
     }
 
     public static Map<Integer, Integer> getServiceToPoints() {
